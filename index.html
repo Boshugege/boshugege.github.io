@@ -4,6 +4,15 @@
   <base href="boshugege.github.io" target="_blank">
   <link rel="icon" href="https://boshugege.github.io/favicon.ico">
 </head>
+<script>
+ $(document).ready(function () {
+
+     if(location.href.indexOf("#reloaded")==-1){
+        location.href=location.href+"#reloaded";
+        location.reload();
+    }
+ }）
+</script>
 <body>
  <div style="display: block; margin: 0 auto; width: 60%;">
   <h1>拨鼠哥哥的部落格</h1>
@@ -14,5 +23,29 @@
    <h2>联系方式：</h2>
     <p>邮箱：boshugegewu@outlook.com</p>
     <p>我会定时回复大部分邮件</p>
- </div>
+<!--随机语录-->
+    <script language="JavaScript">  
+    <!-- Hide  
+    var a = Math.random() + ""          //产生一个随机数  
+    var rand1 = a.charAt(5)             //的到这个数的第五个字符(实际还是从0~9的数字)  
+    quotes = new Array              //创建消息数组  
+    quotes[1] = '欢迎这位朋友~'
+    quotes[2] = '语录2'  
+    quotes[3] = '语录3'  
+    quotes[4] = '语录4'  
+    quotes[5] = '语录5'  
+    quotes[6] = '语录6'  
+    quotes[7] = '语录7'  
+    quotes[8] = '语录8'  
+    quotes[9] = '语录9'  
+    quotes[0] = '语录10'  
+    var quote = quotes[rand1]   //由随机数选择一句话  
+    //-->  
+    </script>  
+    <script language="JavaScript">  
+    <!-- Hide  
+    document.write( quote )     //将上面选择的话写进页面  
+    // -->  
+    </script>  
+<!--随机语录-->
 </body>
