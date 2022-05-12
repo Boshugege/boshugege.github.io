@@ -1,0 +1,68 @@
+<!doctype=HTML>
+<head>
+  <title>拨鼠哥哥的部落格</title>
+  <base href="boshugege.github.io" target="_blank">
+  <link rel="icon" href="https://boshugege.github.io/favicon.ico">
+  <link rel="stylesheet" href="./articles.css" type="text/css" >
+</head>
+
+<body>
+<div style="display: block; margin: 0 auto; min-width: 600px; max-width: 900px">
+
+<div class="articles_title">
+<h1>开发和更新日志</h1>
+<h2>2022/05/11 正式开始编辑这个博客！</h2>
+<h3>今日新增如下：</h3>
+</div>
+
+<div class="articles_content">
+<p>更新了第一篇文章；</p>
+<p>制作了首页内容，首页下方随机字样，不完全解决了缓存导致的访问需刷新问题，修改了页边距；</p>
+<p>开启了 gitalk 并解决了相关问题，现在可以放心地使用gitalk进行评论了；</p>
+<p>制作了 RSS，订阅地址为https://boshugege.github.io/feed.xml，还未放到首页（功能不完善）；</p>
+</div>
+<div class="articles_title">
+<h3>下一步编辑的目标：</h3>
+</div>
+<div class="articles_content">
+<p>开始修改整个博客的格式，风格定型。增加上部导航栏。</p>
+<p>解决移动端阅读的问题。现在由于页面内容设置为总宽度的 60%，导致手机无法愉快地阅读，下次更新一定解决！</p>
+<p>想要完全解决刷新的事情……就是进入网站自动刷新一次后不再刷新，这样可以清除一下缓存（因为这个网站很小，缓存很容易留在浏览器里很久）</p>
+<p>眼馋Hexo等带来的很多功能，不过我还是想自己来，每一行东西都知道是什么意思比较好。很馋自动的RSS和搜索功能，不过网上自己搞的似乎不是特别多，慢慢来吧。</p>
+</div>
+<div class="articles_title">
+<h2>2022/05/12 正常更新</h2>
+</div>
+<div class="articles_content">
+<p>改善了内部格式，增加了标题居中、首行缩进、改变字体为宋体；</p>
+<p>更改了首页格式，设置为居中，部分链接更换为图片，改变邮件地址的显示方式为 mailto 的超链接；</p>
+<p>RSS 输出不完全，我认为我的 RSS 配置并没有出错，希望大佬帮忙看看我的 RSS 文档！</p>
+<p>优化了手机和窄分辨率下的阅读体验！</p>
+</div>
+
+<!-- Gitalk -->
+<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk@latest/dist/gitalk.min.js"></script> 
+<div id="gitalk-container"></div>     <script type="text/javascript">
+    var gitalk = new Gitalk({
+    // gitalk的主要参数
+        clientID: '10b12d27a906fa8500bb',
+        clientSecret: '5f937145261c0e65ddb76ddc2a98c22470cf2a0c',
+        repo: 'critics',
+        owner: 'Boshugege',
+        admin: ['Boshugege'],
+        id:decodeURI(window.location.pathname),
+
+    });
+    gitalk.render('gitalk-container');
+</script> 
+<!-- Gitalk end -->
+<br>
+
+<div style="font-family: "宋体"">
+<p>联系我：boshugegewu@outlook.com</p>
+</div>
+
+</div>
+
+</body>
