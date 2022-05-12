@@ -9,16 +9,16 @@
       <description>手动推送的RSS独占消息。（能收到这个的人没几个吧）</description>  
       <author>拨鼠哥哥</author>  
       <pubDate>Tur, 12 May 2022 8:25:00 +0800</pubDate>  
-      <link>https://boshugege.github.io/Articles/1.html</link>  
-      <guid>https://boshugege.github.io/Articles/1.html</guid>  
+      <link>https://boshugege.github.io/articles/1.html</link>  
+      <guid>hey1</guid>  
     </item>    
     <item>  
       <title>一：2022年，我用回了邮箱、论坛和RSS</title>  
       <description>关于互联网快要失去的记忆，我有话要说。详情请阅读全文。</description>  
       <author>拨鼠哥哥</author>  
       <pubDate>Wed, 10 May 2022 12:00:00 +0800</pubDate>  
-      <link>https://boshugege.github.io/Articles/1.html</link>  
-      <guid>https://boshugege.github.io/Articles/1.html</guid>  
+      <link>https://boshugege.github.io/articles/1.html</link>  
+      <guid>https://boshugege.github.io/articles/1.html</guid>  
     </item>  
   </channel>  
 </rss>  
