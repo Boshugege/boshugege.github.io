@@ -3,7 +3,15 @@
   <channel>  
     <title>拨鼠哥哥的博客</title>  
     <link>https://boshugege.github.io</link>  
-    <description>拨鼠哥哥-始终充满好奇心的学生</description>  
+    <description>拨鼠哥哥-始终充满好奇心的学生</description>
+    <item>  
+      <title>更新了网页内部文章的样式，但是觉得还是很丑。</title>  
+      <description>手动推送的RSS独占消息。（能收到这个的人没几个吧）</description>  
+      <author>拨鼠哥哥</author>  
+      <pubDate>Tur, 12 May 2022 8:25:00 +0800</pubDate>  
+      <link>https://boshugege.github.io/Articles/1.html</link>  
+      <guid>https://boshugege.github.io/Articles/1.html</guid>  
+    </item>    
     <item>  
       <title>一：2022年，我用回了邮箱、论坛和RSS</title>  
       <description>关于互联网快要失去的记忆，我有话要说。详情请阅读全文。</description>  
