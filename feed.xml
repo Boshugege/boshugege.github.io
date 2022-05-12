@@ -7,14 +7,12 @@
     <item>  
       <title>更新了网页内部文章和外部入口的样式，但是觉得还是很丑，留着慢慢搞。</title>  
       <description>手动推送的RSS独占消息。（能收到这个的人没几个吧）</description>  
-      <author>拨鼠哥哥</author>  
       <link>https://boshugege.github.io</link>  
     </item>    
     <item>  
       <title>一：2022年，我用回了邮箱、论坛和RSS</title>  
       <description>关于互联网快要失去的记忆，我有话要说。详情请阅读全文。</description>  
-      <author>拨鼠哥哥</author>  
       <link>https://boshugege.github.io/articles/1.html</link>  
     </item>  
   </channel>  
-</rss>  
+</rss>
