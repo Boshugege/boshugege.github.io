@@ -1,8 +1,13 @@
+body{
+background: #000000;
+}
+
 .all{
 display: block;
 margin: 0 auto;
 width: 60%;
-)
+}
 
-.home_articles{
+.link{
+text-align: center;
 }

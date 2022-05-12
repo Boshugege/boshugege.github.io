@@ -6,32 +6,39 @@
   <link rel="stylesheet" href="./home.css" type="text/css" >
   <meta http-equiv="refresh" content="7">
 </head>
+
 <body>
-<div class="all">
 
-<h1>拨鼠哥哥的部落格</h1>
+<div style="display: block; margin: 0 auto; max-width: 900px; min-width: 600px;">
 
-<a href="./feed.xml">
-<img src="./rss.gif" width="36" height="14">
-</a>
+<h1 style="text-align: center;color: #FFFFFF;">拨鼠哥哥的部落格</h1>
 
-<h2>关于我</h2>
-<a href="./AboutMe.html">关于拨鼠哥哥</a>
-
-<h2>文章：</h2>
-
-<div class="home_articles">
-<a href="./articles/1.html" target="_blank">2022年，我用回了邮箱、论坛和RSS</a>
-<p>作者：拨鼠哥哥 更新时间：2022年5月10日</p>
+<div class="link">
+<a href="./feed.xml" style="text-align: right"><img src="./rss.gif" width="36" height="14"></a>
 </div>
 
-<h2>联系方式：</h2>
-<p>邮箱：boshugegewu@outlook.com</p>
-<p>我会定时回复大部分邮件</p>
+<h2 style="text-align: center; color: #FFFFFF">关于我</h2>
+<div class="link">
+<a href="./AboutMe.html" style="text-decoration: none; color: #FFFFFF">关于拨鼠哥哥</a>
+</div>
+
+<h2 style="text-align: center; color: #FFFFFF">文章</h2>
+
+<div class="link">
+<a href="./articles/1.html" style="text-decoration: none; color: #FFFFFF">2022年，我用回了邮箱、论坛和RSS</a>
+</div>
+
+<h2 style="text-align: center;color: #FFFFFF;">联系方式</h2>
+<div class="link">
+<a href=mailto:boshugege@outlook.com><img src="./mail.png" width="50" height="50" style="border-radius:50%; overflow:hidden;"></a>
+</div>
+<p style="text-align: center; color: #FFFFFF">我会定时回复大部分邮件</p>
+</div>
 
 <br>
-<p>随机信息板</p>
-<!--随机语录-->
+<p style="text-align: center; color: #FFFFFF;">随机信息板</p>
+<!--随机语录begin-->
+<div class="link">
     <script language="JavaScript">  
     <!-- Hide  
     var a = Math.random() + ""          //产生一个随机数  
@@ -52,8 +59,10 @@
     </script>  
     <script language="JavaScript">  
     <!-- Hide  
-    document.write( quote )     //将上面选择的话写进页面  
+    document.write("<font color='white'>"+quote+"</font>")     //将上面选择的话写进页面  
     // -->  
     </script>  
-<!--随机语录-->
+<!--随机语录end-->
+</div>
+
 </body>
