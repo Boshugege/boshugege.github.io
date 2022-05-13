@@ -1,20 +1,22 @@
 .articles_title{
-font-family: "宋体";
+font-family: "SimSun";
 text-align:center;
 font-weight: bold;
 font-size: 18px;
 }
 
 .articles_author{
-font-family: "宋体";
+font-family: "SimSun";
 text-align: center;
 font-size: 18px;
 line-height: 35px;
 }
 
 .articles_content{
-font-family: "宋体";
+font-family: "SimSun";
 text-indent: 2em;
 font-size: 18px;
 line-height: 25px;
 }
+
+
