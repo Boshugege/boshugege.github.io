@@ -1,18 +1,34 @@
 <!doctype html>
 <head>
   <title>拨鼠哥哥的部落格</title>
-  <base href="boshugege.github.io" target="_blank">
+  <base target="_blank">
   <link rel="icon" href="https://boshugege.github.io/favicon.ico">
   <link rel="stylesheet" href="./home.css" type="text/css" >
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="expires" content="0" />
+<style>
+.top{
+position:static;
+width:100%; 
+height:100%;
+text-align: center;
+background:url(./img/head.jpg);
+background-size: cover;
+background-position:center;
+color: #FFFFFF;
+font-size: 30px;
+margin: 0;
+padding: 0;
+}
+</style>
 </head>
 
 <body>
 
-<div style="text-align: center;background:url(./img/head.jpg); background-size: cover;background-position:center;color: #FFFFFF;font-size: 30px;">
+<div class="top">
 <div style="background-color: rgba(0, 0, 0, 0.3)">
+
 <br>
 <br>
 <br>
@@ -20,7 +36,9 @@
 <br>
 <!--随机语录begin-->
 <div style="font-size: 20px;">
-<p>随机信息板</p>
+<a href="#main" style="text-decoration: none; color: #FFFFFF;font-size: 35px" target="_self">点击进入</a>
+<br>
+<br>
     <script language="JavaScript">  
     <!-- Hide  
     var a = Math.random() + ""          //产生一个随机数  
@@ -50,12 +68,13 @@
 <br>
 <br>
 <br>
+<br>
 </div>
 </div>
 
-<div style="display: block; margin: 0 auto; max-width: 900px; min-width: 600px;">
+<div style="display: block; margin: 0 auto; max-width: 900px; min-width: 600px;" id="main">
 <h2 style="text-align: center;color: #FFFFFF;">公告</h2>
-<p style="text-align:center; color: #FFFFFF">我到现在还是没搞清楚如何保证各位打开网页时看到的是最新内容，如果你发现没有更新，请麻烦刷新一下。目前我认为应该问题不大，强制设置no-store参数之后，短时间内多次打开可能会因为内容还在内存未释放导致不更新，但是一段时间后打开应该问题不大。这么长一段话放在这里有点丑，但是这还是雏形，来访的各位看到的还是测试版，总是会有这种公告的。</p>
+<p style="text-align:center; color: #FFFFFF">每日更新，若与前一日无变化，请刷新一次。</p>
 <div class="link">
 <a href="./feed.xml" style="text-align: right"><img src="./img/rss.gif" width="36" height="14"></a>
 </div>
