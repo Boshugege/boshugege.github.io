@@ -10,4 +10,32 @@ width: 60%;
 
 .link{
 text-align: center;
+text-decoration: none;
+color: #FFFFFF;
+}
+
+.title{
+    text-align: center;
+    color: #FFFFFF;
+}
+
+#top{
+    position:static;
+    width:100%;
+    height:100%;
+    text-align: center;
+    background:url(./img/head.jpg);
+    background-size: cover;
+    background-position:center;
+    color: #FFFFFF;
+    font-size: 30px;
+    margin: 0;
+   padding: 0;
+}
+
+#main{
+    display: block;
+    margin: 0 auto;
+    max-width: 900px;
+    min-width: 600px;
 }
