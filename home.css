@@ -1,17 +1,19 @@
 body{
-background: #000000
+    background: #000000;
+    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+
 }
 
 .all{
-display: block;
-margin: 0 auto;
-width: 60%;
+    display: block;
+    margin: 0 auto;
+    width: 60%;
 }
 
 .link{
-text-align: center;
-text-decoration: none;
-color: #FFFFFF;
+    text-align: center;
+    text-decoration: none;
+    color: #FFFFFF;
 }
 
 .title{
