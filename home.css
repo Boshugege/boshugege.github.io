@@ -20,13 +20,13 @@ color: #FFFFFF;
 }
 
 #top{
-    position:static;
-    width:100%;
-    height:100%;
+    position: static;
+    width: 100%;
+    height: 100%;
     text-align: center;
     background:url(./img/head.jpg);
     background-size: cover;
-    background-position:center;
+    background-position: center;
     color: #FFFFFF;
     font-size: 30px;
     margin: 0;
