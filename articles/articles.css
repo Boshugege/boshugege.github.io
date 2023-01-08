@@ -1,17 +1,17 @@
 .articles_title{
-    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    font-family: PingFangSC-Light,Microsoft YaHei, sans-serif;
     text-align:center;
     font-weight: bold;
 }
 
 .articles_author{
-    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    font-family: PingFangSC-Light,Microsoft YaHei, sans-serif;
     text-align: center;
     font-size: 18px;
 }
 
 .articles_content{
-    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    font-family: PingFangSC-Light,Microsoft YaHei, sans-serif;
     text-indent: 2em;
     font-size: 18px;
 }
