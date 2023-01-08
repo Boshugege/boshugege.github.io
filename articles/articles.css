@@ -1,22 +1,19 @@
 .articles_title{
-font-family: "SimSun";
-text-align:center;
-font-weight: bold;
-font-size: 18px;
+    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    text-align:center;
+    font-weight: bold;
 }
 
 .articles_author{
-font-family: "SimSun";
-text-align: center;
-font-size: 18px;
-line-height: 35px;
+    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    text-align: center;
+    font-size: 18px;
 }
 
 .articles_content{
-font-family: "SimSun";
-text-indent: 2em;
-font-size: 18px;
-line-height: 25px;
+    font-family: PingFangSC-Regular,Microsoft YaHei, sans-serif;
+    text-indent: 2em;
+    font-size: 18px;
 }
 
 #background{
