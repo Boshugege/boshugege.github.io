@@ -20,6 +20,12 @@ body{
     color: #FFFFFF;
 }
 
+.song{
+    position: fixed;
+    bottom: 5%;
+    left: 10%;
+}
+
 #top{
     position: static;
     width: 100%;
