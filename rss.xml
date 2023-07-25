@@ -1,13 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[拨鼠哥哥的部落格]]></title><description><![CDATA[一个什么都想玩玩的人]]></description><link>https://boshugege.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Fri, 07 Jul 2023 10:22:44 GMT</lastBuildDate><item><title><![CDATA[知识分子的回望——读《中国在梁庄》]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/zhongguo-zai-liangzhuang/</link><guid isPermaLink="false">https://boshugege.github.io/zhongguo-zai-liangzhuang/</guid><pubDate>Wed, 05 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;这本书给我的第一感受，居然是“为什么我没有时间来做这件事”的可惜。这是知识分子对非虚构的主动意识，对“故乡”概念的再次进入和记录，给正在消亡的乡土中国最后的画像。&lt;strong&gt;中国&lt;/strong&gt;在梁庄，梁庄在本身之外，反映着整个中国乡村的处境：它们曾经有自己的居民，自己的历史和故事，但是却逐渐独自腐烂变质直至消失。梁鸿有这个机会，可以给这个角落留下画像，但无数同样的角落早已失去了这个机会。梁鸿即是读者，即是阅读这一本书的每一个知识分子。对于每一个人都有一组与“梁鸿与梁庄”同构的短语。这赋予这本书更宏大的意义，也体现着书名，写梁庄，终究写的是&lt;strong&gt;中国&lt;/strong&gt;。&lt;/p&gt;
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[拨鼠哥哥的部落格]]></title><description><![CDATA[一个什么都想玩玩的人]]></description><link>https://boshugege.github.io</link><generator>GatsbyJS</generator><lastBuildDate>Tue, 25 Jul 2023 08:40:26 GMT</lastBuildDate><item><title><![CDATA[琐碎想法记录]]></title><description><![CDATA[在这里开一个想法的记录吧，有的时候难得想到的事情没有空写成文，但是有很珍贵，丢掉了很多，实在可惜。还有，得说服自己不能因为丢脸就把以前的不成熟的想法删掉，毕竟得真实记录。]]></description><link>https://boshugege.github.io/record/</link><guid isPermaLink="false">https://boshugege.github.io/record/</guid><pubDate>Tue, 19 Jan 2038 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;&lt;strong&gt;在这里开一个想法的记录吧，有的时候难得想到的事情没有空写成文，但是有很珍贵，丢掉了很多，实在可惜。还有，得说服自己不能因为丢脸就把以前的不成熟的想法删掉，毕竟得真实记录。&lt;/strong&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[汇编学习笔记（一）]]></title><description><![CDATA[使用书籍：《汇编语言》王爽（第四版 清华大学出版社） 入个门先]]></description><link>https://boshugege.github.io/huibian/</link><guid isPermaLink="false">https://boshugege.github.io/huibian/</guid><pubDate>Sat, 08 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;使用书籍：《汇编语言》王爽（第四版 清华大学出版社）&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;入个门先&lt;/del&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[知识分子的回望——读《中国在梁庄》]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/zhongguo-zai-liangzhuang/</link><guid isPermaLink="false">https://boshugege.github.io/zhongguo-zai-liangzhuang/</guid><pubDate>Wed, 05 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;这本书给我的第一感受，居然是“为什么我没有时间来做这件事”的可惜。这是知识分子对非虚构的主动意识，对“故乡”概念的再次进入和记录，给正在消亡的乡土中国最后的画像。&lt;strong&gt;中国&lt;/strong&gt;在梁庄，梁庄在本身之外，反映着整个中国乡村的处境：它们曾经有自己的居民，自己的历史和故事，但是却逐渐独自腐烂变质直至消失。梁鸿有这个机会，可以给这个角落留下画像，但无数同样的角落早已失去了这个机会。梁鸿即是读者，即是阅读这一本书的每一个知识分子。对于每一个人都有一组与“梁鸿与梁庄”同构的短语。这赋予这本书更宏大的意义，也体现着书名，写梁庄，终究写的是&lt;strong&gt;中国&lt;/strong&gt;。&lt;/p&gt;
 &lt;h3&gt;一、改变：梁庄现在的消失&lt;/h3&gt;
 &lt;p&gt;为何作者会对曾经熟悉的乡村有这么大的反应？私以为是一种久违的重逢和无奈的距离感之间微妙的共存。正如作者所言：&lt;/p&gt;
 &lt;blockquote&gt;
@@ -62,42 +54,15 @@
 &lt;p&gt;如果乡村消失了，那么“故乡”这个概念，就只能永存在文艺作品里，成为时代之殇了。&lt;strong&gt;知识分子给我们反观乡村的距离感，是否意味着我们需要更多的教育，以赋予大众以文化的情怀？&lt;/strong&gt; 或许，我们需要从根源里荡涤一些污渍了。&lt;/p&gt;
 &lt;h3&gt;七、仍然适用吗？&lt;/h3&gt;
 &lt;p&gt;有人会说，这是2008年和2009年的故事了，放到现在仍然适用吗？我国又做了大量的新农村建设，现在的农村真的还是这个样子吗？它对我们又还有什么意义呢？&lt;/p&gt;
-&lt;p&gt;我不知道该怎么说。我觉得所有人都可以，至少在自己身边，做一次类似的调查。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[萌新入手尘埃拉力2（DiRT Rally 2.0）小感]]></title><description><![CDATA[本萌新入坑 rac…]]></description><link>https://boshugege.github.io/chenai-lali/</link><guid isPermaLink="false">https://boshugege.github.io/chenai-lali/</guid><pubDate>Mon, 03 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;本萌新入坑 rac 第一作是什么？&lt;del&gt;天天飞车&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;我不知道该怎么说。我觉得所有人都可以，至少在自己身边，做一次类似的调查。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[萌新入手尘埃拉力2（DiRT Rally 2.0）小感]]></title><description><![CDATA[本萌新入坑 rac…]]></description><link>https://boshugege.github.io/chenai-lali/</link><guid isPermaLink="false">https://boshugege.github.io/chenai-lali/</guid><pubDate>Mon, 03 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;本萌新入坑 rac 第一作是什么？&lt;del&gt;天天飞车&lt;/del&gt;&lt;/p&gt;
 &lt;p&gt;好吧，说实话我一个地平线都要把难度调成初学者才能跑跑比赛的人属实是高估了自己的实力（没手柄的时候可以怪键盘，现在怪没有方向盘？）&lt;/p&gt;
 &lt;p&gt;超级硬核的游戏，画质在这个题材下算是很不错了，最重要的就是超级拟真（当然并非完全一致）。一进游戏不带任何教程，上来就是生涯、车队、车库，一分钱都没有的穷光蛋直接点开生涯……开着老破车的我疯狂推头打滑，熄火，罚时，下赛道，罚时，翻车，灯没了，引擎盖没了，迫真减重……过了几个弯才能看懂路书顺便熟悉领航员，别说跑个能看的时间了，完赛都做不到，就算把电子辅助全部拉满，也就是勉强能开得动的程度。切到自定义玩了一会儿，勉强可以在 Medium 难度开到倒数第二，还是一圈一圈反复熟悉地形的成果，虽然熟悉的基本上都是第一个。然后又去折腾，玩 Rally Cross，上赛道了我又完全整不明白了，玩成了超级大马力碰碰车……&lt;/p&gt;
 &lt;p&gt;四个小时的游戏时长也就能给我一点小小的游戏理解了。这个游戏提供了大量的细节以完成最重要的真实性，其实在向模拟器发展（变速箱也能坏出各种问题来），车子调教还没有仔细看，先等我把车开顺手了再来吧（就这样开十条命都不够跑完一场比赛的）。它需要大量的耐心和时间，或者是对拉力本身的热爱。B站上有上海佬用它加全套模拟器培养小孩当拉力车手的，只能说沪会玩。（还有，三岁小朋友开得都比我好一百倍）&lt;/p&gt;
-&lt;p&gt;唉，不能沉迷于此，一天就玩了快五个小时，回地平线闲逛+拍照去咯！&lt;/p&gt;</content:encoded></item><item><title><![CDATA[关于《民主的细节》]]></title><description><![CDATA[是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。 手上这本是 2011 年出版的修订版，1…]]></description><link>https://boshugege.github.io/minzhu-de-xijie/</link><guid isPermaLink="false">https://boshugege.github.io/minzhu-de-xijie/</guid><pubDate>Sun, 02 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。&lt;/p&gt;
+&lt;p&gt;唉，不能沉迷于此，一天就玩了快五个小时，回地平线闲逛+拍照去咯！&lt;/p&gt;</content:encoded></item><item><title><![CDATA[关于《民主的细节》]]></title><description><![CDATA[是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。 手上这本是 2011 年出版的修订版，1…]]></description><link>https://boshugege.github.io/minzhu-de-xijie/</link><guid isPermaLink="false">https://boshugege.github.io/minzhu-de-xijie/</guid><pubDate>Sun, 02 Jul 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。&lt;/p&gt;
 &lt;p&gt;手上这本是 2011 年出版的修订版，18 年印的，也不知道有没有删改。对于这种时效性较强的题材来说，确实是很老的书了。这十多年里，中国从胡温到习李再到新的习李，美国则是布什奥巴马特朗普拜登，很多概念和状况都发生了翻天覆地的变化。看这本书也没花我多少时间，大概三个小时左右。很多论点早就在这些年里被反复使用和讨论了。作为对众学生的推荐，我想还是普及性质为主的。&lt;/p&gt;
 &lt;p&gt;当然争论也是明显的，并且这样的争论已经在各种网络平台上持续了很长时间，我当然不愿意让我正在码的文章卷进永无止境的争论当中，并且在某一天成为我的定时炸弹。支持者，和她的看法相同，不需赘述；反对者，大概从几个方面：有倾向性的例子、刻意强调中国的不足（而中国为发展中国家，而且两国国情不同）、理想化自由民主和普世人权，认为国家是阶级调和而非阶级矛盾不可调和的产物。保守地防止争议地说，我建议把这本书仅仅当作是使几乎不了解政治之人一个了解美国民主制度的窗口，对其运作方式有一个基本的把控，而不关心其政治倾向和立场。即使有惰于思考只嫌，也可免去一些不必要的错误和麻烦。&lt;/p&gt;
 &lt;p&gt;真要说它有多少东西，有多少理论，有多少思想的深度，大概是挖不出多少的。其陈述，特别是最后的人物篇，倾向性是极明显的。然而就因此全盘推翻吗？倒也不必。其指出的中国问题，客观上确实存在过，并有很大一部分继续存在；其对美国制度的阐释，大体也是没有问题的。我的这几句话显然是在打官腔，但是如果要深入作者的观点，我的建议就是带着一碗水端平的态度去看待。有问题的，问题确实存在，但也不代表都坏；制度好的，也不完全是制度的功劳，也依托于大量下层建筑，但也值得思考和学习。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;好的完全无力水字数了，换一本再说吧。只能说这玩意儿实在就是 just so so，没啥坏的也没啥好的。丢到我博客的垃圾堆里完全不违和。&lt;/strong&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[2023 上半年总结]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/2023-first-half-conclusion/</link><guid isPermaLink="false">https://boshugege.github.io/2023-first-half-conclusion/</guid><pubDate>Thu, 29 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;这半年，这个学期，好漫长但是又好短暂。感觉好多事情似乎是很久之前发生的，仔细一想还是在这半年……既然忙里偷闲，那就大概为这半年做一个总结吧。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;好的完全无力水字数了，换一本再说吧。只能说这玩意儿实在就是 just so so，没啥坏的也没啥好的。丢到我博客的垃圾堆里完全不违和。&lt;/strong&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[2023 上半年总结]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/2023-first-half-conclusion/</link><guid isPermaLink="false">https://boshugege.github.io/2023-first-half-conclusion/</guid><pubDate>Thu, 29 Jun 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;这半年，这个学期，好漫长但是又好短暂。感觉好多事情似乎是很久之前发生的，仔细一想还是在这半年……既然忙里偷闲，那就大概为这半年做一个总结吧。&lt;/p&gt;
 &lt;h3&gt;学习&lt;/h3&gt;
 &lt;p&gt;先聊这个使得我看上去又像是卷狗了……然而只是因为这个比较平淡所以先写下来进入状态而已。&lt;/p&gt;
 &lt;p&gt;看上去我这半年的情况很不错，除了&lt;del&gt;因为原神&lt;/del&gt;第一个月的月考暴毙之外， 期中和期末都还不错。然而我这半年目标实在是太不清晰，念头太杂了。科大直接拒材料把我的线路彻底打乱了，好久没缓过来（就算本来就是想试试看而已），没及时回物理又转去化学玩，又因为课内的压力压根等于没搞化竞，浪费了大量的时间。说实话我自己都不知道我这半年到底在干什么。更何况，在作业质量下滑只剩速度，考试连续暴毙的情况下，其实我唯一的重点拉分项变成了语文，然而这是极度不可依赖的（想用语文去救数学那绝对是没有可能的），解几甚至物理和化学的一部分概念都有大问题，生物就算考得还行其实也没好到哪里去（常规综合卷怎么做都上不了 80 真的是……）。时间的压力下，现在我只有保化学得奖（就算比去年的物理还低也没事），冲课内，顺带着拐强基一条路了。时间确实极度紧张，更何况这个暑假超级忙，只能加油吧……&lt;/p&gt;
@@ -212,16 +177,7 @@
         decoding=&quot;async&quot;
       /&gt;
   &lt;/a&gt;
-    &lt;/span&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[吴谢宇，从其自述出发]]></title><description><![CDATA[本文背景：弑母者吴谢宇的心理档案 | 南方周末 一个额外的不辨对错但是 po 在这里的链接：知乎。一定程度上小小地代表了我的一点想法，或者是在那么多解释里我偏向的一个 本文偏向个人和主观 WHY I'M WRITING THESE…]]></description><link>https://boshugege.github.io/wuxieyu/</link><guid isPermaLink="false">https://boshugege.github.io/wuxieyu/</guid><pubDate>Sun, 28 May 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;本文背景：&lt;a href=&quot;http://www.infzm.com/contents/249640&quot;&gt;弑母者吴谢宇的心理档案 | 南方周末&lt;/a&gt;&lt;/p&gt;
+    &lt;/span&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[吴谢宇，从其自述出发]]></title><description><![CDATA[本文背景：弑母者吴谢宇的心理档案 | 南方周末 一个额外的不辨对错但是 po 在这里的链接：知乎。一定程度上小小地代表了我的一点想法，或者是在那么多解释里我偏向的一个 本文偏向个人和主观 WHY I'M WRITING THESE…]]></description><link>https://boshugege.github.io/wuxieyu/</link><guid isPermaLink="false">https://boshugege.github.io/wuxieyu/</guid><pubDate>Sun, 28 May 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;本文背景：&lt;a href=&quot;http://www.infzm.com/contents/249640&quot;&gt;弑母者吴谢宇的心理档案 | 南方周末&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;一个额外的不辨对错但是 po 在这里的链接：&lt;a href=&quot;https://www.zhihu.com/question/322039124/answer/668294767&quot;&gt;知乎&lt;/a&gt;。一定程度上小小地代表了我的一点想法，或者是在那么多解释里我偏向的一个&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;本文偏向个人和主观&lt;/strong&gt;&lt;/p&gt;
 &lt;h4&gt;WHY I&apos;M WRITING THESE&lt;/h4&gt;
@@ -235,43 +191,16 @@
 &lt;p&gt;为什么案情中的吴谢宇显得那么不可理喻？因为完全失去超我辖制的大脑活动或许就是这样的。（个人体会）&lt;/p&gt;
 &lt;h4&gt;对于其行为的具体分析&lt;/h4&gt;
 &lt;p&gt;（未完待续）&lt;/p&gt;
-&lt;p&gt;感觉自己写不出来脑子里想的东西。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[使用 Thunderbird 生活：Email, RSS, IRC]]></title><description><![CDATA[一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？ Mozilla 公司在 Firefox 之外，开发的另一个著名软件 Thunderbird，带给我们一个在即时通讯软件（IM…]]></description><link>https://boshugege.github.io/thunderbird/</link><guid isPermaLink="false">https://boshugege.github.io/thunderbird/</guid><pubDate>Sun, 02 Apr 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？&lt;/p&gt;
+&lt;p&gt;感觉自己写不出来脑子里想的东西。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[使用 Thunderbird 生活：Email, RSS, IRC]]></title><description><![CDATA[一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？ Mozilla 公司在 Firefox 之外，开发的另一个著名软件 Thunderbird，带给我们一个在即时通讯软件（IM…]]></description><link>https://boshugege.github.io/thunderbird/</link><guid isPermaLink="false">https://boshugege.github.io/thunderbird/</guid><pubDate>Sun, 02 Apr 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？&lt;/p&gt;
 &lt;p&gt;Mozilla 公司在 Firefox 之外，开发的另一个著名软件 Thunderbird，带给我们一个在即时通讯软件（IM）横行的时代，一个更为古老的生活方式。或许它不能完全替代现代的需求，但是我们可以在这里找到自己的归宿。&lt;/p&gt;
 &lt;p&gt;其实怀念的不是 Thunderbird 本身，而是 Web1.0 后期到 Web2.0 前期那种开放和谐的互联网环境。这个博客的第一篇文章关于邮箱、博客和 RSS，现在看来虽然有点幼稚，但是我的观念依然没有改变。&lt;/p&gt;
 &lt;p&gt;如果那么多古早的早就不再维护的软件过于复杂，那就用 Thunderbird 短暂地体验一下自己的空间吧。在 Thunderbird 中找到关于聊天账户的设置，一阵狂喜，一看，果然是 IRC 相关。之前用 HexChat 的体验实在是太难受了，赶紧连上 libera.chat。探索之后，发现有“新闻源”，确实是 RSS 功能，于是把之前的 opml 文件导入进来，配合 RSSHub 食用确实很香。&lt;/p&gt;
-&lt;p&gt;不管是微博知乎还是 twitter fb 都实在是太聒噪了，订阅几个有想法的技术博主，订阅一点各方面的新闻，装装B看看 Sci 也完全可以。圈地时代，互联网被大规模的 SEO 完全污染了，精英的优秀的东西都藏在角落里，很多专业的东西还是在书上，无论什么方式都不如看书学习能更快地提升自己，如果累了不妨安静下来思考人生，很多想法都来自于无厘头的发端。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[关于情商的一点想法]]></title><description><![CDATA[私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external…]]></description><link>https://boshugege.github.io/qingshang/</link><guid isPermaLink="false">https://boshugege.github.io/qingshang/</guid><pubDate>Tue, 21 Mar 2023 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external）。&lt;/p&gt;
+&lt;p&gt;不管是微博知乎还是 twitter fb 都实在是太聒噪了，订阅几个有想法的技术博主，订阅一点各方面的新闻，装装B看看 Sci 也完全可以。圈地时代，互联网被大规模的 SEO 完全污染了，精英的优秀的东西都藏在角落里，很多专业的东西还是在书上，无论什么方式都不如看书学习能更快地提升自己，如果累了不妨安静下来思考人生，很多想法都来自于无厘头的发端。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[关于情商的一点想法]]></title><description><![CDATA[私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external…]]></description><link>https://boshugege.github.io/qingshang/</link><guid isPermaLink="false">https://boshugege.github.io/qingshang/</guid><pubDate>Tue, 21 Mar 2023 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external）。&lt;/p&gt;
 &lt;p&gt;一般来说，内部情商和外部情商是统一的，更敏感的人倾向于有更强的共情能力，而共情能力更弱的人倾向于不敏感。然而，显而易见地，这并不是绝对的。&lt;/p&gt;
 &lt;p&gt;情商总体低的人显现出“大大咧咧”，不容易记恨他人，但也容易无意间伤人。在我看来，和这类人打交道至少是轻松的，不令人尴尬的。&lt;/p&gt;
 &lt;p&gt;在情商总体低的人眼中，情商总体高的人是“不可理解的”，他们可能会有“无意义的举动”或“异常的反馈”，然而这在情商总体高的人眼里是必要的。情商高的人并不全是易打交道的，他们包括：可以使别人接受自己观点的“演讲家”；善于安慰他人的“朋友”；善于寻找潜在人性弱点的“骗子/社会工程学家”等。&lt;/p&gt;
 &lt;p&gt;于我个人而言，内部情商低而外部情商高是不可及的，是圣人标准；内部情商高而外部情商低的人使人不舒服，不仅会急，还会认为自己没有急，还会认为别人急了，还会认为别人先急，他们无法理解自己的情绪和逻辑来源，但是又确实感到情绪，是贬义上的情绪化的（emotional）。&lt;/p&gt;
-&lt;p&gt;虽然我一直自称情商低，但搬出来认真说实话我也没觉得我情商低到哪里去，该忍的都忍了，有的时候莫名其妙暴走八成是因为层数叠满了。天天大大咧咧像个小丑显然是套的壳子，本来就是极端的人，把什么事情都往极端推。我还没掏心窝子跟几个人说过话。我觉得情商确实低的人也挺不错的，活得挺快乐的，对朋友的定义就是一起玩，真的希望这种小朋友可以一帆风顺长大，不要跟我这种人一样太有意识。（conscious），那纯粹对他是污染，情商只不过是没办法的工具罢了，软技能（soft skill）嘛。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[虚构的小故事]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/xugoudexiaogushi/</link><guid isPermaLink="false">https://boshugege.github.io/xugoudexiaogushi/</guid><pubDate>Thu, 29 Dec 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;h3&gt;一&lt;/h3&gt;
+&lt;p&gt;虽然我一直自称情商低，但搬出来认真说实话我也没觉得我情商低到哪里去，该忍的都忍了，有的时候莫名其妙暴走八成是因为层数叠满了。天天大大咧咧像个小丑显然是套的壳子，本来就是极端的人，把什么事情都往极端推。我还没掏心窝子跟几个人说过话。我觉得情商确实低的人也挺不错的，活得挺快乐的，对朋友的定义就是一起玩，真的希望这种小朋友可以一帆风顺长大，不要跟我这种人一样太有意识。（conscious），那纯粹对他是污染，情商只不过是没办法的工具罢了，软技能（soft skill）嘛。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[虚构的小故事]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/xugoudexiaogushi/</link><guid isPermaLink="false">https://boshugege.github.io/xugoudexiaogushi/</guid><pubDate>Thu, 29 Dec 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;一&lt;/h3&gt;
 &lt;p&gt;冬夜，小雨。&lt;/p&gt;
 &lt;p&gt;嘈杂的声音伴随着呛人的油烟味，使冰冷的空气多少有了一点温热。烟头散落的地上漂着一层无法清除的油污，在霓虹灯的照射下旋转地泛着诡异的明暗相间的彩光。泡沫塑料板上印刷的菜名早就被雨水冲刷得有些褪色，价格一栏倒用上了最先进的薄膜显示技术，靠着稀薄的能源型电磁波就能工作。&lt;/p&gt;
 &lt;p&gt;“又涨了？”&lt;/p&gt;
@@ -301,16 +230,7 @@
 &lt;p&gt;“走吧。”方舟催促着，然后补充了一句：“那边，墙脚下，能走。”&lt;/p&gt;
 &lt;p&gt;于是男人迈开了脚步，然后越来越快。&lt;/p&gt;
 &lt;p&gt;“大厦……人……自……”方舟说的话没人听清。&lt;/p&gt;
-&lt;p&gt;后记：字数有限，不尽兴，留给各位想象的空间吧。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[浅谈诸子百家中数家]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/zhuzibaijia/</link><guid isPermaLink="false">https://boshugege.github.io/zhuzibaijia/</guid><pubDate>Sat, 26 Nov 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;写在前面：随想，不成文体，无暇整理，主要在其中想法。&lt;/p&gt;
+&lt;p&gt;后记：字数有限，不尽兴，留给各位想象的空间吧。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[浅谈诸子百家中数家]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/zhuzibaijia/</link><guid isPermaLink="false">https://boshugege.github.io/zhuzibaijia/</guid><pubDate>Sat, 26 Nov 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;写在前面：随想，不成文体，无暇整理，主要在其中想法。&lt;/p&gt;
 &lt;h3&gt;儒家&lt;/h3&gt;
 &lt;p&gt;无论如何，儒家是中国历史上对民族价值观形成有最重大意义的一家。自从汉“独尊儒术”之后，一切政治、文化活动都主要围绕儒家展开。&lt;/p&gt;
 &lt;p&gt;从儒家本意、孔孟原书出发，儒家给出了非常多美德的标准，而围绕“仁”的主题展开。由于其注重自己对他人的“德”，故更像是一门社会学，而非哲学或政治纲领。具体来说，孔子为了维护社会稳定，给社会上“士”以上的阶层划分了等级和各层级的行为准则，以保证大部分人在小部分更“知礼”的人的领导下，最终效命于“至德之人”。虽然儒家意在使所有人都有“仁”，但其言行，即使“食无求饱”“一箪食、一瓢饮”，也仍然建立在学儒之人有良好的文化和物质条件基础上的，倡导道高于物质生活，也掩盖不了它“仓廪实”才有资格“知”的本质。&lt;/p&gt;
@@ -337,16 +257,7 @@
 &lt;p&gt;所以说墨家像黑帮是确切的，它还像是梁山泊，它的兼爱，多少有点“江湖义气”的成分。他们对“别者”（差别爱之人）有强烈的分开，而反对天命，恰像是大碗喝酒、大块吃肉的英雄或土匪。&lt;/p&gt;
 &lt;p&gt;墨家全盘否定了人之本性，提出了一个过于高级的社会形态、一个乌托邦模型。它的实现需要其中参与的所有人从小接受相应的教育，而它的维系无疑需要上述提到的暴力机构。它的模型确实是很高效的，然而即使是现在，经济条件也远没有达到它所需的程度，没有人知道在这样的基础条件下，该怎么做。墨家是有理想的，但他没有弄清楚实现他的理想需要的社会基础，故只能以侠的形式出现，以门派的形式活动，最后消失在历史的长河之中。&lt;/p&gt;
 &lt;p&gt;后记：人的思想会随着时间而改变，有时，几个月前写的东西，现在看来也有有失妥当的地方。于是不再修改，呈现这个时间下的理解吧。&lt;/p&gt;
-&lt;p&gt;*又后记：又读了一点书，发现对于道家的理解问题很大，不过当时的想法就是当时的想法。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决]]></title><description><![CDATA[折腾了这么久，终于把这个东西折腾完了……快乐 这两款整机，不管什么配置，从后期出厂开始就一直是 12A 版本的 BIOS，这个版本的 BIOS 会导致 CPU 的功耗被锁在 65W，具体表现就是当 CPU 全核满负载运行的时候，任务管理器内的占用率会始终显示 6…]]></description><link>https://boshugege.github.io/ren9000-suopin/</link><guid isPermaLink="false">https://boshugege.github.io/ren9000-suopin/</guid><pubDate>Sat, 30 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;折腾了这么久，终于把这个东西折腾完了……快乐&lt;/p&gt;
+&lt;p&gt;*又后记：又读了一点书，发现对于道家的理解问题很大，不过当时的想法就是当时的想法。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决]]></title><description><![CDATA[折腾了这么久，终于把这个东西折腾完了……快乐 这两款整机，不管什么配置，从后期出厂开始就一直是 12A 版本的 BIOS，这个版本的 BIOS 会导致 CPU 的功耗被锁在 65W，具体表现就是当 CPU 全核满负载运行的时候，任务管理器内的占用率会始终显示 6…]]></description><link>https://boshugege.github.io/ren9000-suopin/</link><guid isPermaLink="false">https://boshugege.github.io/ren9000-suopin/</guid><pubDate>Sat, 30 Jul 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;折腾了这么久，终于把这个东西折腾完了……快乐&lt;/p&gt;
 &lt;p&gt;这两款整机，不管什么配置，从后期出厂开始就一直是 12A 版本的 BIOS，这个版本的 BIOS 会导致 CPU 的功耗被锁在 65W，具体表现就是当 CPU 全核满负载运行的时候，任务管理器内的占用率会始终显示 63% 左右，并且频率锁定在 2.3GHz。i9 变 E5 名不虚传。然而，升级了 BIOS，问题依然存在，而且找不到任何相应的设置项。&lt;/p&gt;
 &lt;p&gt;解决方法其实非常简单，但是网络上几乎没有任何资料，只有在谷歌上搜索得出的结果里，联想论坛的一个帖子有一些线索。[链接]&lt;a href=&quot;https://club.lenovo.com.cn/forum.php?mod=viewthread&amp;#x26;tid=6297932&amp;#x27;&quot;&gt;https://club.lenovo.com.cn/forum.php?mod=viewthread&amp;#x26;tid=6297932&apos;&lt;/a&gt;。根据最后一楼的提示，把BIOS设置重置，就可以直接解决问题了。&lt;/p&gt;
 &lt;p&gt;联想出厂 BIOS 就能有 Bug 也是无语……升级 BIOS 不彻底修复 Bug 更让人无语……好吧，现在能好好用了。&lt;/p&gt;
@@ -356,16 +267,7 @@
 &lt;p&gt;今年发布会搞了很多 API ，正好今年 WWDC 的图标是 Swift ，况且开发者又可以线下参加活动，今年对开发的力度还是挺大的。这次居然提了 Metal 3，找了游戏开发者来，而且重点介绍的是桌面端游戏，看来 Apple 在想依靠 Apple Silicon 回到游戏市场啊。对于游戏所需要的性能，Apple 这次的确满足得很好了……希望能有更多开发者关注吧。要是 Apple 真能在游戏市场打下一块地，那 Windows 仅剩的优势就是自定义和工业了，何况在国外很多企业 Apple 也做了很多企业用机。&lt;/p&gt;
 &lt;p&gt;iPadOS 的更新更好地利用了 iPad 现在的性能，对于外接屏幕的利用也变强了。台前调度太强了（可惜 iPad Air 要第三代才能用上，手上的老一代设备要正式宣布退伍了啊）&lt;/p&gt;
 &lt;p&gt;之前一直有传闻的无密码化的确要来了，Apple 果然又是打头的，看来 Windows 11 需要 TPM 2.0 应该也和这个有关。说实话，对于普通用户而言，果里果气的 Windows 才是最好的选择，天天吐槽 Windows 11 各种烂的基本上都是纯粹的数码爱好者，对于普通用户而言的确在越来越简单易用。&lt;/p&gt;
-&lt;p&gt;先写这么多&lt;/p&gt;</content:encoded></item><item><title><![CDATA[口口星人的故事]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/lianzai-koukouxing/</link><guid isPermaLink="false">https://boshugege.github.io/lianzai-koukouxing/</guid><pubDate>Mon, 30 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;在遥远的地方，有一颗星球，上面有很多智慧生物，因为它们的文字中出现频率最高的字是一个方框，形似汉字中的口，所以我们暂且把它们称为口口星人。这个故事是由一个口口星人记述的，后来有人把它翻译成了地球的语言，被地球上的人无意中获得了。&lt;/p&gt;
+&lt;p&gt;先写这么多&lt;/p&gt;</content:encoded></item><item><title><![CDATA[口口星人的故事]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/lianzai-koukouxing/</link><guid isPermaLink="false">https://boshugege.github.io/lianzai-koukouxing/</guid><pubDate>Mon, 30 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;在遥远的地方，有一颗星球，上面有很多智慧生物，因为它们的文字中出现频率最高的字是一个方框，形似汉字中的口，所以我们暂且把它们称为口口星人。这个故事是由一个口口星人记述的，后来有人把它翻译成了地球的语言，被地球上的人无意中获得了。&lt;/p&gt;
 &lt;p&gt;口口星有一种蔓延了很久很久，久到没有人知道什么时候开始的疫病，而且传染非常迅速。毕竟是疫病，所以大家都不想患上，于是每隔几个口口日，负责管理口口星的部门就要对口口星检查一次。口口星人有魔法，都要通过魔力来生存，所以口口星人通过付出魔力来获得居住场所和食物等物品，而检查患者需要施法，每个聚落每次施法传言需要耗费两千万单位的口口魔力，不过这只是传言，没有几个普通的口口星人知道确切的消息，看上去还是风平浪静。口口星人的繁殖也需要魔力，不过为了种族的繁衍，很多口口星人还是愿意繁殖，于是管理部门就需要新建一所抚育小口口星人的场所。&lt;/p&gt;
 &lt;p&gt;负责建造的口口星人很快发现，给的口口魔力不足，于是乎，只能使用较为低级的法术来建造。但是口口星明文规定，所有的建筑必须通过审查，口口星人一看审查报告，有十分之一都是不合格，怎么办呢？于是它又使用一种低级的法术，把不合格改成了合格（当然，口口星语言和我们不同，所以不是去掉一个字这么简单）。后来，无论如何，该建造的还是建造了，也有好多小口口星人在里面长大。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[科普：有关 GFW ，即通常所说的「墙」的一些事]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/gfw/</link><guid isPermaLink="false">https://boshugege.github.io/gfw/</guid><pubDate>Thu, 26 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
 &lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
@@ -388,72 +290,27 @@
 &lt;p&gt;可以去看看这篇文章 &lt;a href=&quot;https://cloud.tencent.com/developer/article/1740977&quot;&gt;https://cloud.tencent.com/developer/article/1740977&lt;/a&gt;&lt;/p&gt;&lt;/p&gt;
 &lt;h3&gt;二、VPN 扫盲&lt;/h3&gt;
 &lt;p&gt;总有人觉得 VPN 是一个很刑的东西，不能拿到台面上来说，这种想法就跟菜刀可以杀人所以要禁止菜刀一样可笑……虽然国内的搜索引擎搜索到的有关 VPN 的信息里，真的有关的很少，但是你们哪怕在百度百科看看 VPN 是啥也不至于啥都不知道吧……其实 VPN 是虚拟专用网络，不过就是把你的电脑接入一个虚拟的、非物理的局域网环境中罢了，所以 VPN 在高校和企业中的应用是非常广泛的，例如，员工出差到外地，学生放假回家，想要访问企业/学校内网的资源，就会通过企业/学校提供的 VPN 服务来访问。所以使用 VPN 这个词来作为突破网络长城的代名词实在是太污名化 VPN 了。更何况，GFW 现在已经可以准确地封锁 VPN 协议的流量，任何声称是 VPN 的工具都不使用 VPN 的加密方式，而是一些其他的新加密协议。VPN 本身只是前期技术相对不成熟时的借用工具，其原意并非为了突破 GFW。&lt;/p&gt;
-&lt;p&gt;后面的东西似乎不太属于原理范围……等仔细斟酌之后吧。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[使用笔记：内网穿透+远程桌面，流畅使用远程计算机]]></title><description><![CDATA[大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。 Windows…]]></description><link>https://boshugege.github.io/remote-desktop/</link><guid isPermaLink="false">https://boshugege.github.io/remote-desktop/</guid><pubDate>Wed, 18 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。&lt;/p&gt;
+&lt;p&gt;后面的东西似乎不太属于原理范围……等仔细斟酌之后吧。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[使用笔记：内网穿透+远程桌面，流畅使用远程计算机]]></title><description><![CDATA[大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。 Windows…]]></description><link>https://boshugege.github.io/remote-desktop/</link><guid isPermaLink="false">https://boshugege.github.io/remote-desktop/</guid><pubDate>Wed, 18 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。&lt;/p&gt;
 &lt;p&gt;Windows 自带的远程桌面可以有各种各样的配置，使用多种多样的屏幕分辨率和本地资源等。当然，由于中国的各位基本上都是内网用户，所以我们不能直接连接，需要一些配置
 才能访问。&lt;/p&gt;
 &lt;p&gt;于是，我使用了一个类 VPN 的服务 ZeroTier ，只简单配置了一下，并没有开服务器 moon ，不过国内的 UDP 流量很容易遭到丢包处理，所以不太稳定，正在
 找寻解决方案。（一种解决方案是使用免费服务器作为备用的 TCP 握手服务器，不过我没有这个条件）&lt;/p&gt;
-&lt;p&gt;大概就笔记一下几个关键词吧：Zerotier（组网），向日葵、ToDesk（远程桌面），FRP（内网穿透）。具体教程网上确实不少。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[RSSHub，跟上了潮流的 RSS 升级服务]]></title><description><![CDATA[一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：https://rssh-ub-ten-jet.vercel.app 相关内容和路由请访问RSSHub]]></description><link>https://boshugege.github.io/rsshub/</link><guid isPermaLink="false">https://boshugege.github.io/rsshub/</guid><pubDate>Tue, 17 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：&lt;a href=&quot;https://rssh-ub-ten-jet.vercel.app&quot;&gt;https://rssh-ub-ten-jet.vercel.app&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;相关内容和路由请访问&lt;a href=&quot;https://rsshub.app&quot;&gt;RSSHub&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[一份作业，关于屠呦呦和“三无科学家”]]></title><description><![CDATA[原题： 瑞典卡罗琳医学院 10 月 5 日宣布，将 201…]]></description><link>https://boshugege.github.io/tuyouyou/</link><guid isPermaLink="false">https://boshugege.github.io/tuyouyou/</guid><pubDate>Mon, 16 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;h3&gt;原题：&lt;/h3&gt;
+&lt;p&gt;大概就笔记一下几个关键词吧：Zerotier（组网），向日葵、ToDesk（远程桌面），FRP（内网穿透）。具体教程网上确实不少。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[RSSHub，跟上了潮流的 RSS 升级服务]]></title><description><![CDATA[一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：https://rssh-ub-ten-jet.vercel.app 相关内容和路由请访问RSSHub]]></description><link>https://boshugege.github.io/rsshub/</link><guid isPermaLink="false">https://boshugege.github.io/rsshub/</guid><pubDate>Tue, 17 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：&lt;a href=&quot;https://rssh-ub-ten-jet.vercel.app&quot;&gt;https://rssh-ub-ten-jet.vercel.app&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;相关内容和路由请访问&lt;a href=&quot;https://rsshub.app&quot;&gt;RSSHub&lt;/a&gt;&lt;/p&gt;</content:encoded></item><item><title><![CDATA[一份作业，关于屠呦呦和“三无科学家”]]></title><description><![CDATA[原题： 瑞典卡罗琳医学院 10 月 5 日宣布，将 201…]]></description><link>https://boshugege.github.io/tuyouyou/</link><guid isPermaLink="false">https://boshugege.github.io/tuyouyou/</guid><pubDate>Mon, 16 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;原题：&lt;/h3&gt;
 &lt;p&gt;瑞典卡罗琳医学院 10 月 5 日宣布，将 2015 年诺贝尔生理学或医学奖授予中国药学家屠呦呦，屠呦呦的获奖理由是「有关疟疾新疗法的发现」。这是中国科学家因为在中国本土进行的科学研究而首次获诺贝尔科学奖，因为没有博士学位、留洋背景和院士头衔，屠呦呦被媒体报道称为「三无」科学家。对此，你有何看法？&lt;/p&gt;
 &lt;p&gt;让我们从不太一样的角度来看。&lt;/p&gt;
 &lt;p&gt;这「三无」，指的是博士学位、留洋背景、院士头衔的「三无」。博士学位是科学家的相关知识走到世界前沿的标志，所以提「博士」；当时是 2015 年，正值「出国热」时期，人们普遍认为要做出世界一流的水准，必须要到欧美深造，接受最前沿的教育，在最前言的科学环境中才有可能，所以提「留洋」；中国的科学家最梦寐以求的头衔就是「院士」，院士代表着国家对这位科学家贡献的直接肯定，所以提「院士」。侧面看出当时在科学界上社会普遍认可的一种标准。如果放到现在或者是将来，可能就不会是这「三无」了。&lt;/p&gt;
 &lt;p&gt;再换一个角度：屠呦呦为什么「三无」？&lt;/p&gt;
 &lt;p&gt;屠呦呦科学生涯最重要的部分在一个特殊的时期，博士学位和留洋背景这两项我们暂且按下不表。首先不作评价，把网络上相关的文章和信息拿出来说一说：网络上的一些自媒体和小媒体的文章认为，当选院士需要有论文、学历等硬性要求，而屠呦呦并不满足相关要求。又有文章表示，从两院评选院士的章程和中国工程院工作人员的相关辟谣中可得知，屠呦呦未入选院士并非上述原因。网友揣测更可能是参选院士需要推选，和人缘有关。另有《中国工程院院士增选工作实施办法》表示，候选人的年龄原则上不超过 65 周岁，年龄超过 65 周岁的候选人，获得 6 位院士提名方为有效，且仅能接受 6 位院士的提名，其中本学部院士应不少于 4 位。而屠呦呦现已 92 岁高龄。至于真相和原因，在这些或真或假的文章里，并不一定能辨认清楚。&lt;/p&gt;
 &lt;p&gt;再换一个角度，媒体为何选择「三无」科学家作为重点来报道？&lt;/p&gt;
-&lt;p&gt;每一次媒体报道新闻，都需要抓住一个关键词大做文章，特别是能力并不是很强的自媒体。当时自媒体刚刚兴起，大量自媒体喜欢集中抓住一个重点，抱团渲染。这里抓住的就是「三无」。挑这个点，主要在于它是「不同」的，可以脱离开主要的叙事，去生发自媒体作者自己的观点。很多质量并不高的自媒体喜欢「半叙事半议论」，来彰显自己和别人的「不一样」，「三无」这个点恰好抓住了自媒体兴奋的各个关键，所以被作为重点大加渲染。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[语文作文讲评后的几点思考]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/yuwen-zuowen-jiangping/</link><guid isPermaLink="false">https://boshugege.github.io/yuwen-zuowen-jiangping/</guid><pubDate>Thu, 12 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;h3&gt;审题要清晰&lt;/h3&gt;
+&lt;p&gt;每一次媒体报道新闻，都需要抓住一个关键词大做文章，特别是能力并不是很强的自媒体。当时自媒体刚刚兴起，大量自媒体喜欢集中抓住一个重点，抱团渲染。这里抓住的就是「三无」。挑这个点，主要在于它是「不同」的，可以脱离开主要的叙事，去生发自媒体作者自己的观点。很多质量并不高的自媒体喜欢「半叙事半议论」，来彰显自己和别人的「不一样」，「三无」这个点恰好抓住了自媒体兴奋的各个关键，所以被作为重点大加渲染。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[语文作文讲评后的几点思考]]></title><description><![CDATA[…]]></description><link>https://boshugege.github.io/yuwen-zuowen-jiangping/</link><guid isPermaLink="false">https://boshugege.github.io/yuwen-zuowen-jiangping/</guid><pubDate>Thu, 12 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;h3&gt;审题要清晰&lt;/h3&gt;
 &lt;p&gt;虽然是老生常谈，但在这种作文里的确很重要。审题不仅是要审该写什么，更要搞明白题目背后到底是什么。拿此次作文题《熟悉的陌生人》举例，如果直接审题错误，那么就会写成诸如「陌生的熟人」一类，选材选偏了，到后面硬拉回来就会很生硬。如果未搞清楚题目的内核就匆匆动笔，那么文章只会被限定于鸡毛蒜皮的家庭琐事，没有阐发和思考。是什么让「陌生人」变得「熟悉」？这是一个选材的方向；有一个人，你认为自己原本很熟悉，但发现自己根本不了解他，这是另一个选材的途径。这道题目的内核更在于「我」和所写之人的关系，所以这篇记叙文要写人——写事也是一种审题错误。&lt;/p&gt;
 &lt;h3&gt;选材、立意&lt;/h3&gt;
 &lt;p&gt;选材这里有一个坑点：如果你要写自己理应熟悉的人是「陌生人」，很容易写出格，很多事情并不足以证明你和他是「陌生人」。例如，和家长吵架，埋怨家长不理解「我」，这还远远不能让被写双方成为「陌生人」，所以从此处着笔，立意一定要深，否则就是不合理的作文；如果从原本的「陌生人」着手，例如外卖小哥，楼下某某店的老板娘，则比较稳，这也是正和反的区别。&lt;/p&gt;
 &lt;h3&gt;文笔和构思&lt;/h3&gt;
 &lt;p&gt;虽然文笔很难在短时间内改变，但是看了那篇作文竞赛中写出来的文章，真的觉得一个“写手”的文笔和构思是非常重要的。很难有人能在考场上构思出这样一篇细节丰富的文章，并用这样老练的笔调写下来。前后一贯需要写前的谋篇布局。文笔这个东西很玄乎，知道什么样的文笔很好，但是不一定能写出这个味道来，有的时候生硬模仿反倒有点东施效颦的味道，不过有的时候去吸取一点优秀作文谋篇布局的习惯和潜意识里遣词造句的习惯还是非常有用的。&lt;/p&gt;
 &lt;h3&gt;一点另外的想法&lt;/h3&gt;
-&lt;p&gt;写一篇文章最花功夫的时候是在写的过程中，但是考场作文最重要的时间段是动笔前。这构成了一个矛盾：我需要在限定的时间内完成作文（虽然这次我留了一个小时无所事事……时间安排的重大失误），但同时也需要在动笔之前尽可能地想完备，想到一些可以串联整篇文章的重点细节。我觉得很多写作文的要领我们都是知道的，但就是在考场上翻到作文那一面时，就回到了之前写作文的习惯，其中有很多不是什么好习惯。现在的记叙文还可以在写文章之间去加深立意，甚至修改文章的走向，等之后我们进入了议论文的环节，可能到中途再转向就更难了。还是要定向培养自己在看见一个命题时检索相关信息的速度和准确度。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[2022年，我用回了邮箱、论坛和RSS]]></title><description><![CDATA[你知道这三个名词吗？你还记得这三个名词吗？ 淹没在信息的海洋里，我们越来越习惯于无需思考的视频和图片。离开网络几分钟，就害怕自己错过了世界各地的新闻、同学同事朋友发来的即时通讯。在触手可得的娱乐中，我们用短视频麻痹自己，从 10 分钟到 3 分钟再到 1…]]></description><link>https://boshugege.github.io/youxiang-luntan-rss/</link><guid isPermaLink="false">https://boshugege.github.io/youxiang-luntan-rss/</guid><pubDate>Wed, 11 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;!-- Google tag (gtag.js) --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-P8BK01ELC3&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&apos;js&apos;, new Date());
-
-  gtag(&apos;config&apos;, &apos;G-P8BK01ELC3&apos;);
-&lt;/script&gt;
-&lt;p&gt;你知道这三个名词吗？你还记得这三个名词吗？&lt;/p&gt;
+&lt;p&gt;写一篇文章最花功夫的时候是在写的过程中，但是考场作文最重要的时间段是动笔前。这构成了一个矛盾：我需要在限定的时间内完成作文（虽然这次我留了一个小时无所事事……时间安排的重大失误），但同时也需要在动笔之前尽可能地想完备，想到一些可以串联整篇文章的重点细节。我觉得很多写作文的要领我们都是知道的，但就是在考场上翻到作文那一面时，就回到了之前写作文的习惯，其中有很多不是什么好习惯。现在的记叙文还可以在写文章之间去加深立意，甚至修改文章的走向，等之后我们进入了议论文的环节，可能到中途再转向就更难了。还是要定向培养自己在看见一个命题时检索相关信息的速度和准确度。&lt;/p&gt;</content:encoded></item><item><title><![CDATA[2022年，我用回了邮箱、论坛和RSS]]></title><description><![CDATA[你知道这三个名词吗？你还记得这三个名词吗？ 淹没在信息的海洋里，我们越来越习惯于无需思考的视频和图片。离开网络几分钟，就害怕自己错过了世界各地的新闻、同学同事朋友发来的即时通讯。在触手可得的娱乐中，我们用短视频麻痹自己，从 10 分钟到 3 分钟再到 1…]]></description><link>https://boshugege.github.io/youxiang-luntan-rss/</link><guid isPermaLink="false">https://boshugege.github.io/youxiang-luntan-rss/</guid><pubDate>Wed, 11 May 2022 00:00:00 GMT</pubDate><content:encoded>&lt;p&gt;你知道这三个名词吗？你还记得这三个名词吗？&lt;/p&gt;
 &lt;p&gt;淹没在信息的海洋里，我们越来越习惯于无需思考的视频和图片。离开网络几分钟，就害怕自己错过了世界各地的新闻、同学同事朋友发来的即时通讯。在触手可得的娱乐中，我们用短视频麻痹自己，从 10 分钟到 3 分钟再到 15 秒，我们注意力能够持续的时间越来越短，纯粹傻笑的欢愉支配着我们的休闲时间。信息越来越多，我们无力选择，只能囫囵吞枣，看完之后忘记所有。在那些充斥自媒体的平台出现之前，在随时发送消息的通讯软件出现之前，我们好像也能获取消息，相互交流。这让我想，现在的平台，必要吗？&lt;/p&gt;
 &lt;p&gt;我找回了三个从普通人生活中消失的名词：邮箱、论坛、RSS。&lt;/p&gt;
 &lt;p&gt;邮箱。有些人工作和注册账号可能还能用到邮箱，但日常交流里大部分人几乎不会使用了。电子邮件的消失，就像纸质信件的消失一样：快速，了无痕迹，让人想不起来，在电脑上曾经也可以写信。面对空白的信纸，虽然知道自己可以发很多很多封，虽然知道每一封不管写多少字都可以，但终归让人不敢使用碎片化的表达，迫使人仔细斟酌每一句话，确认想说的都写下来了，才敢点击发送。相对即时消息，严肃的写作给了信息的发送者一个门槛，筛选掉了无数不该出现的消息，节省了接收者判断所需要的时间，让接收者能更好地面对问题。宣告使用邮箱，就像是宣布拒绝那些没有必要没有营养的对话，拒绝需要应付的寒暄和不得不回的招呼，也可以拒绝失去下文的疑问：“在吗，能不能帮我件事？”然后了无音讯。&lt;/p&gt;
