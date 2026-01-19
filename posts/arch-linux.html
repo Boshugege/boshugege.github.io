@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>archlinux 简明安装指南</title>
+  <meta name="post-title" content="archlinux 简明安装指南">
+  <meta name="post-date" content="2023-10-14">
+  <meta name="post-tags" content="科技,Linux">
+  <meta name="post-excerpt" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <article class="post-content">
+    <h1>archlinux 简明安装指南</h1>
+    <p class="meta">2023-10-14 · 标签：</p>
+    <p>装了很多回<code>archlinux</code>，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</p>
+<p>安装之前的准备略去不写，就从<code>archlinux</code>的 iso 启动之后开始吧。其实<code>archlinux</code>也只是安装过程<strong>看上去</strong>高级一点，滚动更新的理念和大部分所谓主流发行版有点区别，用惯了 TUI 操作的人对于无 GUI 操作应当还是比较适应的，更何况提供了好几个 terminal 可以多线程操作，避免在等待的时候没事干（不是），甚至看到有老哥速通<code>archlinux</code>安装（这居然也有速通？）</p>
+<p>至于跟<code>archlinux</code>这个话题有关的争议，反正不在这个笔记的叙述范围之内，快速进入正题吧。</p>
+<p>进入<code>archlinux</code>安装环境之后，我们选择 <code>Arch Linux install medium (x86_64, UEFI)</code> 进入<code>archlinux</code>的安装环境，这是一个比较小的 live 系统，其 bash 已经可以给我们完成很多任务。</p>
+<p>archlinux 镜像中现在启用了 <code>reflector</code> 服务，会自己更新镜像源，然而在存在 GFW 的特殊网络环境中，这个服务并不适合被启用，我们还是老老实实地禁用它吧。</p>
+<pre><code class="language-bash">systemctl stop reflector.service
+</code></pre>
+<p>查看服务状态，按<code>q</code>退出</p>
+<pre><code class="language-bash">systemctl status reflector.service
+</code></pre>
+<p>确认 <code>UEFI</code> 模式（保险起见）</p>
+<pre><code class="language-bash">ls /sys/firmware/efi/efivars
+</code></pre>
+<p>若有输出即是 <code>UEFI</code></p>
+<p>如果使用无线网络（有线跳过即可）：</p>
+<pre><code class="language-bash">iwctl # 进入交互式命令行
+device list # 列出无线网卡设备名，比如无线网卡看到叫 wlan0
+station wlan0 scan # 扫描网络
+station wlan0 get-networks # 列出所有 wifi 网络
+station wlan0 connect wifi-name # 进行连接，注意这里无法输入中文。回车后输入密码即可
+exit # 连接成功后退出
+</code></pre>
+<p>随便 <code>ping</code> 一个网站，应该能看到网络的连接情况。按 <code>Ctrl+C</code> 退出。</p>
+<p>同步时钟：</p>
+<pre><code class="language-bash">timedatectl set-ntp true
+timedatectl status
+</code></pre>
+<p>更新国内镜像源：</p>
+<pre><code class="language-bash">vim /etc/pacman.d/mirrorlist
+</code></pre>
+<p>在最上面加入以下镜像源的任意一条</p>
+<pre><code class="language-bash">Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch # 清华大学开源软件镜像站
+Server = https://repo.huaweicloud.com/archlinux/$repo/os/$arch # 华为开源镜像站
+Server = http://mirror.lzu.edu.cn/archlinux/$repo/os/$arch # 兰州大学开源镜像站
+Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch # 中国科学技术大学开源镜像站
+</code></pre>
+<p><del>你问我为什么把科大放最下面？</del><strong>我就爱用 THU 源</strong></p>
+<p>现在我们进入磁盘分区阶段。</p>
+<p>使用 <code>lsblk</code> 查看当前磁盘的情况，找到要用的磁盘和分区</p>
+<pre><code class="language-bash">lsblk
+</code></pre>
+<p>使用 <code>cfdisk</code> 对需要使用的磁盘分区：注意，SATA 磁盘名称为 sdx (x=a~z)，NVME 磁盘名称为 nvmexn1 (x=0~n)。（接下来我们都以 SATA 磁盘举例，请 NVME 用户注意）</p>
+<pre><code class="language-bash">cfdisk /dev/sdx
+</code></pre>
+<p>使用上下方向键在需要操作的分区中移动，使用左右方向键在不同的操作中移动。我们 <code>[New]</code> 一个分区，指定大小，默认为 <code>Linux filesystem</code>，我们再选中并更改类型即可。</p>
+<p>我们需要：一个内存大小 50% ~ 100% 的 <code>Swap</code> 分区，类型为 <code>Linux swap</code>，一个自定义大小的分区（2GiB 以上），类型为 <code>Linux filesystem</code>，因为我们使用 <code>Btrfs</code> 文件系统。</p>
+<p><code>[Write]</code> 并且 <code>[Quit]</code>，这时将对磁盘进行操作，这个操作<strong>不可逆</strong>！谨慎删除分区！</p>
+<p>使用 <code>fdisk -l</code> 查看分区的情况 </p>
+<p>格式化并创建子卷</p>
+<p>EFI：（双系统请跳过这步，不需要格式化）：</p>
+<pre><code class="language-bash">mkfs.fat -F32 /dev/sdxn
+</code></pre>
+<p>Swap：</p>
+<pre><code class="language-bash">mkswap /dev/sdxn
+</code></pre>
+<p>Btrfs 分区：（archlinux为卷标，可自定义，但不可以包含特殊字符和空格）</p>
+<pre><code class="language-bash">mkfs.btrfs -L archlinux /dev/sdxn
+</code></pre>
+<p>挂载：</p>
+<pre><code class="language-bash">mount -t btrfs -o compress=zstd /dev/sdxn /mnt
+</code></pre>
+<p>使用<code>df -h</code>复查挂载情况，若不对，用<code>umount</code>卸载重来。</p>
+<p>创建子卷：</p>
+<pre><code class="language-bash">btrfs subvolume create /mnt/@
+btrfs subvolume create /mnt/@home
+</code></pre>
+<p>复查：</p>
+<pre><code class="language-bash">btrfs subvolume list -p /mnt
+</code></pre>
+<p>卸载：</p>
+<pre><code class="language-bash">umount /mnt
+</code></pre>
+<p>准确按照如下顺序挂载子卷！</p>
+<pre><code class="language-bash">mount -t btrfs -o subvol=/@,compress=zstd /dev/sdxn /mnt
+mkdir /mnt/home
+mount -t btrfs -o subvol=/@home,compress=zstd /dev/sdxn /mnt/home
+mkdir -p /mnt/boot
+mount /dev/sdxn /mnt/boot
+swapon /dev/sdxn
+</code></pre>
+<p>复查：<code>df -h</code>，<code>free -h</code></p>
+<p>使用<code>pacstrap</code>安装基本包：<em>终于进入安装了 :)</em></p>
+<pre><code class="language-bash">pacstrap /mnt base base-devel linux linux-firmware btrfs-progs
+</code></pre>
+<p>若提示 GPG 证书错误，使用<code>pacman -S archlilnux-keyrinig</code>更新解决。</p>
+<p>安装亿些必要软件（把<code>zsh</code>换成<code>bash</code>也是可以哒~老东西用惯了）：</p>
+<pre><code class="language-bash">pacstrap /mnt networkmanager vim sudo zsh zsh-completions
+</code></pre>
+<p>生成 fstab file：</p>
+<pre><code class="language-bash">genfstab -U /mnt &gt; /mnt/etc/fstab
+cat /mnt/etc/fstab
+</code></pre>
+<p>有正常输出即可。</p>
+<p>chroot（就快成功了！）</p>
+<pre><code class="language-bash">arch-chroot /mnt
+</code></pre>
+<p>设置主机名，同样，不要有特殊字符和空格：</p>
+<pre><code class="language-bash">vim /etc/hostname
+</code></pre>
+<p>设置 hosts：</p>
+<pre><code class="language-bash">vim /etc/hosts
+</code></pre>
+<p>输入：</p>
+<pre><code>127.0.0.1   localhost
+::1         localhost
+127.0.1.1   主机名
+</code></pre>
+<p>设置时区：</p>
+<pre><code class="language-bash">ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+</code></pre>
+<p>同步时间：</p>
+<pre><code class="language-bash">hwclock --systohc
+</code></pre>
+<p>地区化：</p>
+<pre><code class="language-bash">vim /etc/locale.gen
+</code></pre>
+<p>编辑<code>/etc/locale.gen</code>，去掉<code>en_US.UTF-8 UTF-8</code>以及<code>zh_CN.UTF-8 UTF-8</code>行前的注释符号（#）：</p>
+<p>生成：</p>
+<pre><code class="language-bash">locale-gen
+</code></pre>
+<p>输入（不要中文！会乱码）：</p>
+<pre><code class="language-bash">echo &#39;LANG=en_US.UTF-8&#39;  &gt; /etc/locale.conf
+</code></pre>
+<p>设置密码：</p>
+<pre><code class="language-bash">passwd root
+</code></pre>
+<p>安装微码（根据 CPU）：</p>
+<pre><code class="language-bash">pacman -S intel-ucode # Intel
+pacman -S amd-ucode # AMD
+</code></pre>
+<p>用<code>GRUB</code>引导：</p>
+<pre><code class="language-bash">pacman -S grub efibootmgr os-prober
+</code></pre>
+<p>安装<code>GRUB</code>：</p>
+<pre><code class="language-bash">grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH
+</code></pre>
+<pre><code class="language-bash">vim /etc/default/grub
+</code></pre>
+<p>去掉 GRUB_CMDLINE_LINUX_DEFAULT 一行中最后的 quiet 参数，把 loglevel 的数值从 3 改成 5。这样是为了后续如果出现系统错误，方便排错，加入 nowatchdog 参数，这可以显著提高开关机速度。</p>
+<p>为引导，<code>Windows</code>添加一行：</p>
+<pre><code>GRUB_DISABLE_OS_PROBER=false
+</code></pre>
+<p>生成配置文件：</p>
+<pre><code class="language-bash">grub-mkconfig -o /boot/grub/grub.cfg
+</code></pre>
+<p>若引导了<code>Windows</code>，会&quot;Found Windows Boot Manager&quot;，若双硬盘双系统，则先不着急，进入<code>archlinux</code>后重新执行该命令。</p>
+<p>拔掉U盘，</p>
+<pre><code class="language-bash">exit
+umount -R /mnt
+reboot
+</code></pre>
+<p>进入系统啦！</p>
+<p>善后：</p>
+<pre><code class="language-bash">systemctl enable --now NetworkManager #联网
+#无线：
+nmcli dev wifi list # 显示附近的 Wi-Fi 网络
+nmcli dev wifi connect &quot;Wi-Fi名（SSID）&quot; password &quot;网络密码&quot; # 连接指定的无线网络
+neofetch #你会爱上它的
+</code></pre>
+<p>大功告成。</p>
+
+  </article>
+</body>
+</html>

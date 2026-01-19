@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</title>
+  <meta name="post-title" content="使用笔记：内网穿透+远程桌面，流畅使用远程计算机">
+  <meta name="post-date" content="2022-05-18">
+  <meta name="post-tags" content="科技,远程桌面">
+  <meta name="post-excerpt" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <article class="post-content">
+    <h1>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</h1>
+    <p class="meta">2022-05-18 · 标签：</p>
+    <p>大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。</p>
+<p>Windows 自带的远程桌面可以有各种各样的配置，使用多种多样的屏幕分辨率和本地资源等。当然，由于中国的各位基本上都是内网用户，所以我们不能直接连接，需要一些配置
+才能访问。</p>
+<p>于是，我使用了一个类 VPN 的服务 ZeroTier ，只简单配置了一下，并没有开服务器 moon ，不过国内的 UDP 流量很容易遭到丢包处理，所以不太稳定，正在
+找寻解决方案。（一种解决方案是使用免费服务器作为备用的 TCP 握手服务器，不过我没有这个条件）</p>
+<p>大概就笔记一下几个关键词吧：Zerotier（组网），向日葵、ToDesk（远程桌面），FRP（内网穿透）。具体教程网上确实不少。</p>
+
+  </article>
+</body>
+</html>
