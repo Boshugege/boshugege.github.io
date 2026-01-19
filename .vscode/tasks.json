@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start static server (Python)",
+      "type": "shell",
+      "command": "python -m http.server 8000",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Start static server (npx http-server)",
+      "type": "shell",
+      "command": "npx http-server . -p 8000",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Watch posts and generate index",
+      "type": "shell",
+      "command": "pwsh -NoProfile -File .\\scripts\\watch_generate.ps1",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate index (once)",
+      "type": "shell",
+      "command": "pwsh -NoProfile -File .\\scripts\\generate_index.ps1",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate index (with SITE_URL)",
+      "type": "shell",
+      "command": "pwsh -NoProfile -File .\\scripts\\generate_index.ps1",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "options": {
+        "env": {
+          "SITE_URL": "https://yourdomain.com"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
