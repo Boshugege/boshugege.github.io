@@ -64,7 +64,6 @@ function renderTags(posts) {
     a.textContent = `${tag} (${count})`;
     a.className = "tag";
     if (idx < VISIBLE_COUNT) a.classList.add("visible");
-    if (idx === 0) a.classList.add("top");
     if (tag === activeTag) a.classList.add("active");
     list.appendChild(a);
   });

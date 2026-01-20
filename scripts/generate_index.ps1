@@ -1,9 +1,43 @@
-# 生成 index.json 的简单脚本（PowerShell）
-# 在项目根目录运行： pwsh .\scripts\generate_index.ps1
+# 一键脚本：填充文章标签（为链接）并生成 index.json / tags.json / rss.xml（PowerShell）
+# 用法：在项目根目录运行： pwsh .\scripts\generate_index.ps1
+# 说明：本脚本会先把每篇文章 <head> 中的 <meta name="post-tags"> 填入正文（以链接形式指向 /index.html?tag=xxx），然后生成 index.json / tags.json / rss.xml
 # 可选：使用 SITE_URL 环境变量或传入参数用于 RSS 中的绝对链接
 param(
   [string]$SiteUrl = $env:SITE_URL
 )
+
+# Unified step: fill post tags (as links) from head meta before generating index
+function Fill-TagsAsLinks {
+    Write-Host "Filling post tags as links..." -ForegroundColor Cyan
+    $posts = Get-ChildItem -Path (Join-Path $PSScriptRoot '..\posts\*.html') -File
+    foreach ($p in $posts) {
+        $path = $p.FullName
+        $content = Get-Content -Raw -Encoding UTF8 $path
+
+        if ($content -match '<meta\s+name="post-tags"\s+content="([^"]*)">') {
+            $tagsRaw = $matches[1]
+            $tags = @()
+            if ($tagsRaw -ne '') { $tags = ($tagsRaw -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' } }
+
+            $anchors = ($tags | ForEach-Object { '<a href="/index.html?tag=' + [uri]::EscapeDataString($_) + '">' + $_ + '</a>' }) -join ', '
+
+            $pattern = '(<p class="meta">[^<]*?·\s*标签：)\s*[^<]*?(</p>)'
+            $newContent = $content -replace $pattern, "`$1$anchors`$2"
+
+            if ($newContent -ne $content) {
+                Set-Content -Path $path -Value $newContent -Encoding UTF8
+                Write-Host "Updated: $($p.Name) -> $anchors"
+            } else {
+                Write-Host "No change needed: $($p.Name)"
+            }
+        } else {
+            Write-Host "No tags meta found: $($p.Name)"
+        }
+    }
+}
+
+# Run the tag-fill step (links)
+Fill-TagsAsLinks
 
 $posts = Get-ChildItem -Path .\posts -Filter *.html -File -Recurse
 $result = @()
