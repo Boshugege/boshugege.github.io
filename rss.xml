@@ -5,7 +5,14 @@
   <link>./</link>
   <description>静态 HTML 技术笔记 - 自动生成的 RSS</description>
   <language>zh-CN</language>
-  <lastBuildDate>Tue, 20 Jan 2026 10:12:55 GMT</lastBuildDate>
+  <lastBuildDate>Tue, 20 Jan 2026 11:28:07 GMT</lastBuildDate>
+  <item>
+    <title>示例：代码与公式</title>
+    <link>posts/2026-01-20-sample.html</link>
+    <guid isPermaLink="true">posts/2026-01-20-sample.html</guid>
+    <pubDate>Tue, 20 Jan 2026 00:00:00 GMT</pubDate>
+    <description>示例文章，包含行内代码、代码块、行内数学与独立数学公式。</description>
+  </item>
   <item>
     <title>擦写过的磁带</title>
     <link>posts/cidai.html</link>
