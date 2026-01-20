@@ -18,7 +18,7 @@
    pwsh .\scripts\generate_index.ps1
    ```
 
-   该脚本会扫描 `posts/` 目录并生成 `index.json`，并额外生成：
+   该脚本会先把每篇文章 `<head>` 中的 `post-tags` 写入正文（以链接到 `/index.html?tag=xxx` 的形式），随后扫描 `posts/` 目录并生成 `index.json`，并额外生成：
    - `tags.json`：按 tag 聚合的文章列表，便于客户端按 tag 加载或生成页面；
    - `rss.xml`：RSS（RSS 2.0）订阅源（支持通过 `SITE_URL` 环境变量或 `-SiteUrl` 参数设置站点根域名，以生成 RSS 中的绝对链接；否则生成相对链接）。
 
