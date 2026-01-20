@@ -1,342 +1,336 @@
 {
-  "生活": [
+  "网络": [
     {
-      "id": "762d3ff7-85f5-40fb-8491-987f3dc340dd",
-      "title": "2022年，我用回了邮箱、论坛和RSS",
-      "date": "2022-05-11",
-      "url": "posts/youxiang-luntan-rss.html"
-    }
-  ],
-  "Thunderbird": [
-    {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
-      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
-      "date": "2023-04-02",
-      "url": "posts/thunderbird.html"
-    }
-  ],
-  "GFW": [
-    {
-      "id": "2523cb39-fce4-454d-9bc6-568a6741e4b5",
+      "id": "e7bc25d9-ed8c-437a-9276-db5d9780fe43",
       "title": "科普：有关 GFW ，即通常所说的「墙」的一些事",
       "date": "2022-05-26",
       "url": "posts/gfw.html"
     }
   ],
-  "代码": [
+  "软件": [
     {
-      "id": "d50f9d9a-f188-411f-b301-5887c13889e9",
-      "title": "示例：代码与公式",
-      "date": "2026-01-20",
-      "url": "posts/2026-01-20-sample.html"
-    }
-  ],
-  "硬件": [
-    {
-      "id": "178d0b2b-a53e-4dd9-ae21-5e676b5063b7",
-      "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
-      "date": "2022-07-30",
-      "url": "posts/ren9000-suopin.html"
-    },
-    {
-      "id": "e8321ca3-8058-47a7-8c57-db252a9cdc1d",
-      "title": "2022 WWDC 浅评",
-      "date": "2022-06-07",
-      "url": "posts/2022-wwdc.html"
-    }
-  ],
-  "经济": [
-    {
-      "id": "fc4d15ee-6567-4ade-9174-dded5285db33",
-      "title": "A Brief Research into the 2007-2008 Financial Crisis",
-      "date": "2023-11-25",
-      "url": "posts/financial-crisis.html"
-    }
-  ],
-  "数学": [
-    {
-      "id": "d50f9d9a-f188-411f-b301-5887c13889e9",
-      "title": "示例：代码与公式",
-      "date": "2026-01-20",
-      "url": "posts/2026-01-20-sample.html"
-    }
-  ],
-  "RSS": [
-    {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
       "title": "使用 Thunderbird 生活：Email, RSS, IRC",
       "date": "2023-04-02",
       "url": "posts/thunderbird.html"
-    },
+    }
+  ],
+  "生活": [
     {
-      "id": "c36f7ef0-9eda-4996-b0d9-6dc7801fa0eb",
-      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
-      "date": "2022-05-17",
-      "url": "posts/rsshub.html"
-    },
-    {
-      "id": "762d3ff7-85f5-40fb-8491-987f3dc340dd",
+      "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
       "title": "2022年，我用回了邮箱、论坛和RSS",
       "date": "2022-05-11",
       "url": "posts/youxiang-luntan-rss.html"
-    }
-  ],
-  "远程桌面": [
-    {
-      "id": "10e181a0-8f6e-40f3-8e80-abcdb4a08702",
-      "title": "使用笔记：内网穿透+远程桌面，流畅使用远程计算机",
-      "date": "2022-05-18",
-      "url": "posts/remote-desktop.html"
-    }
-  ],
-  "邮箱": [
-    {
-      "id": "762d3ff7-85f5-40fb-8491-987f3dc340dd",
-      "title": "2022年，我用回了邮箱、论坛和RSS",
-      "date": "2022-05-11",
-      "url": "posts/youxiang-luntan-rss.html"
-    }
-  ],
-  "RSSHub": [
-    {
-      "id": "c36f7ef0-9eda-4996-b0d9-6dc7801fa0eb",
-      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
-      "date": "2022-05-17",
-      "url": "posts/rsshub.html"
-    }
-  ],
-  "总结": [
-    {
-      "id": "1c65406c-9024-4b9f-afbf-87e67a028880",
-      "title": "2023 上半年总结",
-      "date": "2023-06-29",
-      "url": "posts/2023-first-half-conclusion.html"
-    }
-  ],
-  "Linux": [
-    {
-      "id": "9428b5e0-ed89-4937-a25f-8555d010cbc6",
-      "title": "archlinux 简明安装指南",
-      "date": "2023-10-14",
-      "url": "posts/arch-linux.html"
     }
   ],
   "感想": [
     {
-      "id": "45ac3569-41f2-4749-ba5e-300e4fbcca1c",
+      "id": "8081efcc-0452-469f-818b-a7719caaaed7",
       "title": "关于情商的一点想法",
       "date": "2023-03-21",
       "url": "posts/qingshang.html"
     }
   ],
+  "经济": [
+    {
+      "id": "21e3bdcf-8ecc-40ac-ab41-7bde49fbd27a",
+      "title": "A Brief Research into the 2007-2008 Financial Crisis",
+      "date": "2023-11-25",
+      "url": "posts/financial-crisis.html"
+    }
+  ],
+  "RSSHub": [
+    {
+      "id": "b840aef7-fd71-4bc6-bf18-a70cb39700e6",
+      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
+      "date": "2022-05-17",
+      "url": "posts/rsshub.html"
+    }
+  ],
+  "金融": [
+    {
+      "id": "21e3bdcf-8ecc-40ac-ab41-7bde49fbd27a",
+      "title": "A Brief Research into the 2007-2008 Financial Crisis",
+      "date": "2023-11-25",
+      "url": "posts/financial-crisis.html"
+    }
+  ],
   "小说": [
     {
-      "id": "37a03ca1-c269-4c08-a596-cad466a54397",
-      "title": "擦写过的磁带",
-      "date": "2024-07-25",
-      "url": "posts/cidai.html"
-    },
-    {
-      "id": "dbf822ff-4927-4c6e-9da7-d7e17dbdb78b",
+      "id": "06230618-fc44-4700-b985-62b5e12655c1",
       "title": "虚构的小故事",
       "date": "2022-12-29",
       "url": "posts/xugoudexiaogushi.html"
     },
     {
-      "id": "8ba37cd1-2385-4570-88cd-9b7841e7c06d",
+      "id": "58d47dd5-5fa0-4432-b18e-2d4a936faa5f",
       "title": "口口星人的故事",
       "date": "2022-05-30",
       "url": "posts/lianzai-koukouxing.html"
     }
   ],
+  "GFW": [
+    {
+      "id": "e7bc25d9-ed8c-437a-9276-db5d9780fe43",
+      "title": "科普：有关 GFW ，即通常所说的「墙」的一些事",
+      "date": "2022-05-26",
+      "url": "posts/gfw.html"
+    }
+  ],
+  "邮箱": [
+    {
+      "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
+      "title": "2022年，我用回了邮箱、论坛和RSS",
+      "date": "2022-05-11",
+      "url": "posts/youxiang-luntan-rss.html"
+    }
+  ],
+  "综述": [
+    {
+      "id": "21e3bdcf-8ecc-40ac-ab41-7bde49fbd27a",
+      "title": "A Brief Research into the 2007-2008 Financial Crisis",
+      "date": "2023-11-25",
+      "url": "posts/financial-crisis.html"
+    }
+  ],
+  "Linux": [
+    {
+      "id": "41fe0647-14e6-48db-9f00-7964e80d8033",
+      "title": "archlinux 简明安装指南",
+      "date": "2023-10-14",
+      "url": "posts/arch-linux.html"
+    }
+  ],
+  "远程桌面": [
+    {
+      "id": "1dcb1470-19f3-4ab8-81a5-dafd104f0678",
+      "title": "使用笔记：内网穿透+远程桌面，流畅使用远程计算机",
+      "date": "2022-05-18",
+      "url": "posts/remote-desktop.html"
+    }
+  ],
+  "锁频": [
+    {
+      "id": "2a93d371-2b52-4907-8ac2-85c46732b3ad",
+      "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
+      "date": "2022-07-30",
+      "url": "posts/ren9000-suopin.html"
+    }
+  ],
+  "RSS": [
+    {
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
+      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
+      "date": "2023-04-02",
+      "url": "posts/thunderbird.html"
+    },
+    {
+      "id": "b840aef7-fd71-4bc6-bf18-a70cb39700e6",
+      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
+      "date": "2022-05-17",
+      "url": "posts/rsshub.html"
+    },
+    {
+      "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
+      "title": "2022年，我用回了邮箱、论坛和RSS",
+      "date": "2022-05-11",
+      "url": "posts/youxiang-luntan-rss.html"
+    }
+  ],
   "游戏": [
     {
-      "id": "438dee65-eec3-4ce5-9910-7274abb4b657",
+      "id": "2b8ef30d-319e-4441-a6ba-acc5a94e3ead",
       "title": "萌新入手尘埃拉力2（DiRT Rally 2.0）小感",
       "date": "2023-07-03",
       "url": "posts/chenai-lali.html"
     }
   ],
+  "总结": [
+    {
+      "id": "f0c5fe61-ebd8-49b3-ae8a-0c8a15df42a0",
+      "title": "2023 上半年总结",
+      "date": "2023-06-29",
+      "url": "posts/2023-first-half-conclusion.html"
+    }
+  ],
+  "数学": [
+    {
+      "id": "8abc4bcf-d917-4822-8802-3a65a23b0ebf",
+      "title": "示例：代码与公式",
+      "date": "2026-01-20",
+      "url": "posts/2026-01-20-sample.html"
+    }
+  ],
+  "读书": [
+    {
+      "id": "6437fa34-fd20-42e9-bb15-5f401dd026b4",
+      "title": "关于《民主的细节》",
+      "date": "2023-07-02",
+      "url": "posts/minzhu-de-xijie.html"
+    }
+  ],
+  "论坛": [
+    {
+      "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
+      "title": "2022年，我用回了邮箱、论坛和RSS",
+      "date": "2022-05-11",
+      "url": "posts/youxiang-luntan-rss.html"
+    }
+  ],
   "作业": [
     {
-      "id": "ee5c431e-9e79-4c4e-8dd7-faab08b5ba11",
+      "id": "a994363f-8f00-49bf-a202-fb7b9624b839",
       "title": "知识分子的回望——读《中国在梁庄》",
       "date": "2023-07-05",
       "url": "posts/zhongguo-zai-liangzhuang.html"
     },
     {
-      "id": "a4b68d51-7cb9-418a-b312-0bfb2f4e6802",
+      "id": "6437fa34-fd20-42e9-bb15-5f401dd026b4",
       "title": "关于《民主的细节》",
       "date": "2023-07-02",
       "url": "posts/minzhu-de-xijie.html"
     },
     {
-      "id": "3af7d82b-463d-4acc-b52a-06d04b829fc5",
+      "id": "4c0b255d-17c2-431c-ac97-17a91f4d98ee",
       "title": "吴谢宇，从其自述出发",
       "date": "2023-05-28",
       "url": "posts/wuxieyu.html"
     },
     {
-      "id": "dbf822ff-4927-4c6e-9da7-d7e17dbdb78b",
+      "id": "06230618-fc44-4700-b985-62b5e12655c1",
       "title": "虚构的小故事",
       "date": "2022-12-29",
       "url": "posts/xugoudexiaogushi.html"
     },
     {
-      "id": "c6387e4d-488a-4a5f-8839-76991be9dd7c",
+      "id": "8f1c3262-069a-43d9-919d-f5119d05ff12",
       "title": "浅谈诸子百家中数家",
       "date": "2022-11-26",
       "url": "posts/zhuzibaijia.html"
     },
     {
-      "id": "13c8dd00-bf3f-4c26-9076-26ae9e00ef18",
+      "id": "011bbbab-f796-48f5-ac7d-027f304d120b",
       "title": "一份作业，关于屠呦呦和“三无科学家”",
       "date": "2022-05-16",
       "url": "posts/tuyouyou.html"
     },
     {
-      "id": "e77ac14d-af91-4d31-b408-203e145b396c",
+      "id": "077df131-9f71-48bf-b769-c48261841b34",
       "title": "语文作文讲评后的几点思考",
       "date": "2022-05-12",
       "url": "posts/yuwen-zuowen-jiangping.html"
     }
   ],
-  "论坛": [
+  "硬件": [
     {
-      "id": "762d3ff7-85f5-40fb-8491-987f3dc340dd",
-      "title": "2022年，我用回了邮箱、论坛和RSS",
-      "date": "2022-05-11",
-      "url": "posts/youxiang-luntan-rss.html"
+      "id": "2a93d371-2b52-4907-8ac2-85c46732b3ad",
+      "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
+      "date": "2022-07-30",
+      "url": "posts/ren9000-suopin.html"
+    },
+    {
+      "id": "839f72d0-88af-416f-b9d1-7a789aa2efbe",
+      "title": "2022 WWDC 浅评",
+      "date": "2022-06-07",
+      "url": "posts/2022-wwdc.html"
+    }
+  ],
+  "服务": [
+    {
+      "id": "b840aef7-fd71-4bc6-bf18-a70cb39700e6",
+      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
+      "date": "2022-05-17",
+      "url": "posts/rsshub.html"
     }
   ],
   "科技": [
     {
-      "id": "9428b5e0-ed89-4937-a25f-8555d010cbc6",
+      "id": "41fe0647-14e6-48db-9f00-7964e80d8033",
       "title": "archlinux 简明安装指南",
       "date": "2023-10-14",
       "url": "posts/arch-linux.html"
     },
     {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
       "title": "使用 Thunderbird 生活：Email, RSS, IRC",
       "date": "2023-04-02",
       "url": "posts/thunderbird.html"
     },
     {
-      "id": "178d0b2b-a53e-4dd9-ae21-5e676b5063b7",
+      "id": "2a93d371-2b52-4907-8ac2-85c46732b3ad",
       "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
       "date": "2022-07-30",
       "url": "posts/ren9000-suopin.html"
     },
     {
-      "id": "e8321ca3-8058-47a7-8c57-db252a9cdc1d",
+      "id": "839f72d0-88af-416f-b9d1-7a789aa2efbe",
       "title": "2022 WWDC 浅评",
       "date": "2022-06-07",
       "url": "posts/2022-wwdc.html"
     },
     {
-      "id": "2523cb39-fce4-454d-9bc6-568a6741e4b5",
+      "id": "e7bc25d9-ed8c-437a-9276-db5d9780fe43",
       "title": "科普：有关 GFW ，即通常所说的「墙」的一些事",
       "date": "2022-05-26",
       "url": "posts/gfw.html"
     },
     {
-      "id": "10e181a0-8f6e-40f3-8e80-abcdb4a08702",
+      "id": "1dcb1470-19f3-4ab8-81a5-dafd104f0678",
       "title": "使用笔记：内网穿透+远程桌面，流畅使用远程计算机",
       "date": "2022-05-18",
       "url": "posts/remote-desktop.html"
     },
     {
-      "id": "c36f7ef0-9eda-4996-b0d9-6dc7801fa0eb",
+      "id": "b840aef7-fd71-4bc6-bf18-a70cb39700e6",
       "title": "RSSHub，跟上了潮流的 RSS 升级服务",
       "date": "2022-05-17",
       "url": "posts/rsshub.html"
     },
     {
-      "id": "762d3ff7-85f5-40fb-8491-987f3dc340dd",
+      "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
       "title": "2022年，我用回了邮箱、论坛和RSS",
       "date": "2022-05-11",
       "url": "posts/youxiang-luntan-rss.html"
     }
   ],
-  "锁频": [
+  "代码": [
     {
-      "id": "178d0b2b-a53e-4dd9-ae21-5e676b5063b7",
-      "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
-      "date": "2022-07-30",
-      "url": "posts/ren9000-suopin.html"
-    }
-  ],
-  "金融": [
-    {
-      "id": "fc4d15ee-6567-4ade-9174-dded5285db33",
-      "title": "A Brief Research into the 2007-2008 Financial Crisis",
-      "date": "2023-11-25",
-      "url": "posts/financial-crisis.html"
-    }
-  ],
-  "Email": [
-    {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
-      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
-      "date": "2023-04-02",
-      "url": "posts/thunderbird.html"
-    }
-  ],
-  "软件": [
-    {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
-      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
-      "date": "2023-04-02",
-      "url": "posts/thunderbird.html"
+      "id": "8abc4bcf-d917-4822-8802-3a65a23b0ebf",
+      "title": "示例：代码与公式",
+      "date": "2026-01-20",
+      "url": "posts/2026-01-20-sample.html"
     }
   ],
   "IRC": [
     {
-      "id": "0250230f-c22d-408a-9b32-bfc3164230ce",
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
       "title": "使用 Thunderbird 生活：Email, RSS, IRC",
       "date": "2023-04-02",
       "url": "posts/thunderbird.html"
     }
   ],
-  "网络": [
+  "Thunderbird": [
     {
-      "id": "2523cb39-fce4-454d-9bc6-568a6741e4b5",
-      "title": "科普：有关 GFW ，即通常所说的「墙」的一些事",
-      "date": "2022-05-26",
-      "url": "posts/gfw.html"
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
+      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
+      "date": "2023-04-02",
+      "url": "posts/thunderbird.html"
+    }
+  ],
+  "Email": [
+    {
+      "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
+      "title": "使用 Thunderbird 生活：Email, RSS, IRC",
+      "date": "2023-04-02",
+      "url": "posts/thunderbird.html"
     }
   ],
   "苹果": [
     {
-      "id": "e8321ca3-8058-47a7-8c57-db252a9cdc1d",
+      "id": "839f72d0-88af-416f-b9d1-7a789aa2efbe",
       "title": "2022 WWDC 浅评",
       "date": "2022-06-07",
       "url": "posts/2022-wwdc.html"
-    }
-  ],
-  "读书": [
-    {
-      "id": "a4b68d51-7cb9-418a-b312-0bfb2f4e6802",
-      "title": "关于《民主的细节》",
-      "date": "2023-07-02",
-      "url": "posts/minzhu-de-xijie.html"
-    }
-  ],
-  "综述": [
-    {
-      "id": "fc4d15ee-6567-4ade-9174-dded5285db33",
-      "title": "A Brief Research into the 2007-2008 Financial Crisis",
-      "date": "2023-11-25",
-      "url": "posts/financial-crisis.html"
-    }
-  ],
-  "服务": [
-    {
-      "id": "c36f7ef0-9eda-4996-b0d9-6dc7801fa0eb",
-      "title": "RSSHub，跟上了潮流的 RSS 升级服务",
-      "date": "2022-05-17",
-      "url": "posts/rsshub.html"
     }
   ]
 }
