@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>示例：代码与公式</title>
+  <meta name="post-title" content="示例：代码与公式">
+  <meta name="post-date" content="2026-01-20">
+  <meta name="post-tags" content="数学,代码">
+  <meta name="post-excerpt" content="示例文章，包含行内代码、代码块、行内数学与独立数学公式。">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('pre code').forEach((el)=> { if(window.hljs) hljs.highlightElement(el); }); });
+  </script>
+
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$'], ['\\(','\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+  <script>
+    // Enhance code blocks: detect language from classes and set data-lang on <pre>
+    // Only set data-lang when language is explicitly specified (no icon)
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.querySelectorAll('pre').forEach(pre => {
+        if (pre.hasAttribute('data-lang')) return; // only set when not already set
+        const code = pre.querySelector('code');
+        if (!code) return;
+        let lang = '';
+        // class patterns: language-xxx, sourceCode xxx, or plain xxx
+        code.classList.forEach(c => {
+          if (c.startsWith('language-')) lang = c.replace('language-','');
+          else if (!lang && /^[a-z]+$/i.test(c) && c.length < 20) lang = c;
+        });
+        // handle pandoc's div.sourceCode parent classes
+        const parentDiv = pre.closest('div.sourceCode');
+        if (!lang && parentDiv) {
+          parentDiv.classList.forEach(c => { if (c !== 'sourceCode' && /^[a-z]+$/i.test(c)) lang = c });
+        }
+        // fallback: look for first language-... in entire pre
+        if (!lang){ const m = pre.innerHTML.match(/class=\"[^\"]*language-([a-zA-Z0-9]+)[^\"]*\"/); if(m) lang = m[1]; }
+
+        if (lang) {
+          const normalized = lang.toLowerCase();
+          // only show if language was actually specified (we detect common patterns above)
+          const display = normalized.replace(/^[a-z]/, (s) => s.toUpperCase());
+          pre.setAttribute('data-lang', display);
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <article class="post-content">
+    <h1>示例：代码与公式</h1>
+    <p class="meta">2026-01-20 · 标签：<a href="/index.html?tag=%E6%95%B0%E5%AD%A6">数学</a>, <a href="/index.html?tag=%E4%BB%A3%E7%A0%81">代码</a></p>
+<p>这是一个示例段落，包含行内代码 <code>x = 42</code>，以及行内数学
+<span class="math inline">\(e^{i\theta}=\cos\theta +
+i\sin\theta\)</span>。</p>
+<p>下面是一个 Python 代码块：</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fib(n):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    a, b <span class="op">=</span> <span class="dv">0</span>, <span class="dv">1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        a, b <span class="op">=</span> b, a <span class="op">+</span> b</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a</span></code></pre></div>
+<p>下面展示一个独立数学公式：</p>
+<p><span class="math display">\[
+\int_0^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+\]</span></p>
+
+  </article>
+</body>
+</html>

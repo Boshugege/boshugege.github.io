@@ -190,11 +190,42 @@ a:focus {
   display: block;
   margin: 12px 0;
 }
+
+/* 代码字体与样式 */
+.post-content pre,
+.post-content code {
+  font-family:
+    "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+    "DejaVu Sans Mono", "Courier New", monospace;
+  font-size: 0.95em;
+}
+
 .post-content pre {
+  position: relative;
   overflow: auto;
   padding: 12px;
   background: #f6f6f6;
   border: 1px solid var(--border);
+}
+
+/* 当识别到语言时，展示语言标签（位于代码块左上内侧）并避免溢出 */
+.post-content pre[data-lang] {
+  margin-top: 8px;
+  padding-top: 32px; /* 为标签在内侧留出空间 */
+}
+.post-content pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2; /* 确保标签在代码之上可见 */
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 3px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  text-transform: capitalize;
 }
 
 .site-footer {
