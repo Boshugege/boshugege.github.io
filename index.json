@@ -1,6 +1,6 @@
 [
   {
-    "id": "8abc4bcf-d917-4822-8802-3a65a23b0ebf",
+    "id": "3473e62632f3a81b85982fa58586d62b",
     "title": "示例：代码与公式",
     "date": "2026-01-20",
     "tags": [
@@ -8,10 +8,11 @@
       "代码"
     ],
     "excerpt": "示例文章，包含行内代码、代码块、行内数学与独立数学公式。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/2026-01-20-sample.html"
   },
   {
-    "id": "21e3bdcf-8ecc-40ac-ab41-7bde49fbd27a",
+    "id": "a305769b1b6fc4e214619cd93431bb3c",
     "title": "A Brief Research into the 2007-2008 Financial Crisis",
     "date": "2023-11-25",
     "tags": [
@@ -19,11 +20,12 @@
       "金融",
       "综述"
     ],
-    "excerpt": "*Academic junk, from copying, ChatGPTing and imagine. But I have to write it. Just post it to check the blog's English composing ability.*",
+    "excerpt": "*Academic junk, from copying, ChatGPTing and imagine. But I have to write it. Just post it to check the blog",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/financial-crisis.html"
   },
   {
-    "id": "41fe0647-14e6-48db-9f00-7964e80d8033",
+    "id": "1a4438da990f27baed86c6ed441bac25",
     "title": "archlinux 简明安装指南",
     "date": "2023-10-14",
     "tags": [
@@ -31,26 +33,33 @@
       "Linux"
     ],
     "excerpt": "装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/arch-linux.html"
   },
   {
-    "id": "a994363f-8f00-49bf-a202-fb7b9624b839",
+    "id": "877399fe9d787c9a686efd47bacb0ad9",
     "title": "知识分子的回望——读《中国在梁庄》",
     "date": "2023-07-05",
-    "tags": "作业",
+    "tags": [
+      "作业"
+    ],
     "excerpt": "这本书给我的第一感受，居然是“为什么我没有时间来做这件事”的可惜。这是知识分子对非虚构的主动意识，对“故乡”概念的再次进入和记录，给正在消亡的乡土中国最后的画像。**中国**在梁庄，梁庄在本身之外，反映着整个中国乡村的处境：它们曾经有自己的居民，自己的历史和故事，但是却逐渐独自腐烂变质直至消失。梁鸿有这个机会，可以给这个角落留下画像，但无数同样的角落早已失去了这个机会。梁鸿即是读者，即是阅读这一本书的每一个知识分子。对于每一个人都有一组与“梁鸿与梁庄”同构的短语。这赋予这本书更宏大的意义，也体现着书名，写梁庄，终究写的是**中国**。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/zhongguo-zai-liangzhuang.html"
   },
   {
-    "id": "2b8ef30d-319e-4441-a6ba-acc5a94e3ead",
+    "id": "03837f7164751b3b8b43cf6c685de517",
     "title": "萌新入手尘埃拉力2（DiRT Rally 2.0）小感",
     "date": "2023-07-03",
-    "tags": "游戏",
+    "tags": [
+      "游戏"
+    ],
     "excerpt": "本萌新入坑 rac 第一作是什么？~~天天飞车~~",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/chenai-lali.html"
   },
   {
-    "id": "6437fa34-fd20-42e9-bb15-5f401dd026b4",
+    "id": "dee5b9c21bc15c09a482ad52d59fb168",
     "title": "关于《民主的细节》",
     "date": "2023-07-02",
     "tags": [
@@ -58,26 +67,33 @@
       "读书"
     ],
     "excerpt": "是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/minzhu-de-xijie.html"
   },
   {
-    "id": "f0c5fe61-ebd8-49b3-ae8a-0c8a15df42a0",
+    "id": "1343fc26488d3382711694073aadb74e",
     "title": "2023 上半年总结",
     "date": "2023-06-29",
-    "tags": "总结",
+    "tags": [
+      "总结"
+    ],
     "excerpt": "这半年，这个学期，好漫长但是又好短暂。感觉好多事情似乎是很久之前发生的，仔细一想还是在这半年……既然忙里偷闲，那就大概为这半年做一个总结吧。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/2023-first-half-conclusion.html"
   },
   {
-    "id": "4c0b255d-17c2-431c-ac97-17a91f4d98ee",
+    "id": "f9e9fac52af8debdfe619e622dc4f1da",
     "title": "吴谢宇，从其自述出发",
     "date": "2023-05-28",
-    "tags": "作业",
+    "tags": [
+      "作业"
+    ],
     "excerpt": "本文背景：[弑母者吴谢宇的心理档案 | 南方周末]",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/wuxieyu.html"
   },
   {
-    "id": "ec2d97a3-c72b-4a06-ba91-3384ebc66620",
+    "id": "703d7b5b9620a090427043fc4dc837a6",
     "title": "使用 Thunderbird 生活：Email, RSS, IRC",
     "date": "2023-04-02",
     "tags": [
@@ -89,18 +105,22 @@
       "IRC"
     ],
     "excerpt": "一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/thunderbird.html"
   },
   {
-    "id": "8081efcc-0452-469f-818b-a7719caaaed7",
+    "id": "ebb4cfbb8bf503749999ecb5000dd402",
     "title": "关于情商的一点想法",
     "date": "2023-03-21",
-    "tags": "感想",
+    "tags": [
+      "感想"
+    ],
     "excerpt": "私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external）。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/qingshang.html"
   },
   {
-    "id": "06230618-fc44-4700-b985-62b5e12655c1",
+    "id": "efbb77092dccd2dc8a4d2dc2bff57cf5",
     "title": "虚构的小故事",
     "date": "2022-12-29",
     "tags": [
@@ -108,18 +128,22 @@
       "作业"
     ],
     "excerpt": "### 一",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/xugoudexiaogushi.html"
   },
   {
-    "id": "8f1c3262-069a-43d9-919d-f5119d05ff12",
+    "id": "41026b70096501b58e8b7203defd721b",
     "title": "浅谈诸子百家中数家",
     "date": "2022-11-26",
-    "tags": "作业",
+    "tags": [
+      "作业"
+    ],
     "excerpt": "写在前面：随想，不成文体，无暇整理，主要在其中想法。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/zhuzibaijia.html"
   },
   {
-    "id": "2a93d371-2b52-4907-8ac2-85c46732b3ad",
+    "id": "ee5e6e4e6beeb350bf1d48a5eaff2b1e",
     "title": "20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决",
     "date": "2022-07-30",
     "tags": [
@@ -128,10 +152,11 @@
       "锁频"
     ],
     "excerpt": "折腾了这么久，终于把这个东西折腾完了……快乐",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/ren9000-suopin.html"
   },
   {
-    "id": "839f72d0-88af-416f-b9d1-7a789aa2efbe",
+    "id": "09c325ed08ee046d65c49240fb6acef5",
     "title": "2022 WWDC 浅评",
     "date": "2022-06-07",
     "tags": [
@@ -140,18 +165,22 @@
       "苹果"
     ],
     "excerpt": "今年 WWDC 好不容易发硬件了……有搭载 M2 芯片的新 MacBook Air 和 MacBook Pro 13 英寸。不过苹果在 WWDC 一向是以软件为主，这次只是常规升级罢了。不过，价格比去年贵了……没有 7999 起步的 Air 了。很神奇的事 Air 用了 liquid 显示屏，但是 Pro 还是 Retina ，这一刀把价格刀得正正好好。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/2022-wwdc.html"
   },
   {
-    "id": "58d47dd5-5fa0-4432-b18e-2d4a936faa5f",
+    "id": "9bb673ac2180e150a9265797909da403",
     "title": "口口星人的故事",
     "date": "2022-05-30",
-    "tags": "小说",
+    "tags": [
+      "小说"
+    ],
     "excerpt": "在遥远的地方，有一颗星球，上面有很多智慧生物，因为它们的文字中出现频率最高的字是一个方框，形似汉字中的口，所以我们暂且把它们称为口口星人。这个故事是由一个口口星人记述的，后来有人把它翻译成了地球的语言，被地球上的人无意中获得了。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/lianzai-koukouxing.html"
   },
   {
-    "id": "e7bc25d9-ed8c-437a-9276-db5d9780fe43",
+    "id": "74858c9edfaa9614699b06a8fb6af641",
     "title": "科普：有关 GFW ，即通常所说的「墙」的一些事",
     "date": "2022-05-26",
     "tags": [
@@ -160,10 +189,11 @@
       "GFW"
     ],
     "excerpt": "这个应该算是一个比较敏感的话题，所以我先声明一下几点内容：在这篇文章里，我不会提及任何关于突破内容审查机制的关键词，如果为了技术一定要提及，我会只留首字母，不介绍、传播、扩散任何关于突破内容审查机制的工具。任何技术探究均在个人局域网中完成，使用的信道均为国家网络运营商提供的合法有效的信道。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/gfw.html"
   },
   {
-    "id": "1dcb1470-19f3-4ab8-81a5-dafd104f0678",
+    "id": "8c8fd60d3d9a507000f486232f7985a9",
     "title": "使用笔记：内网穿透+远程桌面，流畅使用远程计算机",
     "date": "2022-05-18",
     "tags": [
@@ -171,10 +201,11 @@
       "远程桌面"
     ],
     "excerpt": "大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/remote-desktop.html"
   },
   {
-    "id": "b840aef7-fd71-4bc6-bf18-a70cb39700e6",
+    "id": "3c56e0dd4438a4f73d2dfe809dcb2bdf",
     "title": "RSSHub，跟上了潮流的 RSS 升级服务",
     "date": "2022-05-17",
     "tags": [
@@ -184,26 +215,33 @@
       "RSSHub"
     ],
     "excerpt": "一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：https://rssh-ub-ten-jet.vercel.app",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/rsshub.html"
   },
   {
-    "id": "011bbbab-f796-48f5-ac7d-027f304d120b",
+    "id": "44bb72ceda08907585d7f48478b9d14c",
     "title": "一份作业，关于屠呦呦和“三无科学家”",
     "date": "2022-05-16",
-    "tags": "作业",
+    "tags": [
+      "作业"
+    ],
     "excerpt": "### 原题：",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/tuyouyou.html"
   },
   {
-    "id": "077df131-9f71-48bf-b769-c48261841b34",
+    "id": "754ebe4925eef977d4515276b267921c",
     "title": "语文作文讲评后的几点思考",
     "date": "2022-05-12",
-    "tags": "作业",
+    "tags": [
+      "作业"
+    ],
     "excerpt": "### 审题要清晰",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/yuwen-zuowen-jiangping.html"
   },
   {
-    "id": "8064c077-d68a-40c4-bf2e-1e8c8f1c0325",
+    "id": "a248b83530a798a57822f0b7eda19ed6",
     "title": "2022年，我用回了邮箱、论坛和RSS",
     "date": "2022-05-11",
     "tags": [
@@ -214,6 +252,7 @@
       "RSS"
     ],
     "excerpt": "你知道这三个名词吗？你还记得这三个名词吗？",
+    "cover": "assets/img/icon.jpg",
     "url": "posts/youxiang-luntan-rss.html"
   }
 ]

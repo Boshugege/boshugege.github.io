@@ -6,6 +6,7 @@
   --visited: #551a8b;
   --muted: #666666;
   --border: #cccccc;
+  --panel: #fff;
 }
 
 * {
@@ -29,6 +30,19 @@ body {
     sans-serif;
   font-size: 16px;
   line-height: 1.6;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  background: #000;
+  color: #fff;
+  padding: 6px 10px;
+  z-index: 999;
+}
+.skip-link:focus {
+  left: 8px;
 }
 
 /* 链接为经典蓝，带下划线 */
@@ -76,7 +90,12 @@ a:focus {
 .about {
   border: 1px solid var(--border);
   padding: 12px;
-  background: #fff;
+  background: var(--panel);
+}
+.about h2,
+.about h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
 }
 
 /* 标签导航 */
@@ -91,14 +110,17 @@ a:focus {
   color: var(--link);
   text-decoration: underline;
 }
-.tag-nav a.active {
+.tag-nav a.active,
+.tags-list .tag.active {
+  font-weight: bold;
+}
+.tag-nav a.top {
   font-weight: bold;
 }
 
 /* 可折叠的标签列表 */
 .tags-list {
-  display: inline-block;
-  margin-left: 8px;
+  display: contents;
 }
 .tags-list .tag {
   display: inline-block;
@@ -106,12 +128,6 @@ a:focus {
   padding: 4px 8px;
   color: var(--link);
   text-decoration: underline;
-}
-.tags-list .tag.visible {
-  font-weight: normal;
-}
-.tags-list .tag.top {
-  font-weight: bold;
 }
 .tags-list.collapsed .tag:not(.visible) {
   display: none;
@@ -138,11 +154,25 @@ a:focus {
 .directory {
   border: 1px solid var(--border);
   padding: 12px;
-  background: #fff;
+  background: var(--panel);
 }
 .dir-title {
   margin: 0 0 8px;
   font-size: 18px;
+}
+.dir-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+.search-input {
+  width: min(420px, 100%);
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: 6px 10px;
+  font: inherit;
 }
 .dir-list {
   list-style: none;
@@ -169,13 +199,12 @@ a:focus {
 
 /* 文章页面容器：左右保留固定留白，宽屏时内容宽度受限 */
 .post-content {
-  max-width: 820px; /* 最大内容宽度 */
-  margin: 0 auto; /* 居中 */
-  padding: 24px 16px; /* 上下留白较大，左右固定留白 */
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 16px;
   box-sizing: border-box;
 }
 
-/* 大屏时增加左右留白但仍受 max-width 限制 */
 @media (min-width: 1200px) {
   .post-content {
     padding-left: 48px;
@@ -183,7 +212,6 @@ a:focus {
   }
 }
 
-/* 图片与代码在文章中自适应 */
 .post-content img {
   max-width: 100%;
   height: auto;
@@ -191,7 +219,6 @@ a:focus {
   margin: 12px 0;
 }
 
-/* 代码字体与样式 */
 .post-content pre,
 .post-content code {
   font-family:
@@ -208,17 +235,16 @@ a:focus {
   border: 1px solid var(--border);
 }
 
-/* 当识别到语言时，展示语言标签（位于代码块左上内侧）并避免溢出 */
 .post-content pre[data-lang] {
   margin-top: 8px;
-  padding-top: 32px; /* 为标签在内侧留出空间 */
+  padding-top: 32px;
 }
 .post-content pre[data-lang]::before {
   content: attr(data-lang);
   position: absolute;
   top: 8px;
   left: 8px;
-  z-index: 2; /* 确保标签在代码之上可见 */
+  z-index: 2;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border);
   color: var(--muted);
@@ -233,7 +259,7 @@ a:focus {
   margin: 30px auto;
   padding: 12px 16px;
   color: var(--muted);
-  text-align: center; /* 居中页脚文本 */
+  text-align: center;
 }
 
 .loading {
@@ -241,10 +267,9 @@ a:focus {
 }
 
 @media (min-width: 801px) {
-  /* 桌面：仅在两栏布局时隐藏页面滚动条，让右侧区域可滚动，左侧保持固定 */
   .layout {
-    height: calc(100vh - 80px);
-    overflow: hidden; /* 仅限制 layout 的滚动，避免影响单篇文章页 */
+    height: auto;
+    overflow: visible;
   }
   .sidebar {
     position: sticky;
@@ -252,15 +277,13 @@ a:focus {
     align-self: flex-start;
   }
   .content {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    height: auto;
+    overflow: visible;
     padding-right: 12px;
   }
 }
 
 @media (max-width: 800px) {
-  /* 小屏回到单列，恢复页面滚动 */
   body {
     overflow: visible;
   }
@@ -281,5 +304,9 @@ a:focus {
   }
   .directory {
     margin-top: 16px;
+  }
+  .dir-tools {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

@@ -1,156 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
-  <title>古早风技术笔记</title>
-  <link>./</link>
-  <description>静态 HTML 技术笔记 - 自动生成的 RSS</description>
+  <title>PNC's Blog</title>
+  <link>https://parityncsvt.top</link>
+  <description>静态 HTML 技术博客 RSS</description>
   <language>zh-CN</language>
-  <lastBuildDate>Tue, 20 Jan 2026 11:34:35 GMT</lastBuildDate>
+  <lastBuildDate>Thu, 19 Feb 2026 09:12:21 +0000</lastBuildDate>
   <item>
     <title>示例：代码与公式</title>
-    <link>posts/2026-01-20-sample.html</link>
-    <guid isPermaLink="true">posts/2026-01-20-sample.html</guid>
-    <pubDate>Tue, 20 Jan 2026 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/2026-01-20-sample.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/2026-01-20-sample.html</guid>
+    <pubDate>Tue, 20 Jan 2026 00:00:00 +0000</pubDate>
     <description>示例文章，包含行内代码、代码块、行内数学与独立数学公式。</description>
   </item>
   <item>
     <title>A Brief Research into the 2007-2008 Financial Crisis</title>
-    <link>posts/financial-crisis.html</link>
-    <guid isPermaLink="true">posts/financial-crisis.html</guid>
-    <pubDate>Sat, 25 Nov 2023 00:00:00 GMT</pubDate>
-    <description>*Academic junk, from copying, ChatGPTing and imagine. But I have to write it. Just post it to check the blog&apos;s English composing ability.*</description>
+    <link>https://parityncsvt.top/posts/financial-crisis.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/financial-crisis.html</guid>
+    <pubDate>Sat, 25 Nov 2023 00:00:00 +0000</pubDate>
+    <description>*Academic junk, from copying, ChatGPTing and imagine. But I have to write it. Just post it to check the blog</description>
   </item>
   <item>
     <title>archlinux 简明安装指南</title>
-    <link>posts/arch-linux.html</link>
-    <guid isPermaLink="true">posts/arch-linux.html</guid>
-    <pubDate>Sat, 14 Oct 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/arch-linux.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/arch-linux.html</guid>
+    <pubDate>Sat, 14 Oct 2023 00:00:00 +0000</pubDate>
     <description>装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</description>
   </item>
   <item>
     <title>知识分子的回望——读《中国在梁庄》</title>
-    <link>posts/zhongguo-zai-liangzhuang.html</link>
-    <guid isPermaLink="true">posts/zhongguo-zai-liangzhuang.html</guid>
-    <pubDate>Wed, 05 Jul 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/zhongguo-zai-liangzhuang.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/zhongguo-zai-liangzhuang.html</guid>
+    <pubDate>Wed, 05 Jul 2023 00:00:00 +0000</pubDate>
     <description>这本书给我的第一感受，居然是“为什么我没有时间来做这件事”的可惜。这是知识分子对非虚构的主动意识，对“故乡”概念的再次进入和记录，给正在消亡的乡土中国最后的画像。**中国**在梁庄，梁庄在本身之外，反映着整个中国乡村的处境：它们曾经有自己的居民，自己的历史和故事，但是却逐渐独自腐烂变质直至消失。梁鸿有这个机会，可以给这个角落留下画像，但无数同样的角落早已失去了这个机会。梁鸿即是读者，即是阅读这一本书的每一个知识分子。对于每一个人都有一组与“梁鸿与梁庄”同构的短语。这赋予这本书更宏大的意义，也体现着书名，写梁庄，终究写的是**中国**。</description>
   </item>
   <item>
     <title>萌新入手尘埃拉力2（DiRT Rally 2.0）小感</title>
-    <link>posts/chenai-lali.html</link>
-    <guid isPermaLink="true">posts/chenai-lali.html</guid>
-    <pubDate>Mon, 03 Jul 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/chenai-lali.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/chenai-lali.html</guid>
+    <pubDate>Mon, 03 Jul 2023 00:00:00 +0000</pubDate>
     <description>本萌新入坑 rac 第一作是什么？~~天天飞车~~</description>
   </item>
   <item>
     <title>关于《民主的细节》</title>
-    <link>posts/minzhu-de-xijie.html</link>
-    <guid isPermaLink="true">posts/minzhu-de-xijie.html</guid>
-    <pubDate>Sun, 02 Jul 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/minzhu-de-xijie.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/minzhu-de-xijie.html</guid>
+    <pubDate>Sun, 02 Jul 2023 00:00:00 +0000</pubDate>
     <description>是要求的选读书，读完之后还得写个读书报告，那就简单谈谈我自己的感受吧。</description>
   </item>
   <item>
     <title>2023 上半年总结</title>
-    <link>posts/2023-first-half-conclusion.html</link>
-    <guid isPermaLink="true">posts/2023-first-half-conclusion.html</guid>
-    <pubDate>Thu, 29 Jun 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/2023-first-half-conclusion.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/2023-first-half-conclusion.html</guid>
+    <pubDate>Thu, 29 Jun 2023 00:00:00 +0000</pubDate>
     <description>这半年，这个学期，好漫长但是又好短暂。感觉好多事情似乎是很久之前发生的，仔细一想还是在这半年……既然忙里偷闲，那就大概为这半年做一个总结吧。</description>
   </item>
   <item>
     <title>吴谢宇，从其自述出发</title>
-    <link>posts/wuxieyu.html</link>
-    <guid isPermaLink="true">posts/wuxieyu.html</guid>
-    <pubDate>Sun, 28 May 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/wuxieyu.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/wuxieyu.html</guid>
+    <pubDate>Sun, 28 May 2023 00:00:00 +0000</pubDate>
     <description>本文背景：[弑母者吴谢宇的心理档案 | 南方周末]</description>
   </item>
   <item>
     <title>使用 Thunderbird 生活：Email, RSS, IRC</title>
-    <link>posts/thunderbird.html</link>
-    <guid isPermaLink="true">posts/thunderbird.html</guid>
-    <pubDate>Sun, 02 Apr 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/thunderbird.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/thunderbird.html</guid>
+    <pubDate>Sun, 02 Apr 2023 00:00:00 +0000</pubDate>
     <description>一直没有为这个博客专门写什么文章，或许现在有空可以码一篇？</description>
   </item>
   <item>
     <title>关于情商的一点想法</title>
-    <link>posts/qingshang.html</link>
-    <guid isPermaLink="true">posts/qingshang.html</guid>
-    <pubDate>Tue, 21 Mar 2023 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/qingshang.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/qingshang.html</guid>
+    <pubDate>Tue, 21 Mar 2023 00:00:00 +0000</pubDate>
     <description>私以为，人的情商分两部分，一部分可以用对外界的敏感程度（sensitivity）来表示，体现为自己情绪变化的强烈程度，在此简称作内部的（internal）；第二部分是共情能力，即对他人在某事后的情绪变化的预见能力和理解程度，在此称作外部的（external）。</description>
   </item>
   <item>
     <title>虚构的小故事</title>
-    <link>posts/xugoudexiaogushi.html</link>
-    <guid isPermaLink="true">posts/xugoudexiaogushi.html</guid>
-    <pubDate>Thu, 29 Dec 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/xugoudexiaogushi.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/xugoudexiaogushi.html</guid>
+    <pubDate>Thu, 29 Dec 2022 00:00:00 +0000</pubDate>
     <description>### 一</description>
   </item>
   <item>
     <title>浅谈诸子百家中数家</title>
-    <link>posts/zhuzibaijia.html</link>
-    <guid isPermaLink="true">posts/zhuzibaijia.html</guid>
-    <pubDate>Sat, 26 Nov 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/zhuzibaijia.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/zhuzibaijia.html</guid>
+    <pubDate>Sat, 26 Nov 2022 00:00:00 +0000</pubDate>
     <description>写在前面：随想，不成文体，无暇整理，主要在其中想法。</description>
   </item>
   <item>
     <title>20款拯救者刃9000/刃9000k锁频锁功耗问题的原因和解决</title>
-    <link>posts/ren9000-suopin.html</link>
-    <guid isPermaLink="true">posts/ren9000-suopin.html</guid>
-    <pubDate>Sat, 30 Jul 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/ren9000-suopin.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/ren9000-suopin.html</guid>
+    <pubDate>Sat, 30 Jul 2022 00:00:00 +0000</pubDate>
     <description>折腾了这么久，终于把这个东西折腾完了……快乐</description>
   </item>
   <item>
     <title>2022 WWDC 浅评</title>
-    <link>posts/2022-wwdc.html</link>
-    <guid isPermaLink="true">posts/2022-wwdc.html</guid>
-    <pubDate>Tue, 07 Jun 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/2022-wwdc.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/2022-wwdc.html</guid>
+    <pubDate>Tue, 07 Jun 2022 00:00:00 +0000</pubDate>
     <description>今年 WWDC 好不容易发硬件了……有搭载 M2 芯片的新 MacBook Air 和 MacBook Pro 13 英寸。不过苹果在 WWDC 一向是以软件为主，这次只是常规升级罢了。不过，价格比去年贵了……没有 7999 起步的 Air 了。很神奇的事 Air 用了 liquid 显示屏，但是 Pro 还是 Retina ，这一刀把价格刀得正正好好。</description>
   </item>
   <item>
     <title>口口星人的故事</title>
-    <link>posts/lianzai-koukouxing.html</link>
-    <guid isPermaLink="true">posts/lianzai-koukouxing.html</guid>
-    <pubDate>Mon, 30 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/lianzai-koukouxing.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/lianzai-koukouxing.html</guid>
+    <pubDate>Mon, 30 May 2022 00:00:00 +0000</pubDate>
     <description>在遥远的地方，有一颗星球，上面有很多智慧生物，因为它们的文字中出现频率最高的字是一个方框，形似汉字中的口，所以我们暂且把它们称为口口星人。这个故事是由一个口口星人记述的，后来有人把它翻译成了地球的语言，被地球上的人无意中获得了。</description>
   </item>
   <item>
     <title>科普：有关 GFW ，即通常所说的「墙」的一些事</title>
-    <link>posts/gfw.html</link>
-    <guid isPermaLink="true">posts/gfw.html</guid>
-    <pubDate>Thu, 26 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/gfw.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/gfw.html</guid>
+    <pubDate>Thu, 26 May 2022 00:00:00 +0000</pubDate>
     <description>这个应该算是一个比较敏感的话题，所以我先声明一下几点内容：在这篇文章里，我不会提及任何关于突破内容审查机制的关键词，如果为了技术一定要提及，我会只留首字母，不介绍、传播、扩散任何关于突破内容审查机制的工具。任何技术探究均在个人局域网中完成，使用的信道均为国家网络运营商提供的合法有效的信道。</description>
   </item>
   <item>
     <title>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</title>
-    <link>posts/remote-desktop.html</link>
-    <guid isPermaLink="true">posts/remote-desktop.html</guid>
-    <pubDate>Wed, 18 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/remote-desktop.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/remote-desktop.html</guid>
+    <pubDate>Wed, 18 May 2022 00:00:00 +0000</pubDate>
     <description>大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。</description>
   </item>
   <item>
     <title>RSSHub，跟上了潮流的 RSS 升级服务</title>
-    <link>posts/rsshub.html</link>
-    <guid isPermaLink="true">posts/rsshub.html</guid>
-    <pubDate>Tue, 17 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/rsshub.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/rsshub.html</guid>
+    <pubDate>Tue, 17 May 2022 00:00:00 +0000</pubDate>
     <description>一个 RSSHub 服务，源码与 RSSHub 仓库同步，访问地址：https://rssh-ub-ten-jet.vercel.app</description>
   </item>
   <item>
     <title>一份作业，关于屠呦呦和“三无科学家”</title>
-    <link>posts/tuyouyou.html</link>
-    <guid isPermaLink="true">posts/tuyouyou.html</guid>
-    <pubDate>Mon, 16 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/tuyouyou.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/tuyouyou.html</guid>
+    <pubDate>Mon, 16 May 2022 00:00:00 +0000</pubDate>
     <description>### 原题：</description>
   </item>
   <item>
     <title>语文作文讲评后的几点思考</title>
-    <link>posts/yuwen-zuowen-jiangping.html</link>
-    <guid isPermaLink="true">posts/yuwen-zuowen-jiangping.html</guid>
-    <pubDate>Thu, 12 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/yuwen-zuowen-jiangping.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/yuwen-zuowen-jiangping.html</guid>
+    <pubDate>Thu, 12 May 2022 00:00:00 +0000</pubDate>
     <description>### 审题要清晰</description>
   </item>
   <item>
     <title>2022年，我用回了邮箱、论坛和RSS</title>
-    <link>posts/youxiang-luntan-rss.html</link>
-    <guid isPermaLink="true">posts/youxiang-luntan-rss.html</guid>
-    <pubDate>Wed, 11 May 2022 00:00:00 GMT</pubDate>
+    <link>https://parityncsvt.top/posts/youxiang-luntan-rss.html</link>
+    <guid isPermaLink="true">https://parityncsvt.top/posts/youxiang-luntan-rss.html</guid>
+    <pubDate>Wed, 11 May 2022 00:00:00 +0000</pubDate>
     <description>你知道这三个名词吗？你还记得这三个名词吗？</description>
   </item>
 </channel>

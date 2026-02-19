@@ -1,149 +1,304 @@
-// 简单的客户端渲染：加载 index.json，生成文章列表与标签过滤
-async function loadIndex() {
-  try {
-    const res = await fetch("/index.json");
-    if (!res.ok) throw new Error("无法加载 index.json");
-    const posts = await res.json();
+(function () {
+  const SEARCH_DEBOUNCE_MS = 120;
+  const FULLTEXT_MIN_QUERY_LEN = 2;
 
-    // 兼容 tags 可能为字符串或数组的情况
-    function getTags(post) {
-      if (!post) return [];
-      if (Array.isArray(post.tags)) return post.tags;
-      if (typeof post.tags === "string")
-        return post.tags
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      return [];
+  let fullTextMap = null;
+  let fullTextPromise = null;
+  let searchDebounceTimer = null;
+
+  function getContainer(id) {
+    return document.getElementById(id);
+  }
+
+  function normalizeQuery(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function getTags(post) {
+    if (!post) return [];
+    if (Array.isArray(post.tags)) return post.tags;
+    if (typeof post.tags === "string") {
+      return post.tags
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (c) => {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c];
+    });
+  }
+
+  async function loadPosts() {
+    const res = await fetch("/index.json", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error("无法加载 index.json");
+    }
+    return res.json();
+  }
+
+  function getForcedTagFromDom() {
+    const nav = getContainer("tag-nav");
+    if (!nav) return "";
+    return String(nav.dataset.forcedTag || "");
+  }
+
+  async function loadFullTextIndex() {
+    if (fullTextMap) return fullTextMap;
+    if (fullTextPromise) return fullTextPromise;
+
+    fullTextPromise = fetch("/search.json", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("无法加载 search.json");
+        }
+        return res.json();
+      })
+      .then((rows) => {
+        const map = new Map();
+        for (const row of rows) {
+          const tags = Array.isArray(row.tags)
+            ? row.tags.join(" ")
+            : String(row.tags || "");
+          const text = [row.title, row.excerpt, tags, row.content]
+            .filter(Boolean)
+            .join("\n")
+            .toLowerCase();
+          map.set(String(row.id || ""), text);
+        }
+        fullTextMap = map;
+        return map;
+      })
+      .catch((err) => {
+        fullTextPromise = null;
+        throw err;
+      });
+
+    return fullTextPromise;
+  }
+
+  function ensureFullTextIndex(posts, activeTag, query) {
+    const q = normalizeQuery(query);
+    if (q.length < FULLTEXT_MIN_QUERY_LEN || fullTextMap || fullTextPromise) {
+      return;
     }
 
-    // 将 getTags 暴露到模块作用域供其他函数使用
-    window.__getTags = getTags;
-
-    renderTags(posts);
-    renderPosts(posts);
-  } catch (e) {
-    document.getElementById("posts").innerHTML =
-      '<p class="loading">加载失败：' + e.message + "</p>";
-  }
-}
-
-function renderTags(posts) {
-  const nav = document.getElementById("tag-nav");
-  nav.innerHTML = "";
-
-  // 统计标签并按数量降序排列
-  const tagMap = new Map();
-  posts.forEach((p) => {
-    const tags = (window.__getTags && window.__getTags(p)) || [];
-    tags.forEach((t) => tagMap.set(t, (tagMap.get(t) || 0) + 1));
-  });
-  const sorted = [...tagMap.entries()].sort(
-    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
-  );
-
-  const params = new URLSearchParams(location.search);
-  const activeTag = params.get("tag");
-
-  // 全部链接
-  const allLink = document.createElement("a");
-  allLink.href = "./";
-  allLink.textContent = "全部";
-  if (!activeTag) allLink.classList.add("active");
-  nav.appendChild(allLink);
-
-  if (sorted.length === 0) return;
-
-  const VISIBLE_COUNT = 5; // 保留至少多少个标签可见
-  const list = document.createElement("div");
-  list.className = "tags-list";
-
-  sorted.forEach(([tag, count], idx) => {
-    const a = document.createElement("a");
-    a.href = "?tag=" + encodeURIComponent(tag);
-    a.textContent = `${tag} (${count})`;
-    a.className = "tag";
-    if (idx < VISIBLE_COUNT) a.classList.add("visible");
-    if (tag === activeTag) a.classList.add("active");
-    list.appendChild(a);
-  });
-
-  // 计算初始展开状态：当 activeTag 在可见范围外则展开
-  let expanded = false;
-  if (activeTag) {
-    const foundIndex = sorted.findIndex(([t]) => t === activeTag);
-    if (foundIndex >= VISIBLE_COUNT) expanded = true;
+    loadFullTextIndex()
+      .then(() => {
+        const input = document.getElementById("post-search");
+        const latestQuery = input ? input.value : query;
+        renderPostListRegion(posts, activeTag, latestQuery);
+      })
+      .catch((err) => {
+        // Keep metadata search usable even if fulltext index fails.
+        console.warn(err);
+      });
   }
 
-  if (!expanded) list.classList.add("collapsed");
-  nav.appendChild(list);
+  function buildTagMap(posts) {
+    const map = new Map();
+    for (const post of posts) {
+      for (const tag of getTags(post)) {
+        map.set(tag, (map.get(tag) || 0) + 1);
+      }
+    }
+    return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }
 
-  // 切换按钮，仅当总数超过 VISIBLE_COUNT 时显示
-  const total = sorted.length;
-  if (total > VISIBLE_COUNT) {
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "tag-toggle";
-    toggle.textContent = expanded ? "收起标签" : `展开全部标签 (${total})`;
-    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
-    toggle.addEventListener("click", (e) => {
-      e.preventDefault();
-      expanded = !expanded;
-      list.classList.toggle("collapsed", !expanded);
-      toggle.textContent = expanded ? "收起标签" : `展开全部标签 (${total})`;
-      toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+  function renderTags(posts, activeTag) {
+    const nav = getContainer("tag-nav");
+    if (!nav) return;
+
+    const sorted = buildTagMap(posts);
+    nav.innerHTML = "";
+
+    const allLink = document.createElement("a");
+    allLink.href = "/index.html";
+    allLink.textContent = "全部";
+    allLink.className = "tag top";
+    if (!activeTag) allLink.classList.add("active");
+    nav.appendChild(allLink);
+
+    const VISIBLE_COUNT = 8;
+    const list = document.createElement("div");
+    list.className = "tags-list";
+
+    sorted.forEach(([tag, count], idx) => {
+      const a = document.createElement("a");
+      a.href = "?tag=" + encodeURIComponent(tag);
+      a.textContent = `${tag} (${count})`;
+      a.className = "tag";
+      if (idx < VISIBLE_COUNT) a.classList.add("visible");
+      if (tag === activeTag) a.classList.add("active");
+      list.appendChild(a);
     });
-    nav.appendChild(toggle);
+
+    let expanded = false;
+    if (activeTag) {
+      const foundIndex = sorted.findIndex(([t]) => t === activeTag);
+      if (foundIndex >= VISIBLE_COUNT) expanded = true;
+    }
+
+    if (!expanded) list.classList.add("collapsed");
+    nav.appendChild(list);
+
+    if (sorted.length > VISIBLE_COUNT) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "tag-toggle";
+      toggle.textContent = expanded ? "收起标签" : `展开全部标签 (${sorted.length})`;
+      toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+      toggle.addEventListener("click", () => {
+        expanded = !expanded;
+        list.classList.toggle("collapsed", !expanded);
+        toggle.textContent = expanded ? "收起标签" : `展开全部标签 (${sorted.length})`;
+        toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+      });
+      nav.appendChild(toggle);
+    }
   }
-}
 
-function renderPosts(posts) {
-  const container = document.getElementById("posts");
-  const params = new URLSearchParams(location.search);
-  const filter = params.get("tag");
+  function getFilteredPosts(posts, activeTag, query) {
+    let shown = posts.slice();
 
-  let shown = posts.filter(
-    (p) =>
-      !filter ||
-      ((window.__getTags && window.__getTags(p)) || []).includes(filter),
-  );
-  if (shown.length === 0) {
-    container.innerHTML =
-      '<div class="directory"><h2 class="dir-title">文章目录</h2><div class="dir-list loading">没有找到相关文章。</div></div>';
-    return;
+    if (activeTag) {
+      shown = shown.filter((p) => getTags(p).includes(activeTag));
+    }
+
+    const q = normalizeQuery(query);
+    if (q) {
+      shown = shown
+        .map((p) => {
+          const title = String(p.title || "").toLowerCase();
+          const excerpt = String(p.excerpt || "").toLowerCase();
+          const tags = getTags(p).join(" ").toLowerCase();
+          const full = fullTextMap ? fullTextMap.get(String(p.id || "")) || "" : "";
+
+          let score = 0;
+          if (title.includes(q)) score += 20;
+          if (tags.includes(q)) score += 14;
+          if (excerpt.includes(q)) score += 10;
+          if (fullTextMap && full.includes(q)) score += 4;
+
+          return { post: p, score };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return String(b.post.date || "").localeCompare(String(a.post.date || ""));
+        })
+        .map((entry) => entry.post);
+    } else {
+      shown.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    }
+
+    return shown;
   }
 
-  container.innerHTML = "";
-  shown.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  const list = document.createElement("div");
-  list.className = "dir-list";
+  function renderPostListRegion(posts, activeTag, query) {
+    const region = document.getElementById("post-list-region");
+    if (!region) return;
 
-  for (const p of shown) {
-    const item = document.createElement("div");
-    item.className = "dir-item";
-    item.innerHTML = `
-      <a href="${p.url}">${escapeHtml(p.title)}</a>
-      <span class="meta">${escapeHtml(p.date || "")}</span>
+    const shown = getFilteredPosts(posts, activeTag, query);
+    if (shown.length === 0) {
+      region.innerHTML = `<div class="dir-list loading">没有找到相关文章。</div>`;
+      return;
+    }
+
+    const items = shown
+      .map(
+        (p) => `
+          <div class="dir-item">
+            <a href="/${escapeHtml(p.url)}">${escapeHtml(p.title)}</a>
+            <span class="meta">${escapeHtml(p.date || "")}</span>
+          </div>
+        `,
+      )
+      .join("");
+
+    region.innerHTML = `<div class="dir-list">${items}</div>`;
+  }
+
+  function renderPosts(posts, activeTag, query) {
+    const container = getContainer("posts");
+    if (!container) return;
+
+    const searchValue = escapeHtml(query || "");
+    const filterMeta = activeTag
+      ? `<span class="meta">当前标签：${escapeHtml(activeTag)}</span>`
+      : "";
+
+    container.innerHTML = `
+      <h2 class="dir-title">文章目录</h2>
+      <div class="dir-tools">
+        <input id="post-search" class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" value="${searchValue}" />
+        ${filterMeta}
+      </div>
+      <div id="post-list-region"></div>
     `;
-    list.appendChild(item);
+
+    renderPostListRegion(posts, activeTag, query);
+    bindSearchInput(posts, activeTag);
+    ensureFullTextIndex(posts, activeTag, query);
   }
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "directory";
-  wrapper.innerHTML = '<h2 class="dir-title">文章目录</h2>';
-  wrapper.appendChild(list);
-  container.appendChild(wrapper);
-}
+  function bindSearchInput(posts, activeTag) {
+    const input = document.getElementById("post-search");
+    if (!input || input.dataset.bound === "true") return;
 
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>\"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ],
-  );
-}
+    input.dataset.bound = "true";
+    input.addEventListener("input", () => {
+      const params = new URLSearchParams(window.location.search);
+      const value = input.value;
+      if (value.trim()) {
+        params.set("q", value);
+      } else {
+        params.delete("q");
+      }
 
-// 启动
-loadIndex();
+      const url = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+      history.replaceState(null, "", url);
+
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+
+      searchDebounceTimer = setTimeout(() => {
+        renderPostListRegion(posts, activeTag, value);
+        ensureFullTextIndex(posts, activeTag, value);
+      }, SEARCH_DEBOUNCE_MS);
+    });
+  }
+
+  async function init() {
+    const nav = getContainer("tag-nav");
+    const postsContainer = getContainer("posts");
+    if (!nav || !postsContainer) {
+      return;
+    }
+
+    try {
+      const posts = await loadPosts();
+      const params = new URLSearchParams(window.location.search);
+      const forcedTag = getForcedTagFromDom();
+      const activeTag = params.get("tag") || forcedTag || "";
+      const query = params.get("q") || "";
+
+      renderTags(posts, activeTag);
+      renderPosts(posts, activeTag, query);
+    } catch (error) {
+      postsContainer.innerHTML = `<div class="loading">加载失败：${escapeHtml(error.message || String(error))}</div>`;
+    }
+  }
+
+  init();
+})();
