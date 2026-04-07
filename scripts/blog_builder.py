@@ -791,6 +791,7 @@ def render_about_page(
     </footer>
 
 {about_json}
+    <script src="/assets/js/site.js" defer></script>
   </body>
 </html>
 """

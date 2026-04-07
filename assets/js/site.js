@@ -426,12 +426,14 @@
   }
 
   async function init() {
+    initNowStatus();
+    initLatestNotePreview();
+
+    const nav = getContainer("tag-nav");
     const postsContainer = getContainer("posts");
-    if (!postsContainer) {
+    if (!nav || !postsContainer) {
       return;
     }
-
-    initNowStatus();
 
     try {
       const posts = await loadPosts();
@@ -442,7 +444,6 @@
 
       renderPosts(posts, activeTag, query);
       renderTags(posts, activeTag);
-      initLatestNotePreview();
     } catch (error) {
       postsContainer.innerHTML = `<div class="loading">加载失败：${escapeHtml(error.message || String(error))}</div>`;
     }
