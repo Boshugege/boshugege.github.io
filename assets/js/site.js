@@ -279,12 +279,77 @@
     });
   }
 
+  function updateNowStatus(text, isError) {
+    const statusTextEl = document.getElementById("now-status-text");
+    if (!statusTextEl) return;
+
+    statusTextEl.textContent = text;
+    statusTextEl.classList.toggle("is-error", Boolean(isError));
+  }
+
+  function buildNowText(payload) {
+    if (!payload || typeof payload !== "object") {
+      return "空闲";
+    }
+
+    if (Array.isArray(payload.events)) {
+      const now = new Date();
+      const current = payload.events.find((event) => {
+        const start = new Date(String(event.start || ""));
+        const end = new Date(String(event.end || ""));
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+          return false;
+        }
+        return now >= start && now < end;
+      });
+
+      if (!current) {
+        return "空闲";
+      }
+
+      const summary = String(current.summary || "").trim() || "忙碌中";
+      const location = String(current.location || "").replace(/\s+/g, " ").trim();
+      return location ? `${summary}（${location}）` : summary;
+    }
+
+    if (payload.statusText) {
+      return String(payload.statusText);
+    }
+
+    const summary = String(payload.summary || "").trim();
+    const location = String(payload.location || "").replace(/\s+/g, " ").trim();
+    if (!summary) {
+      return "空闲";
+    }
+    return location ? `${summary}（${location}）` : summary;
+  }
+
+  async function initNowStatus() {
+    const statusTextEl = document.getElementById("now-status-text");
+    if (!statusTextEl) return;
+
+    try {
+      const res = await fetch("/now.json", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`now.json 请求失败 (${res.status})`);
+      }
+
+      const payload = await res.json();
+      updateNowStatus(buildNowText(payload), false);
+    } catch (error) {
+      console.warn(error);
+      updateNowStatus("暂时无法读取状态", true);
+    }
+  }
+
   async function init() {
     const nav = getContainer("tag-nav");
     const postsContainer = getContainer("posts");
     if (!nav || !postsContainer) {
       return;
     }
+
+    initNowStatus();
 
     try {
       const posts = await loadPosts();
