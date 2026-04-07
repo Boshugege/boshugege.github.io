@@ -13,10 +13,6 @@ from pathlib import Path
 from typing import Any
 
 from blog_builder import (
-    ABOUT_LINES,
-    ABOUT_TITLE,
-    CONTACT_EMAIL,
-    CONTACT_GITHUB,
     SITE_FOOTER_OWNER,
     SITE_HEADER_DESCRIPTION,
     SITE_HOME_DESCRIPTION,
@@ -27,6 +23,7 @@ from blog_builder import (
     find_pandoc,
     join_url,
     parse_date,
+    render_sidebar_about_section,
     strip_html,
     write_text,
 )
@@ -167,10 +164,11 @@ def parse_notes_markdown(raw_text: str, pandoc_path: str | None) -> list[dict[st
 def render_notes_page(site_prefix: str, entries: list[dict[str, Any]]) -> str:
     canonical = join_url(site_prefix, NOTES_HTML_DEFAULT)
     icon = join_url(site_prefix, "assets/img/icon.jpg")
-    about_intro = ABOUT_LINES[0] if len(ABOUT_LINES) > 0 else ""
-    profile_1 = ABOUT_LINES[1] if len(ABOUT_LINES) > 1 else ""
-    profile_2 = ABOUT_LINES[2] if len(ABOUT_LINES) > 2 else ""
-    profile_3 = ABOUT_LINES[3] if len(ABOUT_LINES) > 3 else ""
+    about_html = render_sidebar_about_section(
+        show_about_link=True,
+        extra_links=['<a href="/index.html">首页</a>'],
+        include_rss=False,
+    )
 
     if entries:
         notes_items = []
@@ -225,18 +223,7 @@ def render_notes_page(site_prefix: str, entries: list[dict[str, Any]]) -> str:
           <p class=\"site-desc\">{html.escape(SITE_HEADER_DESCRIPTION)}</p>
         </header>
 
-        <section class=\"about\">
-          <h2>{html.escape(ABOUT_TITLE)}</h2>
-          <p>{html.escape(about_intro)}</p>
-          <p class=\"profile-info\">{html.escape(profile_1)}</p>
-          <p class=\"profile-info\">{html.escape(profile_2)}</p>
-          <p class=\"profile-info\">{html.escape(profile_3)}</p>
-          <p class=\"contact\">
-            <a href=\"/index.html\">首页</a> ·
-            <a href=\"mailto:{html.escape(CONTACT_EMAIL)}\">Email</a> ·
-            <a href=\"{html.escape(CONTACT_GITHUB)}\">GitHub</a>
-          </p>
-        </section>
+{about_html}
       </aside>
 
       <section class=\"content\">

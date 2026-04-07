@@ -42,7 +42,7 @@ MANIFEST_RELATIVE = "manifest.webmanifest"
 # Tag pages can still be generated, but are excluded from sitemap by default.
 GENERATE_TAG_PAGES = False
 INCLUDE_TAG_PAGES_IN_SITEMAP = False
-SITEMAP_ROOT_PAGES = ("index.html", "archive.html", "rss.xml")
+SITEMAP_ROOT_PAGES = ("index.html", "about.html", "rss.xml")
 
 POSTS_DIRNAME = "posts"
 DRAFTS_DIRNAME = "drafts"
@@ -50,9 +50,9 @@ TAGS_DIRNAME = "tags"
 INDEX_JSON_NAME = "index.json"
 SEARCH_JSON_NAME = "search.json"
 INDEX_HTML_NAME = "index.html"
-ARCHIVE_HTML_NAME = "archive.html"
 RSS_XML_NAME = "rss.xml"
 SITEMAP_XML_NAME = "sitemap.xml"
+ABOUT_HTML_NAME = "about.html"
 
 DEFAULT_DRAFT_GLOB = "*.md"
 PANDOC_HIGHLIGHT_STYLE = "tango"
@@ -545,6 +545,40 @@ def render_post_list(posts: list[dict[str, Any]]) -> str:
     return "\n".join(parts)
 
 
+def render_sidebar_about_section(
+    *,
+    show_about_link: bool,
+    extra_links: list[str] | None = None,
+    include_rss: bool,
+) -> str:
+    about_intro = ABOUT_LINES[0] if len(ABOUT_LINES) > 0 else ""
+    profile_1 = ABOUT_LINES[1] if len(ABOUT_LINES) > 1 else ""
+    profile_2 = ABOUT_LINES[2] if len(ABOUT_LINES) > 2 else ""
+    profile_3 = ABOUT_LINES[3] if len(ABOUT_LINES) > 3 else ""
+    extra = extra_links or []
+    contact_links = [*extra]
+    contact_links.append(f'<a href="mailto:{html.escape(CONTACT_EMAIL)}">Email</a>')
+    if include_rss:
+        contact_links.append(f'<a href="/{RSS_XML_NAME}">RSS</a>')
+    contact_links.append(f'<a href="{html.escape(CONTACT_GITHUB)}">GitHub</a>')
+    more_link = (
+        f' <a class="about-more-link" href="/{ABOUT_HTML_NAME}">更多</a>'
+        if show_about_link
+        else ""
+    )
+
+    return f"""        <section class="about">
+          <h2><a class="plain-link" href="/{ABOUT_HTML_NAME}">{html.escape(ABOUT_TITLE)}</a></h2>
+          <p>{html.escape(about_intro)}{more_link}</p>
+          <p class="profile-info">{html.escape(profile_1)}</p>
+          <p class="profile-info">{html.escape(profile_2)}</p>
+          <p class="profile-info">{html.escape(profile_3)}</p>
+          <p class="contact">
+            {" · ".join(contact_links)}
+          </p>
+        </section>"""
+
+
 def render_shell(
     site_prefix: str,
     page_title: str,
@@ -562,10 +596,11 @@ def render_shell(
     rss_url = join_url(site_prefix, RSS_XML_NAME)
     manifest_url = join_url(site_prefix, MANIFEST_RELATIVE)
     script_line = '    <script src="/assets/js/site.js" defer></script>' if include_client_script else ""
-    about_intro = ABOUT_LINES[0] if len(ABOUT_LINES) > 0 else ""
-    profile_1 = ABOUT_LINES[1] if len(ABOUT_LINES) > 1 else ""
-    profile_2 = ABOUT_LINES[2] if len(ABOUT_LINES) > 2 else ""
-    profile_3 = ABOUT_LINES[3] if len(ABOUT_LINES) > 3 else ""
+    about_html = render_sidebar_about_section(
+        show_about_link=True,
+        extra_links=[],
+        include_rss=True,
+    )
 
     return f"""<!doctype html>
 <html lang="{SITE_LANGUAGE}">
@@ -602,18 +637,7 @@ def render_shell(
           <p class="site-desc">{html.escape(SITE_HEADER_DESCRIPTION)}</p>
         </header>
 
-        <section class="about">
-          <h2>{html.escape(ABOUT_TITLE)}</h2>
-          <p>{html.escape(about_intro)}</p>
-          <p class="profile-info">{html.escape(profile_1)}</p>
-          <p class="profile-info">{html.escape(profile_2)}</p>
-          <p class="profile-info">{html.escape(profile_3)}</p>
-          <p class="contact">
-            <a href="mailto:{html.escape(CONTACT_EMAIL)}">Email</a> ·
-            <a href="/{RSS_XML_NAME}">RSS</a> ·
-            <a href="{html.escape(CONTACT_GITHUB)}">GitHub</a>
-          </p>
-        </section>
+{about_html}
       </aside>
 
       <section class="content">
@@ -633,6 +657,127 @@ def render_shell(
 
 {json_ld}
 {script_line}
+  </body>
+</html>
+"""
+
+
+def render_about_page(
+    site_prefix: str,
+    posts: list[dict[str, Any]],
+    tag_stats: list[dict[str, Any]],
+) -> str:
+    canonical_url = join_url(site_prefix, ABOUT_HTML_NAME)
+    og_image_url = resolve_cover_url(DEFAULT_COVER_RELATIVE, site_prefix)
+    rss_url = join_url(site_prefix, RSS_XML_NAME)
+    manifest_url = join_url(site_prefix, MANIFEST_RELATIVE)
+    top_tags = tag_stats[:5]
+    tag_links = (
+        "、".join(
+            f'<a href="/index.html?tag={quote(entry["tag"])}">{html.escape(entry["tag"])}</a>'
+            for entry in top_tags
+        )
+        if top_tags
+        else "还在慢慢积累中"
+    )
+    latest_post = posts[0] if posts else None
+    about_html = render_sidebar_about_section(
+        show_about_link=False,
+        extra_links=[f'<a href="/{INDEX_HTML_NAME}">首页</a>', f'<a href="/notes.html">随想</a>'],
+        include_rss=True,
+    )
+    latest_post_html = ""
+    if latest_post:
+        latest_post_html = (
+            f'<p class="about-inline-links">最近一篇文章是 '
+            f'<a href="/{html.escape(latest_post["url"])}">{html.escape(latest_post["title"])}</a>'
+            f'（{html.escape(latest_post["date"])}）。</p>'
+        )
+
+    about_json = f"""<script type="application/ld+json">
+{{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "关于我 - {SITE_NAME}",
+  "url": "{html.escape(canonical_url)}",
+  "isPartOf": "{html.escape(join_url(site_prefix, ""))}"
+}}
+</script>"""
+
+    return f"""<!doctype html>
+<html lang="{SITE_LANGUAGE}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>关于我 - {html.escape(SITE_NAME)}</title>
+    <meta name="description" content="{html.escape(SITE_HOME_DESCRIPTION)}" />
+    <link rel="canonical" href="{html.escape(canonical_url)}" />
+    <link rel="alternate" type="application/rss+xml" title="{SITE_NAME} RSS" href="{html.escape(rss_url)}" />
+    <link rel="manifest" href="{html.escape(manifest_url)}" />
+    <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="/assets/img/icon.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{SITE_NAME}" />
+    <meta property="og:title" content="关于我 - {html.escape(SITE_NAME)}" />
+    <meta property="og:description" content="{html.escape(SITE_HOME_DESCRIPTION)}" />
+    <meta property="og:url" content="{html.escape(canonical_url)}" />
+    <meta property="og:image" content="{html.escape(og_image_url)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="关于我 - {html.escape(SITE_NAME)}" />
+    <meta name="twitter:description" content="{html.escape(SITE_HOME_DESCRIPTION)}" />
+    <meta name="twitter:image" content="{html.escape(og_image_url)}" />
+    <meta name="theme-color" content="{SITE_THEME_COLOR}" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#about-main">跳转到个人介绍</a>
+    <div class="layout">
+      <aside class="sidebar">
+        <header class="site-header">
+          <h1 class="site-title">{SITE_NAME}</h1>
+          <p class="site-desc">{html.escape(SITE_HEADER_DESCRIPTION)}</p>
+        </header>
+
+{about_html}
+      </aside>
+
+      <section class="content">
+        <aside class="directory about-page" id="about-main">
+          <h2 class="dir-title">个人介绍</h2>
+
+          <section class="about-block">
+            <h3>我是谁</h3>
+            <p>虽然其实我也不知道，但是至少必须得写一点，所以我的首页是这样写的：</p>
+            <p>{html.escape(ABOUT_LINES[0] if len(ABOUT_LINES) > 0 else "")}</p>
+            <p class="about-fact">{html.escape(ABOUT_LINES[1] if len(ABOUT_LINES) > 1 else "")}</p>
+            <p class="about-fact">{html.escape(ABOUT_LINES[2] if len(ABOUT_LINES) > 2 else "")}</p>
+            <p class="about-fact">{html.escape(ABOUT_LINES[3] if len(ABOUT_LINES) > 3 else "")}</p>
+          </section>
+
+          <section class="about-block">
+            <h3>这个站里会写什么</h3>
+            <p>目前这里有 {len(posts)} 篇文章。内容大多散落在 {tag_links} 这些主题里，虽然其实都是小时候瞎写的，现在一直没时间写也不敢写。</p>
+{latest_post_html}
+          </section>
+
+          <section class="about-block">
+            <h3>怎么逛这个站</h3>
+            <p class="about-inline-links"><a href="/{INDEX_HTML_NAME}">首页</a> 适合直接看最新文章，<a href="/notes.html">每天随想</a> 会更短、更即时，<a href="/{RSS_XML_NAME}">RSS</a> 则适合长期订阅。</p>
+          </section>
+
+          <section class="about-block">
+            <h3>联系我</h3>
+            <p class="about-inline-links"><a href="mailto:{html.escape(CONTACT_EMAIL)}">Email</a> · <a href="{html.escape(CONTACT_GITHUB)}">GitHub</a></p>
+          </section>
+        </aside>
+      </section>
+    </div>
+
+    <footer class="site-footer">
+      <p>© {datetime.now().year} — {html.escape(SITE_FOOTER_OWNER)}</p>
+    </footer>
+
+{about_json}
   </body>
 </html>
 """
@@ -715,7 +860,7 @@ def build_site(repo_root: Path, site_prefix: str) -> None:
     index_json_path = repo_root / INDEX_JSON_NAME
     search_json_path = repo_root / SEARCH_JSON_NAME
     index_html_path = repo_root / INDEX_HTML_NAME
-    archive_html_path = repo_root / ARCHIVE_HTML_NAME
+    about_html_path = repo_root / ABOUT_HTML_NAME
     rss_path = repo_root / RSS_XML_NAME
     sitemap_path = repo_root / SITEMAP_XML_NAME
     tags_dir = repo_root / TAGS_DIRNAME
@@ -783,20 +928,8 @@ def build_site(repo_root: Path, site_prefix: str) -> None:
     )
     write_text(index_html_path, home_html)
 
-    archive_content = '<h2 class="dir-title">文章归档</h2>\n' + render_post_list(items)
-    archive_html = render_shell(
-        site_prefix=site_prefix,
-        page_title=f"文章归档 - {SITE_NAME}",
-        description="按时间排序的全部文章归档。",
-        canonical_path=ARCHIVE_HTML_NAME,
-        tag_nav_html=tag_nav_html,
-        main_html=archive_content,
-        extra_head="",
-        json_ld="",
-        include_client_script=True,
-        forced_tag="",
-    )
-    write_text(archive_html_path, archive_html)
+    about_html = render_about_page(site_prefix, items, tag_stats)
+    write_text(about_html_path, about_html)
 
     if GENERATE_TAG_PAGES:
         ensure_dir(tags_dir)
@@ -912,7 +1045,7 @@ def build_site(repo_root: Path, site_prefix: str) -> None:
     print(f"Site URL prefix: {site_prefix if site_prefix else '(relative mode)'}")
     print(f"Generated posts: {len(items)}")
     print(f"Generated tag pages: {len(tag_stats) if GENERATE_TAG_PAGES else 0}")
-    print("Updated: index.html, archive.html, index.json, search.json, rss.xml, sitemap.xml")
+    print("Updated: index.html, about.html, index.json, search.json, rss.xml, sitemap.xml")
 
 
 def gather_drafts(repo_root: Path, args: argparse.Namespace) -> list[Path]:
