@@ -239,6 +239,7 @@ def render_notes_page(site_prefix: str, entries: list[dict[str, Any]]) -> str:
     <footer class=\"site-footer\">
       <p>© {datetime.now().year} — {html.escape(SITE_FOOTER_OWNER)}</p>
     </footer>
+    <script src=\"/assets/js/site.js\" defer></script>
   </body>
 </html>
 """
