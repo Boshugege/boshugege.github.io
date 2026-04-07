@@ -58,6 +58,18 @@ a:focus {
   text-decoration: underline;
 }
 
+.plain-link {
+  color: inherit;
+  text-decoration: none;
+}
+.plain-link:visited {
+  color: inherit;
+}
+.plain-link:hover,
+.plain-link:focus {
+  text-decoration: underline;
+}
+
 .site-header {
   margin: 0 0 16px 0;
   padding: 0;
@@ -96,6 +108,10 @@ a:focus {
 .about h3 {
   margin: 0 0 8px;
   font-size: 18px;
+}
+.about-more-link {
+  margin-left: 6px;
+  font-size: 13px;
 }
 .profile-info.now-status {
   font-weight: 600;
@@ -361,6 +377,39 @@ a:focus {
 .note-title {
   margin: 0 0 8px;
   font-size: 16px;
+}
+
+.about-page .dir-title {
+  margin-bottom: 12px;
+}
+.about-lead {
+  margin: 0 0 14px;
+}
+.about-block {
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.about-block:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+.about-block h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.about-block p {
+  margin: 0 0 8px;
+}
+.about-block p:last-child {
+  margin-bottom: 0;
+}
+.about-fact {
+  color: var(--muted);
+}
+.about-inline-links {
+  line-height: 1.8;
 }
 
 @media (min-width: 801px) {

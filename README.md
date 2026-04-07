@@ -28,7 +28,6 @@
 
    该脚本会生成以下产物：
    - `index.html`：预渲染首页（无 JS 也可浏览）；
-   - `archive.html`：全量归档页；
    - `index.json` 与 `search.json`：前端增强用数据；
    - `rss.xml`：RSS（RSS 2.0）订阅源；
    - `sitemap.xml`：站点地图。
@@ -65,7 +64,7 @@
       ```
       设置后重新打开终端以让环境变量生效，然后运行 `pandoc --version` 验证。
 
-  - 生成的文件会输出到 `posts/`，并自动触发整站刷新（`index.html` / `archive.html` / `index.json` / `search.json` / `rss.xml` / `sitemap.xml`）。
+  - 生成的文件会输出到 `posts/`，并自动触发整站刷新（`index.html` / `about.html` / `index.json` / `search.json` / `rss.xml` / `sitemap.xml`）。
 
   例如（PowerShell）：
 
