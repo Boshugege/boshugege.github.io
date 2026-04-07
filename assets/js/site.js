@@ -243,6 +243,7 @@
         <input id="post-search" class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" value="${searchValue}" />
         ${filterMeta}
       </div>
+      <nav class="tag-nav in-directory" id="tag-nav" aria-label="标签筛选"></nav>
       <div id="post-list-region"></div>
     `;
 
@@ -397,10 +398,36 @@
     }
   }
 
+  async function initLatestNotePreview() {
+    const textEl = document.getElementById("latest-note-text");
+    if (!textEl) return;
+
+    try {
+      const res = await fetch("/notes.json", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`notes.json 请求失败 (${res.status})`);
+      }
+
+      const payload = await res.json();
+      const entries = Array.isArray(payload.entries) ? payload.entries : [];
+      if (!entries.length) {
+        textEl.textContent = "暂无随想";
+        return;
+      }
+
+      const latest = entries[0];
+      const date = String(latest.date || "").trim();
+      const summary = String(latest.summary || "").trim() || "（无内容）";
+      textEl.textContent = date ? `${date} · ${summary}` : summary;
+    } catch (error) {
+      console.warn(error);
+      textEl.textContent = "暂时无法读取随想";
+    }
+  }
+
   async function init() {
-    const nav = getContainer("tag-nav");
     const postsContainer = getContainer("posts");
-    if (!nav || !postsContainer) {
+    if (!postsContainer) {
       return;
     }
 
@@ -413,8 +440,9 @@
       const activeTag = params.get("tag") || forcedTag || "";
       const query = params.get("q") || "";
 
-      renderTags(posts, activeTag);
       renderPosts(posts, activeTag, query);
+      renderTags(posts, activeTag);
+      initLatestNotePreview();
     } catch (error) {
       postsContainer.innerHTML = `<div class="loading">加载失败：${escapeHtml(error.message || String(error))}</div>`;
     }
