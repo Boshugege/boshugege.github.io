@@ -573,6 +573,14 @@ def render_sidebar_about_section(
           <p class="profile-info">{html.escape(profile_1)}</p>
           <p class="profile-info">{html.escape(profile_2)}</p>
           <p class="profile-info">{html.escape(profile_3)}</p>
+          <p class="profile-info now-status">
+            我正在：<span id="now-status-text">读取中...</span>
+          </p>
+          <div id="next-event" class="profile-info next-event" hidden>
+            <p class="next-event-title">下一个日程：<span id="next-event-summary"></span></p>
+            <p class="next-event-time">时间：<span id="next-event-time"></span></p>
+            <p class="next-event-location">地点：<span id="next-event-location"></span></p>
+          </div>
           <p class="contact">
             {" · ".join(contact_links)}
           </p>
@@ -641,11 +649,16 @@ def render_shell(
       </aside>
 
       <section class="content">
+        <aside class="directory latest-note-panel" id="latest-note-preview">
+          <p class="latest-note-title">最近随想</p>
+          <p class="latest-note-text" id="latest-note-text">读取中...</p>
+          <p class="latest-note-link"><a href="/notes.html">查看全部随想</a></p>
+        </aside>
+
+        <aside class="directory" id="posts">
         <nav class="tag-nav" id="tag-nav" aria-label="标签筛选" data-forced-tag="{html.escape(forced_tag)}">
 {tag_nav_html}
         </nav>
-
-        <aside class="directory" id="posts">
 {main_html}
         </aside>
       </section>
