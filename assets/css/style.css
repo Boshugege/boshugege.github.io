@@ -100,6 +100,17 @@ a:focus {
 .profile-info.now-status {
   font-weight: 600;
 }
+.next-event {
+  margin-top: 8px;
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+.next-event p {
+  margin: 2px 0;
+}
+.next-event-title {
+  font-weight: 600;
+}
 #now-status-text.is-error {
   color: #b00020;
 }
