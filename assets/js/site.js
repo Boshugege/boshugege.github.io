@@ -287,41 +287,95 @@
     statusTextEl.classList.toggle("is-error", Boolean(isError));
   }
 
-  function buildNowText(payload) {
-    if (!payload || typeof payload !== "object") {
-      return "空闲";
+  function updateNextEvent(event) {
+    const block = document.getElementById("next-event");
+    const summaryEl = document.getElementById("next-event-summary");
+    const timeEl = document.getElementById("next-event-time");
+    const locationEl = document.getElementById("next-event-location");
+    if (!block || !summaryEl || !timeEl || !locationEl) return;
+
+    if (!event) {
+      block.hidden = true;
+      return;
     }
 
-    if (Array.isArray(payload.events)) {
-      const now = new Date();
-      const current = payload.events.find((event) => {
+    const start = event.start;
+    const end = event.end;
+    if (!(start instanceof Date) || Number.isNaN(start.getTime())) {
+      block.hidden = true;
+      return;
+    }
+    if (!(end instanceof Date) || Number.isNaN(end.getTime())) {
+      block.hidden = true;
+      return;
+    }
+
+    const dayFmt = new Intl.DateTimeFormat("zh-CN", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const hmFmt = new Intl.DateTimeFormat("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    const sameDay =
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate();
+
+    const timeText = sameDay
+      ? `${dayFmt.format(start)}-${hmFmt.format(end)}`
+      : `${dayFmt.format(start)}-${dayFmt.format(end)}`;
+
+    summaryEl.textContent = event.summary || "忙碌中";
+    timeEl.textContent = timeText;
+    locationEl.textContent = event.location || "（未填写）";
+    block.hidden = false;
+  }
+
+  function normalizeNowPayload(payload) {
+    if (!payload || typeof payload !== "object") return [];
+    if (!Array.isArray(payload.events)) return [];
+
+    return payload.events
+      .map((event) => {
         const start = new Date(String(event.start || ""));
         const end = new Date(String(event.end || ""));
-        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-          return false;
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+          return null;
         }
-        return now >= start && now < end;
-      });
+        return {
+          summary: String(event.summary || "").trim(),
+          location: String(event.location || "").replace(/\s+/g, " ").trim(),
+          start,
+          end,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.start - b.start);
+  }
 
-      if (!current) {
-        return "空闲";
-      }
+  function renderNowAndNext(payload) {
+    const events = normalizeNowPayload(payload);
+    const now = new Date();
+    const current = events.find((event) => now >= event.start && now < event.end) || null;
+    const next = events.find((event) => event.start > now) || null;
 
-      const summary = String(current.summary || "").trim() || "忙碌中";
-      const location = String(current.location || "").replace(/\s+/g, " ").trim();
-      return location ? `${summary}（${location}）` : summary;
+    if (current) {
+      updateNowStatus(
+        current.location ? `${current.summary || "忙碌中"}（${current.location}）` : current.summary || "忙碌中",
+        false,
+      );
+    } else {
+      updateNowStatus("空闲", false);
     }
 
-    if (payload.statusText) {
-      return String(payload.statusText);
-    }
-
-    const summary = String(payload.summary || "").trim();
-    const location = String(payload.location || "").replace(/\s+/g, " ").trim();
-    if (!summary) {
-      return "空闲";
-    }
-    return location ? `${summary}（${location}）` : summary;
+    updateNextEvent(next);
   }
 
   async function initNowStatus() {
@@ -335,10 +389,11 @@
       }
 
       const payload = await res.json();
-      updateNowStatus(buildNowText(payload), false);
+      renderNowAndNext(payload);
     } catch (error) {
       console.warn(error);
       updateNowStatus("暂时无法读取状态", true);
+      updateNextEvent(null);
     }
   }
 
