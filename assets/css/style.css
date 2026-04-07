@@ -97,6 +97,12 @@ a:focus {
   margin: 0 0 8px;
   font-size: 18px;
 }
+.profile-info.now-status {
+  font-weight: 600;
+}
+#now-status-text.is-error {
+  color: #b00020;
+}
 
 /* 标签导航 */
 .tag-nav {
