@@ -441,6 +441,17 @@ def convert_draft_to_post(
     out_path = repo_root / POSTS_DIRNAME / out_filename
     ensure_dir(out_path.parent)
 
+    # Keep titles unique: if filename changes because of date/slug updates,
+    # remove older post files that have the same title.
+    posts_dir = repo_root / POSTS_DIRNAME
+    for existing in sorted(posts_dir.rglob("*.html")):
+        if existing.resolve() == out_path.resolve():
+            continue
+        existing_title = get_meta_value(read_text(existing), "post-title").strip()
+        if existing_title and existing_title == title:
+            existing.unlink()
+            print(f"Removed old post with same title: {existing}")
+
     relative_post_url = f"{POSTS_DIRNAME}/{out_filename}"
     canonical_url = join_url(site_prefix, relative_post_url)
     cover_path = resolve_cover_path(cover_raw, DEFAULT_COVER_RELATIVE)
@@ -510,6 +521,12 @@ def convert_draft_to_post(
 """
     write_text(out_path, doc)
     return out_path
+
+
+def draft_output_title(source_file: Path) -> str:
+    raw = read_text(source_file)
+    meta, _ = parse_front_matter(raw)
+    return str(meta.get("title") or source_file.stem).strip()
 
 
 def render_tag_nav(posts: list[dict[str, Any]], active_tag: str) -> str:
@@ -861,6 +878,19 @@ def collect_posts(repo_root: Path) -> tuple[list[dict[str, Any]], list[dict[str,
 
     items.sort(key=lambda x: (x["_sort_date"], x["title"]), reverse=True)
     search_items.sort(key=lambda x: (x["_sort_date"], x["title"]), reverse=True)
+
+    title_to_urls: dict[str, list[str]] = {}
+    for item in items:
+        title_to_urls.setdefault(item["title"], []).append(item["url"])
+    duplicated = {t: urls for t, urls in title_to_urls.items() if len(urls) > 1}
+    if duplicated:
+        lines = ["Duplicate post titles found:"]
+        for title, urls in sorted(duplicated.items(), key=lambda kv: kv[0]):
+            lines.append(f"- {title}")
+            for url in urls:
+                lines.append(f"  - {url}")
+        raise SystemExit("\n".join(lines))
+
     for item in items:
         item.pop("_sort_date", None)
     for item in search_items:
@@ -1120,6 +1150,21 @@ def main() -> None:
 
     drafts = gather_drafts(repo_root, args)
     if drafts:
+        # Prevent duplicate titles being generated in the same run.
+        seen_title_to_draft: dict[str, Path] = {}
+        for draft in drafts:
+            title = draft_output_title(draft)
+            if not title:
+                continue
+            if title in seen_title_to_draft:
+                first = seen_title_to_draft[title]
+                raise SystemExit(
+                    "Duplicate draft title detected: "
+                    f"'{title}'\n- {first}\n- {draft}\n"
+                    "Please make titles unique before building."
+                )
+            seen_title_to_draft[title] = draft
+
         if pandoc_path:
             print(f"Using pandoc at: {pandoc_path}")
         else:
