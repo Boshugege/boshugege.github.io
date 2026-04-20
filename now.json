@@ -1,22 +1,10 @@
 {
   "version": 1,
   "timezone": "Asia/Shanghai",
-  "windowStart": "2026-04-20T00:00:00+08:00",
-  "windowEnd": "2026-04-27T00:00:00+08:00",
+  "windowStart": "2026-04-21T00:00:00+08:00",
+  "windowEnd": "2026-04-28T00:00:00+08:00",
   "source": "https://p227-caldav.icloud.com.cn/published/2/MTgzMjM1MzA0MDIxODMyM_UREbj5PQcyA96FL7MJBF5qiBpYgUNwqLGCZ9JVR1uK6ofFHRNgbwLVIPJ0VAXBYv5xfH8sji-2YGKEPySJdEM",
   "events": [
-    {
-      "summary": "数学分析(2)",
-      "location": "二教401 双清路30号",
-      "start": "2026-04-20T13:30:00+08:00",
-      "end": "2026-04-20T15:05:00+08:00"
-    },
-    {
-      "summary": "数学建模和数据分析",
-      "location": "三教3200 双清路30号",
-      "start": "2026-04-20T19:20:00+08:00",
-      "end": "2026-04-20T21:45:00+08:00"
-    },
     {
       "summary": "计算机图形学基础",
       "location": "三教2102 双清路30号",
@@ -76,6 +64,18 @@
       "location": "新水利馆327 双清路30号清华大学",
       "start": "2026-04-24T09:50:00+08:00",
       "end": "2026-04-24T12:15:00+08:00"
+    },
+    {
+      "summary": "数学分析(2)",
+      "location": "二教401 双清路30号",
+      "start": "2026-04-27T13:30:00+08:00",
+      "end": "2026-04-27T15:05:00+08:00"
+    },
+    {
+      "summary": "数学建模和数据分析",
+      "location": "三教3200 双清路30号",
+      "start": "2026-04-27T19:20:00+08:00",
+      "end": "2026-04-27T21:45:00+08:00"
     }
   ]
 }
