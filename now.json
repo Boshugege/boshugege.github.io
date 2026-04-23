@@ -1,28 +1,10 @@
 {
   "version": 1,
   "timezone": "Asia/Shanghai",
-  "windowStart": "2026-04-23T00:00:00+08:00",
-  "windowEnd": "2026-04-30T00:00:00+08:00",
+  "windowStart": "2026-04-24T00:00:00+08:00",
+  "windowEnd": "2026-05-01T00:00:00+08:00",
   "source": "https://p227-caldav.icloud.com.cn/published/2/MTgzMjM1MzA0MDIxODMyM_UREbj5PQcyA96FL7MJBF5qiBpYgUNwqLGCZ9JVR1uK6ofFHRNgbwLVIPJ0VAXBYv5xfH8sji-2YGKEPySJdEM",
   "events": [
-    {
-      "summary": "高等线性代数(2)",
-      "location": "六教6A017 双清路30号清华大学",
-      "start": "2026-04-23T08:00:00+08:00",
-      "end": "2026-04-23T09:35:00+08:00"
-    },
-    {
-      "summary": "大学化学A",
-      "location": "建华楼A404 双清路63号",
-      "start": "2026-04-23T09:50:00+08:00",
-      "end": "2026-04-23T12:15:00+08:00"
-    },
-    {
-      "summary": "数学分析习题课",
-      "location": "4203清华大学第四教室楼 双清路30号",
-      "start": "2026-04-23T19:20:00+08:00",
-      "end": "2026-04-23T20:55:00+08:00"
-    },
     {
       "summary": "机械设计基础",
       "location": "新水利馆327 双清路30号清华大学",
@@ -76,6 +58,12 @@
       "location": "六教6C101 双清路30号清华大学第六教学楼内",
       "start": "2026-04-29T13:30:00+08:00",
       "end": "2026-04-29T15:05:00+08:00"
+    },
+    {
+      "summary": "数学分析习题课",
+      "location": "4203清华大学第四教室楼 双清路30号",
+      "start": "2026-04-30T19:20:00+08:00",
+      "end": "2026-04-30T20:55:00+08:00"
     }
   ]
 }
