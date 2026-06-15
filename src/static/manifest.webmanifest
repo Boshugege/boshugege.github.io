@@ -1,0 +1,15 @@
+{
+  "name": "PNC's Blog",
+  "short_name": "PNC Blog",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f2efe7",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/assets/img/icon.jpg",
+      "type": "image/jpeg"
+    }
+  ]
+}

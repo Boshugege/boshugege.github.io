@@ -1,34 +1,13 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</title>
-  <meta name="post-title" content="使用笔记：内网穿透+远程桌面，流畅使用远程计算机">
-  <meta name="post-date" content="2022-05-18">
-  <meta name="post-tags" content="科技,远程桌面">
-  <meta name="post-excerpt" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="/assets/img/icon.jpg">
-</head>
-<body>
-  <article class="post-content">
-    <h1>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</h1>
-    <p class="meta">2022-05-18 · 标签：<a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a>, <a href="/index.html?tag=%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2">远程桌面</a></p>
-    <p>大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。</p>
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</title><meta name="description" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。"><link rel="canonical" href="https://parityncsvt.top/posts/remote-desktop.html"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg"><link rel="apple-touch-icon" href="/assets/img/icon.jpg"><meta property="og:type" content="article"><meta property="og:title" content="使用笔记：内网穿透+远程桌面，流畅使用远程计算机"><meta property="og:description" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。"><meta property="og:url" content="https://parityncsvt.top/posts/remote-desktop.html"><meta property="og:image" content="https://parityncsvt.top/assets/img/icon.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="使用笔记：内网穿透+远程桌面，流畅使用远程计算机"><meta name="twitter:description" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。"><meta name="twitter:image" content="https://parityncsvt.top/assets/img/icon.jpg"><meta name="post-title" content="使用笔记：内网穿透+远程桌面，流畅使用远程计算机"><meta name="post-date" content="2022-05-18"><meta name="post-tags" content="科技,远程桌面"><meta name="post-excerpt" content="大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。"><meta name="post-cover" content="assets/img/icon.jpg"><meta name="post-url" content="posts/remote-desktop.html"><link rel="stylesheet" href="/assets/css/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "使用笔记：内网穿透+远程桌面，流畅使用远程计算机",
+  "datePublished": "2022-05-18",
+  "url": "https://parityncsvt.top/posts/remote-desktop.html",
+  "image": "https://parityncsvt.top/assets/img/icon.jpg"
+}</script></head> <body> <article class="post-content"> <h1>使用笔记：内网穿透+远程桌面，流畅使用远程计算机</h1> <p class="meta"> 2022-05-18  · 约 281 字  · 约 1 分钟读完  · 标签： <a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a> , <a href="/index.html?tag=%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2">远程桌面</a>  </p>  <p>大概叙述一下我做这个的原因：疫情网课后为方便不在学校附近，而电脑因有 HDD 导致不方便搬运（其实还是因为太重），故用远程桌面访问。Windows 已提前升级成专业版，开启了远程桌面。</p>
 <p>Windows 自带的远程桌面可以有各种各样的配置，使用多种多样的屏幕分辨率和本地资源等。当然，由于中国的各位基本上都是内网用户，所以我们不能直接连接，需要一些配置
 才能访问。</p>
 <p>于是，我使用了一个类 VPN 的服务 ZeroTier ，只简单配置了一下，并没有开服务器 moon ，不过国内的 UDP 流量很容易遭到丢包处理，所以不太稳定，正在
 找寻解决方案。（一种解决方案是使用免费服务器作为备用的 TCP 握手服务器，不过我没有这个条件）</p>
-<p>大概就笔记一下几个关键词吧：Zerotier（组网），向日葵、ToDesk（远程桌面），FRP（内网穿透）。具体教程网上确实不少。</p>
-
-  </article>
-</body>
-</html>
-
-
-
-
-
-
+<p>大概就笔记一下几个关键词吧：Zerotier（组网），向日葵、ToDesk（远程桌面），FRP（内网穿透）。具体教程网上确实不少。</p>  </article> </body></html>

@@ -1,0 +1,82 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AboutStats from "../components/AboutStats.astro";
+import { getEntry } from "astro:content";
+import { getNotes } from "../lib/notes";
+import { getAllPosts } from "../lib/posts";
+import { site } from "../lib/site";
+
+const about = await getEntry("about", "resume");
+if (!about) {
+  throw new Error("Missing src/content/about/resume.mdx");
+}
+
+const { Content } = await about.render();
+const updated = about.data.updated?.toISOString().slice(0, 10);
+const posts = await getAllPosts();
+const notes = await getNotes();
+const allTags = new Set(posts.flatMap((post) => post.tags));
+const years = posts.map((post) => Number(post.date.slice(0, 4))).filter(Boolean);
+const earliestYear = Math.min(...years);
+const latestYear = Math.max(...years);
+const yearCounts = new Map<string, number>();
+for (const post of posts) {
+  const year = post.date.slice(0, 4);
+  yearCounts.set(year, (yearCounts.get(year) || 0) + 1);
+}
+const yearlyPosts = [...yearCounts.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+const writingYears = Number.isFinite(earliestYear) ? `${earliestYear}-${latestYear}` : "暂无";
+const totalWords = posts.reduce((sum, post) => sum + post.reading.wordCount, 0);
+const wordEstimate = Math.round(totalWords / 1000);
+const averageWords = posts.length ? Math.round(totalWords / posts.length) : 0;
+const codeBlocks = posts.reduce((sum, post) => sum + (post.content.match(/```/g)?.length || 0) / 2, 0);
+const mathPosts = posts.filter((post) => /\$\$[\s\S]*?\$\$|(?<!\\)\$[^$\n]+(?<!\\)\$/m.test(post.content)).length;
+const imageCount = posts.reduce((sum, post) => sum + (post.content.match(/!\[[^\]]*\]\([^)]+\)/g)?.length || 0), 0);
+const longestPost = posts.reduce((longest, post) => post.reading.wordCount > longest.reading.wordCount ? post : longest, posts[0]);
+const peakYear = [...yearCounts.entries()].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]))[0];
+const stats = [
+  { label: "文章", value: posts.length, detail: `${writingYears}` },
+  { label: "标签", value: allTags.size, detail: "主题跨度" },
+  { label: "随想", value: notes.length, detail: notes[0] ? `最近 ${notes[0].date}` : "暂无" },
+  { label: "字数", value: `${wordEstimate}k`, detail: "粗略估算" },
+];
+const highlights = [
+  { label: "代码块", value: Math.round(codeBlocks), detail: "技术笔记密度" },
+  { label: "公式文章", value: mathPosts, detail: "含 TeX 数学" },
+  { label: "图片", value: imageCount, detail: "文章配图" },
+  { label: "平均篇幅", value: averageWords.toLocaleString("zh-CN"), detail: "字/篇" },
+  { label: "最长文章", value: longestPost ? longestPost.reading.wordCount.toLocaleString("zh-CN") : 0, detail: longestPost?.title || "暂无" },
+  { label: "高峰年份", value: peakYear?.[0] || "暂无", detail: peakYear ? `${peakYear[1]} 篇文章` : "" },
+];
+---
+
+<BaseLayout
+  title={about.data.title}
+  description={about.data.description}
+  canonicalPath="/about.html"
+  skipHref="#about-main"
+  skipText="跳转到个人介绍"
+  sidebarProps={{
+    showAboutLink: false,
+    extraLinks: [
+      { href: "/index.html", label: "首页" },
+      { href: "/notes.html", label: "随想" },
+    ],
+  }}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: `关于我 - ${site.name}`,
+    url: `${site.url}/about.html`,
+    isPartOf: site.url,
+  }}
+>
+  <aside class="directory about-page" id="about-main">
+    <h2 class="dir-title">{about.data.title}</h2>
+    {updated && <p class="meta">更新：{updated}</p>}
+    <div class="resume-content">
+      <Content />
+    </div>
+    <AboutStats stats={stats} highlights={highlights} yearlyPosts={yearlyPosts} />
+  </aside>
+</BaseLayout>

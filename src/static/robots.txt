@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://parityncsvt.top/sitemap.xml

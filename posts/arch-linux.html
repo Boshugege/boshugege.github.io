@@ -1,188 +1,129 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>archlinux 简明安装指南</title>
-  <meta name="post-title" content="archlinux 简明安装指南">
-  <meta name="post-date" content="2023-10-14">
-  <meta name="post-tags" content="科技,Linux">
-  <meta name="post-excerpt" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="/assets/img/icon.jpg">
-</head>
-<body>
-  <article class="post-content">
-    <h1>archlinux 简明安装指南</h1>
-    <p class="meta">2023-10-14 · 标签：<a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a>, <a href="/index.html?tag=Linux">Linux</a></p>
-    <p>装了很多回<code>archlinux</code>，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</p>
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>archlinux 简明安装指南</title><meta name="description" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。"><link rel="canonical" href="https://parityncsvt.top/posts/arch-linux.html"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg"><link rel="apple-touch-icon" href="/assets/img/icon.jpg"><meta property="og:type" content="article"><meta property="og:title" content="archlinux 简明安装指南"><meta property="og:description" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。"><meta property="og:url" content="https://parityncsvt.top/posts/arch-linux.html"><meta property="og:image" content="https://parityncsvt.top/assets/img/icon.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="archlinux 简明安装指南"><meta name="twitter:description" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。"><meta name="twitter:image" content="https://parityncsvt.top/assets/img/icon.jpg"><meta name="post-title" content="archlinux 简明安装指南"><meta name="post-date" content="2023-10-14"><meta name="post-tags" content="科技,Linux"><meta name="post-excerpt" content="装了很多回`archlinux`，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。"><meta name="post-cover" content="assets/img/icon.jpg"><meta name="post-url" content="posts/arch-linux.html"><link rel="stylesheet" href="/assets/css/style.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "archlinux 简明安装指南",
+  "datePublished": "2023-10-14",
+  "url": "https://parityncsvt.top/posts/arch-linux.html",
+  "image": "https://parityncsvt.top/assets/img/icon.jpg"
+}</script></head> <body> <article class="post-content"> <h1>archlinux 简明安装指南</h1> <p class="meta"> 2023-10-14  · 约 972 字  · 约 3 分钟读完  · 标签： <a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a> , <a href="/index.html?tag=Linux">Linux</a>  </p>  <p>装了很多回<code>archlinux</code>，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</p>
 <p>安装之前的准备略去不写，就从<code>archlinux</code>的 iso 启动之后开始吧。其实<code>archlinux</code>也只是安装过程<strong>看上去</strong>高级一点，滚动更新的理念和大部分所谓主流发行版有点区别，用惯了 TUI 操作的人对于无 GUI 操作应当还是比较适应的，更何况提供了好几个 terminal 可以多线程操作，避免在等待的时候没事干（不是），甚至看到有老哥速通<code>archlinux</code>安装（这居然也有速通？）</p>
 <p>至于跟<code>archlinux</code>这个话题有关的争议，反正不在这个笔记的叙述范围之内，快速进入正题吧。</p>
 <p>进入<code>archlinux</code>安装环境之后，我们选择 <code>Arch Linux install medium (x86_64, UEFI)</code> 进入<code>archlinux</code>的安装环境，这是一个比较小的 live 系统，其 bash 已经可以给我们完成很多任务。</p>
 <p>archlinux 镜像中现在启用了 <code>reflector</code> 服务，会自己更新镜像源，然而在存在 GFW 的特殊网络环境中，这个服务并不适合被启用，我们还是老老实实地禁用它吧。</p>
-<pre><code class="language-bash">systemctl stop reflector.service
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">systemctl</span><span style="color:#032F62"> stop</span><span style="color:#032F62"> reflector.service</span></span></code></pre>
 <p>查看服务状态，按<code>q</code>退出</p>
-<pre><code class="language-bash">systemctl status reflector.service
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">systemctl</span><span style="color:#032F62"> status</span><span style="color:#032F62"> reflector.service</span></span></code></pre>
 <p>确认 <code>UEFI</code> 模式（保险起见）</p>
-<pre><code class="language-bash">ls /sys/firmware/efi/efivars
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">ls</span><span style="color:#032F62"> /sys/firmware/efi/efivars</span></span></code></pre>
 <p>若有输出即是 <code>UEFI</code></p>
 <p>如果使用无线网络（有线跳过即可）：</p>
-<pre><code class="language-bash">iwctl # 进入交互式命令行
-device list # 列出无线网卡设备名，比如无线网卡看到叫 wlan0
-station wlan0 scan # 扫描网络
-station wlan0 get-networks # 列出所有 wifi 网络
-station wlan0 connect wifi-name # 进行连接，注意这里无法输入中文。回车后输入密码即可
-exit # 连接成功后退出
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">iwctl</span><span style="color:#6A737D"> # 进入交互式命令行</span></span>
+<span class="line"><span style="color:#6F42C1">device</span><span style="color:#032F62"> list</span><span style="color:#6A737D"> # 列出无线网卡设备名，比如无线网卡看到叫 wlan0</span></span>
+<span class="line"><span style="color:#6F42C1">station</span><span style="color:#032F62"> wlan0</span><span style="color:#032F62"> scan</span><span style="color:#6A737D"> # 扫描网络</span></span>
+<span class="line"><span style="color:#6F42C1">station</span><span style="color:#032F62"> wlan0</span><span style="color:#032F62"> get-networks</span><span style="color:#6A737D"> # 列出所有 wifi 网络</span></span>
+<span class="line"><span style="color:#6F42C1">station</span><span style="color:#032F62"> wlan0</span><span style="color:#032F62"> connect</span><span style="color:#032F62"> wifi-name</span><span style="color:#6A737D"> # 进行连接，注意这里无法输入中文。回车后输入密码即可</span></span>
+<span class="line"><span style="color:#005CC5">exit</span><span style="color:#6A737D"> # 连接成功后退出</span></span></code></pre>
 <p>随便 <code>ping</code> 一个网站，应该能看到网络的连接情况。按 <code>Ctrl+C</code> 退出。</p>
 <p>同步时钟：</p>
-<pre><code class="language-bash">timedatectl set-ntp true
-timedatectl status
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">timedatectl</span><span style="color:#032F62"> set-ntp</span><span style="color:#005CC5"> true</span></span>
+<span class="line"><span style="color:#6F42C1">timedatectl</span><span style="color:#032F62"> status</span></span></code></pre>
 <p>更新国内镜像源：</p>
-<pre><code class="language-bash">vim /etc/pacman.d/mirrorlist
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">vim</span><span style="color:#032F62"> /etc/pacman.d/mirrorlist</span></span></code></pre>
 <p>在最上面加入以下镜像源的任意一条</p>
-<pre><code class="language-bash">Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch # 清华大学开源软件镜像站
-Server = https://repo.huaweicloud.com/archlinux/$repo/os/$arch # 华为开源镜像站
-Server = http://mirror.lzu.edu.cn/archlinux/$repo/os/$arch # 兰州大学开源镜像站
-Server = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch # 中国科学技术大学开源镜像站
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">Server</span><span style="color:#032F62"> =</span><span style="color:#032F62"> https://mirrors.tuna.tsinghua.edu.cn/archlinux/</span><span style="color:#24292E">$repo</span><span style="color:#032F62">/os/</span><span style="color:#24292E">$arch </span><span style="color:#6A737D"># 清华大学开源软件镜像站</span></span>
+<span class="line"><span style="color:#6F42C1">Server</span><span style="color:#032F62"> =</span><span style="color:#032F62"> https://repo.huaweicloud.com/archlinux/</span><span style="color:#24292E">$repo</span><span style="color:#032F62">/os/</span><span style="color:#24292E">$arch </span><span style="color:#6A737D"># 华为开源镜像站</span></span>
+<span class="line"><span style="color:#6F42C1">Server</span><span style="color:#032F62"> =</span><span style="color:#032F62"> http://mirror.lzu.edu.cn/archlinux/</span><span style="color:#24292E">$repo</span><span style="color:#032F62">/os/</span><span style="color:#24292E">$arch </span><span style="color:#6A737D"># 兰州大学开源镜像站</span></span>
+<span class="line"><span style="color:#6F42C1">Server</span><span style="color:#032F62"> =</span><span style="color:#032F62"> https://mirrors.ustc.edu.cn/archlinux/</span><span style="color:#24292E">$repo</span><span style="color:#032F62">/os/</span><span style="color:#24292E">$arch </span><span style="color:#6A737D"># 中国科学技术大学开源镜像站</span></span></code></pre>
 <p><del>你问我为什么把科大放最下面？</del><strong>我就爱用 THU 源</strong></p>
 <p>现在我们进入磁盘分区阶段。</p>
 <p>使用 <code>lsblk</code> 查看当前磁盘的情况，找到要用的磁盘和分区</p>
-<pre><code class="language-bash">lsblk
-</code></pre>
-<p>使用 <code>cfdisk</code> 对需要使用的磁盘分区：注意，SATA 磁盘名称为 sdx (x=a~z)，NVME 磁盘名称为 nvmexn1 (x=0~n)。（接下来我们都以 SATA 磁盘举例，请 NVME 用户注意）</p>
-<pre><code class="language-bash">cfdisk /dev/sdx
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">lsblk</span></span></code></pre>
+<p>使用 <code>cfdisk</code> 对需要使用的磁盘分区：注意，SATA 磁盘名称为 sdx (x=a<del>z)，NVME 磁盘名称为 nvmexn1 (x=0</del>n)。（接下来我们都以 SATA 磁盘举例，请 NVME 用户注意）</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">cfdisk</span><span style="color:#032F62"> /dev/sdx</span></span></code></pre>
 <p>使用上下方向键在需要操作的分区中移动，使用左右方向键在不同的操作中移动。我们 <code>[New]</code> 一个分区，指定大小，默认为 <code>Linux filesystem</code>，我们再选中并更改类型即可。</p>
 <p>我们需要：一个内存大小 50% ~ 100% 的 <code>Swap</code> 分区，类型为 <code>Linux swap</code>，一个自定义大小的分区（2GiB 以上），类型为 <code>Linux filesystem</code>，因为我们使用 <code>Btrfs</code> 文件系统。</p>
 <p><code>[Write]</code> 并且 <code>[Quit]</code>，这时将对磁盘进行操作，这个操作<strong>不可逆</strong>！谨慎删除分区！</p>
-<p>使用 <code>fdisk -l</code> 查看分区的情况 </p>
+<p>使用 <code>fdisk -l</code> 查看分区的情况</p>
 <p>格式化并创建子卷</p>
 <p>EFI：（双系统请跳过这步，不需要格式化）：</p>
-<pre><code class="language-bash">mkfs.fat -F32 /dev/sdxn
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">mkfs.fat</span><span style="color:#005CC5"> -F32</span><span style="color:#032F62"> /dev/sdxn</span></span></code></pre>
 <p>Swap：</p>
-<pre><code class="language-bash">mkswap /dev/sdxn
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">mkswap</span><span style="color:#032F62"> /dev/sdxn</span></span></code></pre>
 <p>Btrfs 分区：（archlinux为卷标，可自定义，但不可以包含特殊字符和空格）</p>
-<pre><code class="language-bash">mkfs.btrfs -L archlinux /dev/sdxn
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">mkfs.btrfs</span><span style="color:#005CC5"> -L</span><span style="color:#032F62"> archlinux</span><span style="color:#032F62"> /dev/sdxn</span></span></code></pre>
 <p>挂载：</p>
-<pre><code class="language-bash">mount -t btrfs -o compress=zstd /dev/sdxn /mnt
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">mount</span><span style="color:#005CC5"> -t</span><span style="color:#032F62"> btrfs</span><span style="color:#005CC5"> -o</span><span style="color:#032F62"> compress=zstd</span><span style="color:#032F62"> /dev/sdxn</span><span style="color:#032F62"> /mnt</span></span></code></pre>
 <p>使用<code>df -h</code>复查挂载情况，若不对，用<code>umount</code>卸载重来。</p>
 <p>创建子卷：</p>
-<pre><code class="language-bash">btrfs subvolume create /mnt/@
-btrfs subvolume create /mnt/@home
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">btrfs</span><span style="color:#032F62"> subvolume</span><span style="color:#032F62"> create</span><span style="color:#032F62"> /mnt/@</span></span>
+<span class="line"><span style="color:#6F42C1">btrfs</span><span style="color:#032F62"> subvolume</span><span style="color:#032F62"> create</span><span style="color:#032F62"> /mnt/@home</span></span></code></pre>
 <p>复查：</p>
-<pre><code class="language-bash">btrfs subvolume list -p /mnt
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">btrfs</span><span style="color:#032F62"> subvolume</span><span style="color:#032F62"> list</span><span style="color:#005CC5"> -p</span><span style="color:#032F62"> /mnt</span></span></code></pre>
 <p>卸载：</p>
-<pre><code class="language-bash">umount /mnt
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">umount</span><span style="color:#032F62"> /mnt</span></span></code></pre>
 <p>准确按照如下顺序挂载子卷！</p>
-<pre><code class="language-bash">mount -t btrfs -o subvol=/@,compress=zstd /dev/sdxn /mnt
-mkdir /mnt/home
-mount -t btrfs -o subvol=/@home,compress=zstd /dev/sdxn /mnt/home
-mkdir -p /mnt/boot
-mount /dev/sdxn /mnt/boot
-swapon /dev/sdxn
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">mount</span><span style="color:#005CC5"> -t</span><span style="color:#032F62"> btrfs</span><span style="color:#005CC5"> -o</span><span style="color:#032F62"> subvol=/@,compress=zstd</span><span style="color:#032F62"> /dev/sdxn</span><span style="color:#032F62"> /mnt</span></span>
+<span class="line"><span style="color:#6F42C1">mkdir</span><span style="color:#032F62"> /mnt/home</span></span>
+<span class="line"><span style="color:#6F42C1">mount</span><span style="color:#005CC5"> -t</span><span style="color:#032F62"> btrfs</span><span style="color:#005CC5"> -o</span><span style="color:#032F62"> subvol=/@home,compress=zstd</span><span style="color:#032F62"> /dev/sdxn</span><span style="color:#032F62"> /mnt/home</span></span>
+<span class="line"><span style="color:#6F42C1">mkdir</span><span style="color:#005CC5"> -p</span><span style="color:#032F62"> /mnt/boot</span></span>
+<span class="line"><span style="color:#6F42C1">mount</span><span style="color:#032F62"> /dev/sdxn</span><span style="color:#032F62"> /mnt/boot</span></span>
+<span class="line"><span style="color:#6F42C1">swapon</span><span style="color:#032F62"> /dev/sdxn</span></span></code></pre>
 <p>复查：<code>df -h</code>，<code>free -h</code></p>
 <p>使用<code>pacstrap</code>安装基本包：<em>终于进入安装了 :)</em></p>
-<pre><code class="language-bash">pacstrap /mnt base base-devel linux linux-firmware btrfs-progs
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">pacstrap</span><span style="color:#032F62"> /mnt</span><span style="color:#032F62"> base</span><span style="color:#032F62"> base-devel</span><span style="color:#032F62"> linux</span><span style="color:#032F62"> linux-firmware</span><span style="color:#032F62"> btrfs-progs</span></span></code></pre>
 <p>若提示 GPG 证书错误，使用<code>pacman -S archlilnux-keyrinig</code>更新解决。</p>
 <p>安装亿些必要软件（把<code>zsh</code>换成<code>bash</code>也是可以哒~老东西用惯了）：</p>
-<pre><code class="language-bash">pacstrap /mnt networkmanager vim sudo zsh zsh-completions
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">pacstrap</span><span style="color:#032F62"> /mnt</span><span style="color:#032F62"> networkmanager</span><span style="color:#032F62"> vim</span><span style="color:#032F62"> sudo</span><span style="color:#032F62"> zsh</span><span style="color:#032F62"> zsh-completions</span></span></code></pre>
 <p>生成 fstab file：</p>
-<pre><code class="language-bash">genfstab -U /mnt &gt; /mnt/etc/fstab
-cat /mnt/etc/fstab
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">genfstab</span><span style="color:#005CC5"> -U</span><span style="color:#032F62"> /mnt</span><span style="color:#D73A49"> &gt;</span><span style="color:#032F62"> /mnt/etc/fstab</span></span>
+<span class="line"><span style="color:#6F42C1">cat</span><span style="color:#032F62"> /mnt/etc/fstab</span></span></code></pre>
 <p>有正常输出即可。</p>
 <p>chroot（就快成功了！）</p>
-<pre><code class="language-bash">arch-chroot /mnt
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">arch-chroot</span><span style="color:#032F62"> /mnt</span></span></code></pre>
 <p>设置主机名，同样，不要有特殊字符和空格：</p>
-<pre><code class="language-bash">vim /etc/hostname
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">vim</span><span style="color:#032F62"> /etc/hostname</span></span></code></pre>
 <p>设置 hosts：</p>
-<pre><code class="language-bash">vim /etc/hosts
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">vim</span><span style="color:#032F62"> /etc/hosts</span></span></code></pre>
 <p>输入：</p>
-<pre><code>127.0.0.1   localhost
-::1         localhost
-127.0.1.1   主机名
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="plaintext"><code><span class="line"><span>127.0.0.1   localhost</span></span>
+<span class="line"><span>::1         localhost</span></span>
+<span class="line"><span>127.0.1.1   主机名</span></span></code></pre>
 <p>设置时区：</p>
-<pre><code class="language-bash">ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">ln</span><span style="color:#005CC5"> -sf</span><span style="color:#032F62"> /usr/share/zoneinfo/Asia/Shanghai</span><span style="color:#032F62"> /etc/localtime</span></span></code></pre>
 <p>同步时间：</p>
-<pre><code class="language-bash">hwclock --systohc
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">hwclock</span><span style="color:#005CC5"> --systohc</span></span></code></pre>
 <p>地区化：</p>
-<pre><code class="language-bash">vim /etc/locale.gen
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">vim</span><span style="color:#032F62"> /etc/locale.gen</span></span></code></pre>
 <p>编辑<code>/etc/locale.gen</code>，去掉<code>en_US.UTF-8 UTF-8</code>以及<code>zh_CN.UTF-8 UTF-8</code>行前的注释符号（#）：</p>
 <p>生成：</p>
-<pre><code class="language-bash">locale-gen
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">locale-gen</span></span></code></pre>
 <p>输入（不要中文！会乱码）：</p>
-<pre><code class="language-bash">echo &#39;LANG=en_US.UTF-8&#39;  &gt; /etc/locale.conf
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#005CC5">echo</span><span style="color:#032F62"> &#39;LANG=en_US.UTF-8&#39;</span><span style="color:#D73A49">  &gt;</span><span style="color:#032F62"> /etc/locale.conf</span></span></code></pre>
 <p>设置密码：</p>
-<pre><code class="language-bash">passwd root
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">passwd</span><span style="color:#032F62"> root</span></span></code></pre>
 <p>安装微码（根据 CPU）：</p>
-<pre><code class="language-bash">pacman -S intel-ucode # Intel
-pacman -S amd-ucode # AMD
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">pacman</span><span style="color:#005CC5"> -S</span><span style="color:#032F62"> intel-ucode</span><span style="color:#6A737D"> # Intel</span></span>
+<span class="line"><span style="color:#6F42C1">pacman</span><span style="color:#005CC5"> -S</span><span style="color:#032F62"> amd-ucode</span><span style="color:#6A737D"> # AMD</span></span></code></pre>
 <p>用<code>GRUB</code>引导：</p>
-<pre><code class="language-bash">pacman -S grub efibootmgr os-prober
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">pacman</span><span style="color:#005CC5"> -S</span><span style="color:#032F62"> grub</span><span style="color:#032F62"> efibootmgr</span><span style="color:#032F62"> os-prober</span></span></code></pre>
 <p>安装<code>GRUB</code>：</p>
-<pre><code class="language-bash">grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=ARCH
-</code></pre>
-<pre><code class="language-bash">vim /etc/default/grub
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">grub-install</span><span style="color:#005CC5"> --target=x86_64-efi</span><span style="color:#005CC5"> --efi-directory=/boot</span><span style="color:#005CC5"> --bootloader-id=ARCH</span></span></code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">vim</span><span style="color:#032F62"> /etc/default/grub</span></span></code></pre>
 <p>去掉 GRUB_CMDLINE_LINUX_DEFAULT 一行中最后的 quiet 参数，把 loglevel 的数值从 3 改成 5。这样是为了后续如果出现系统错误，方便排错，加入 nowatchdog 参数，这可以显著提高开关机速度。</p>
 <p>为引导，<code>Windows</code>添加一行：</p>
-<pre><code>GRUB_DISABLE_OS_PROBER=false
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="plaintext"><code><span class="line"><span>GRUB_DISABLE_OS_PROBER=false</span></span></code></pre>
 <p>生成配置文件：</p>
-<pre><code class="language-bash">grub-mkconfig -o /boot/grub/grub.cfg
-</code></pre>
-<p>若引导了<code>Windows</code>，会&quot;Found Windows Boot Manager&quot;，若双硬盘双系统，则先不着急，进入<code>archlinux</code>后重新执行该命令。</p>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">grub-mkconfig</span><span style="color:#005CC5"> -o</span><span style="color:#032F62"> /boot/grub/grub.cfg</span></span></code></pre>
+<p>若引导了<code>Windows</code>，会”Found Windows Boot Manager”，若双硬盘双系统，则先不着急，进入<code>archlinux</code>后重新执行该命令。</p>
 <p>拔掉U盘，</p>
-<pre><code class="language-bash">exit
-umount -R /mnt
-reboot
-</code></pre>
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#005CC5">exit</span></span>
+<span class="line"><span style="color:#6F42C1">umount</span><span style="color:#005CC5"> -R</span><span style="color:#032F62"> /mnt</span></span>
+<span class="line"><span style="color:#6F42C1">reboot</span></span></code></pre>
 <p>进入系统啦！</p>
 <p>善后：</p>
-<pre><code class="language-bash">systemctl enable --now NetworkManager #联网
-#无线：
-nmcli dev wifi list # 显示附近的 Wi-Fi 网络
-nmcli dev wifi connect &quot;Wi-Fi名（SSID）&quot; password &quot;网络密码&quot; # 连接指定的无线网络
-neofetch #你会爱上它的
-</code></pre>
-<p>大功告成。</p>
-
-  </article>
-</body>
-</html>
-
-
-
-
-
-
+<pre class="astro-code github-light" style="background-color:#fff;color:#24292e;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1">systemctl</span><span style="color:#032F62"> enable</span><span style="color:#005CC5"> --now</span><span style="color:#032F62"> NetworkManager</span><span style="color:#6A737D"> #联网</span></span>
+<span class="line"><span style="color:#6A737D">#无线：</span></span>
+<span class="line"><span style="color:#6F42C1">nmcli</span><span style="color:#032F62"> dev</span><span style="color:#032F62"> wifi</span><span style="color:#032F62"> list</span><span style="color:#6A737D"> # 显示附近的 Wi-Fi 网络</span></span>
+<span class="line"><span style="color:#6F42C1">nmcli</span><span style="color:#032F62"> dev</span><span style="color:#032F62"> wifi</span><span style="color:#032F62"> connect</span><span style="color:#032F62"> &quot;Wi-Fi名（SSID）&quot;</span><span style="color:#032F62"> password</span><span style="color:#032F62"> &quot;网络密码&quot;</span><span style="color:#6A737D"> # 连接指定的无线网络</span></span>
+<span class="line"><span style="color:#6F42C1">neofetch</span><span style="color:#6A737D"> #你会爱上它的</span></span></code></pre>
+<p>大功告成。</p>  </article> </body></html>

@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getNotes } from "../lib/notes";
+import { getAllPosts } from "../lib/posts";
+import { absoluteUrl, site } from "../lib/site";
+
+const posts = await getAllPosts();
+const notes = await getNotes();
+const latestNote = notes[0];
+const tagCounts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.tags) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+}
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+<BaseLayout
+  title={site.name}
+  canonicalPath="/index.html"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: site.name,
+    url: site.url,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${site.url}/index.html?tag={tag}`,
+      "query-input": "required name=tag",
+    },
+  }}
+>
+  <aside class="directory latest-note-panel" id="latest-note-preview">
+    <p class="latest-note-title">最近随想</p>
+    <p class="latest-note-text" id="latest-note-text">
+      {latestNote ? `${latestNote.date} · ${latestNote.body.replace(/\s+/g, " ").slice(0, 120)}` : "暂无随想"}
+    </p>
+    <p class="latest-note-link"><a href="/notes.html">查看全部随想</a></p>
+  </aside>
+
+  <aside class="directory" id="posts">
+    <nav class="tag-nav" id="tag-nav" aria-label="标签筛选" data-forced-tag="">
+      <a href="/index.html" class="tag top active">全部</a>
+      {tags.map(([tag, count]) => <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag} ({count})</a>)}
+    </nav>
+    <h2 class="dir-title">最新文章</h2>
+    <div class="dir-list" id="post-list-region">
+      {posts.map((post) => (
+        <div class="dir-item">
+          <a href={`/${post.url}`}>{post.title}</a>
+          <span class="meta">{post.date}</span>
+        </div>
+      ))}
+    </div>
+  </aside>
+</BaseLayout>

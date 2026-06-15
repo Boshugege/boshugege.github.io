@@ -1,0 +1,83 @@
+---
+import { absoluteUrl, formatDate, normalizeTags, site } from "../lib/site";
+
+interface Props {
+  title: string;
+  description?: string;
+  date: Date | string;
+  tags?: string[] | string;
+  canonicalPath: string;
+  image?: string;
+  wordCount?: number;
+  readingMinutes?: number;
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description = "",
+  date,
+  tags = [],
+  canonicalPath,
+  image = site.defaultCover,
+  wordCount,
+  readingMinutes,
+  jsonLd,
+} = Astro.props;
+
+const dateText = formatDate(date);
+const tagList = normalizeTags(tags);
+const canonicalUrl = absoluteUrl(canonicalPath);
+const imageUrl = image.startsWith("http") ? image : absoluteUrl(image);
+const excerpt = description || site.homeDescription;
+---
+
+<!doctype html>
+<html lang={site.language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={excerpt} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="/assets/img/icon.jpg" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={excerpt} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={excerpt} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="post-title" content={title} />
+    <meta name="post-date" content={dateText} />
+    <meta name="post-tags" content={tagList.join(",")} />
+    <meta name="post-excerpt" content={excerpt} />
+    <meta name="post-cover" content={image.replace(/^\//, "")} />
+    <meta name="post-url" content={canonicalPath.replace(/^\//, "")} />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />}
+  </head>
+  <body>
+    <article class="post-content">
+      <h1>{title}</h1>
+      <p class="meta">
+        {dateText}
+        {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
+        {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
+        {tagList.length > 0 && " · 标签："}
+        {tagList.map((tag, index) => (
+          <>
+            {index > 0 && ", "}
+            <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
+          </>
+        ))}
+      </p>
+      <slot />
+    </article>
+  </body>
+</html>

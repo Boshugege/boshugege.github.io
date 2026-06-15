@@ -1,0 +1,52 @@
+---
+import { site } from "../lib/site";
+
+interface Props {
+  showAboutLink?: boolean;
+  extraLinks?: { href: string; label: string }[];
+  includeRss?: boolean;
+}
+
+const { showAboutLink = true, extraLinks = [], includeRss = true } = Astro.props;
+const [intro, profile1, profile2, profile3] = site.aboutLines;
+const contactLinks = [
+  ...extraLinks,
+  { href: `mailto:${site.email}`, label: "Email" },
+  ...(includeRss ? [{ href: "/rss.xml", label: "RSS" }] : []),
+  { href: site.github, label: "GitHub" },
+];
+---
+
+<aside class="sidebar">
+  <header class="site-header">
+    <h1 class="site-title">{site.name}</h1>
+    <p class="site-desc">{site.headerDescription}</p>
+  </header>
+
+  <section class="about">
+    <h2><a class="plain-link" href="/about.html">{site.aboutTitle}</a></h2>
+    <p>
+      {intro}
+      {showAboutLink && <a class="about-more-link" href="/about.html">更多</a>}
+    </p>
+    <p class="profile-info">{profile1}</p>
+    <p class="profile-info">{profile2}</p>
+    <p class="profile-info">{profile3}</p>
+    <p class="profile-info now-status">
+      我正在：<span id="now-status-text">等待状态更新</span>
+    </p>
+    <div id="next-event" class="profile-info next-event" hidden>
+      <p class="next-event-title">下一个日程：<span id="next-event-summary"></span></p>
+      <p class="next-event-time">时间：<span id="next-event-time"></span></p>
+      <p class="next-event-location">地点：<span id="next-event-location"></span></p>
+    </div>
+    <p class="contact">
+      {contactLinks.map((link, index) => (
+        <>
+          {index > 0 && " · "}
+          <a href={link.href}>{link.label}</a>
+        </>
+      ))}
+    </p>
+  </section>
+</aside>

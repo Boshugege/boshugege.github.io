@@ -1,0 +1,38 @@
+---
+import PostLayout from "../../layouts/PostLayout.astro";
+import { getAllPosts, type PostSummary } from "../../lib/posts";
+import { absoluteUrl } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props as { post: PostSummary };
+const rendered = await post.entry.render();
+const Content = rendered?.Content;
+---
+
+<PostLayout
+  title={post.title}
+  description={post.excerpt}
+  date={post.date}
+  tags={post.tags}
+  canonicalPath={`/${post.url}`}
+  image={post.cover}
+  wordCount={post.reading.wordCount}
+  readingMinutes={post.reading.readingMinutes}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    datePublished: post.date,
+    url: absoluteUrl(`/${post.url}`),
+    image: post.cover.startsWith("http") ? post.cover : absoluteUrl(post.cover),
+  }}
+>
+  <Content />
+</PostLayout>

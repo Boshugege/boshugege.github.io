@@ -1,0 +1,31 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getNotes } from "../lib/notes";
+
+const notes = await getNotes();
+---
+
+<BaseLayout
+  title="每天随想"
+  canonicalPath="/notes.html"
+  skipHref="#notes-main"
+  skipText="跳转到随想"
+  sidebarProps={{
+    extraLinks: [{ href: "/index.html", label: "首页" }],
+  }}
+>
+  <aside class="directory" id="notes-main">
+    <h2 class="dir-title">每天随想</h2>
+    <div class="notes-timeline">
+      {notes.map((note) => (
+        <section class="note-item">
+          <div class="note-date">{note.date}</div>
+          <div class="note-body post-content">
+            {note.title && <h3 class="note-title">{note.title}</h3>}
+            <Fragment set:html={note.html} />
+          </div>
+        </section>
+      ))}
+    </div>
+  </aside>
+</BaseLayout>

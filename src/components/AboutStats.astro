@@ -1,0 +1,54 @@
+---
+interface Stat {
+  label: string;
+  value: string | number;
+  detail?: string;
+}
+
+interface Props {
+  stats: Stat[];
+  highlights: Stat[];
+  yearlyPosts: [string, number][];
+}
+
+const { stats, highlights, yearlyPosts } = Astro.props;
+const maxYearCount = Math.max(...yearlyPosts.map(([, count]) => count), 1);
+---
+
+<section class="about-stats" aria-label="网站数据">
+  <h2>站点侧写</h2>
+  <div class="about-stat-grid">
+    {stats.map((stat) => (
+      <div class="about-stat">
+        <span class="about-stat-value">{stat.value}</span>
+        <span class="about-stat-label">{stat.label}</span>
+        {stat.detail && <span class="about-stat-detail">{stat.detail}</span>}
+      </div>
+    ))}
+  </div>
+
+  <div class="about-highlight-grid">
+    {highlights.map((item) => (
+      <div class="about-highlight">
+        <span>{item.label}</span>
+        <strong>{item.value}</strong>
+        {item.detail && <small>{item.detail}</small>}
+      </div>
+    ))}
+  </div>
+
+  <section class="about-data-section about-yearly">
+    <h3>写作年份</h3>
+    <div class="about-year-bars">
+      {yearlyPosts.map(([year, count]) => (
+        <div class="about-year-row">
+          <span>{year}</span>
+          <div class="about-year-track" aria-hidden="true">
+            <i style={`width: ${(count / maxYearCount) * 100}%`}></i>
+          </div>
+          <span>{count}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+</section>
