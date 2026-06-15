@@ -563,8 +563,8 @@ a:focus {
 .post-content pre,
 .post-content code {
   font-family:
-    "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Monaco, "Roboto Mono",
-    "DejaVu Sans Mono", "Courier New", monospace;
+    "Cascadia Code", "Cascadia Mono", "JetBrains Mono", "Fira Code", "SFMono-Regular",
+    Consolas, "Liberation Mono", Menlo, Monaco, "DejaVu Sans Mono", "Courier New", monospace;
   font-size: 0.95em;
 }
 

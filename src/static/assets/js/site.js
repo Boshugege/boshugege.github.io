@@ -345,7 +345,7 @@
           const transitionKey = String(p.slug || p.url || p.id || "").replace(/[^a-zA-Z0-9_-]/g, "-");
           return `
           <div class="dir-item">
-            <a class="dir-item-title" href="/${escapeHtml(p.url)}" style="view-transition-name: post-title-${escapeHtml(transitionKey)};">${escapeHtml(p.title)}</a>
+            <a class="dir-item-title" href="/${escapeHtml(p.url)}" data-astro-prefetch style="view-transition-name: post-title-${escapeHtml(transitionKey)};">${escapeHtml(p.title)}</a>
             <span class="meta dir-item-meta" style="view-transition-name: post-meta-${escapeHtml(transitionKey)};">${escapeHtml(meta.join(" · "))}</span>
           </div>
         `;

@@ -7,6 +7,7 @@ export default defineConfig({
   site: "https://parityncsvt.top",
   output: "static",
   publicDir: "./src/static",
+  prefetch: true,
   integrations: [mdx()],
   markdown: {
     syntaxHighlight: "shiki",

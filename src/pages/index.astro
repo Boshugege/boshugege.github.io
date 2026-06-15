@@ -55,7 +55,7 @@ function getPostMeta(post: (typeof posts)[number]) {
     <div class="dir-list" id="post-list-region">
       {posts.map((post) => (
         <div class="dir-item">
-          <a class="dir-item-title" href={`/${post.url}`} style={`view-transition-name: post-title-${post.slug};`}>
+          <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch style={`view-transition-name: post-title-${post.slug};`}>
             {post.title}
           </a>
           <span class="meta dir-item-meta" style={`view-transition-name: post-meta-${post.slug};`}>
