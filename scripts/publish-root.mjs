@@ -5,6 +5,7 @@ const root = process.cwd();
 const dist = path.join(root, "dist");
 
 const rootOutputs = [
+  ".nojekyll",
   "CNAME",
   "about.html",
   "assets",
