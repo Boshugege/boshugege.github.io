@@ -16,8 +16,44 @@
   "datePublished": "2023-10-14",
   "url": "https://parityncsvt.top/posts/arch-linux.html",
   "image": "https://parityncsvt.top/assets/img/icon.jpg"
-}</script><style>.astro-route-announcer{position:absolute;left:0;top:0;clip:rect(0 0 0 0);clip-path:inset(50%);overflow:hidden;white-space:nowrap;width:1px;height:1px}
-</style></head> <body> <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题"> <span class="theme-icon theme-icon-moon" aria-hidden="true"> <svg viewBox="0 0 24 24" focusable="false"> <path d="M21 14.6A8.3 8.3 0 0 1 9.4 3 9.2 9.2 0 1 0 21 14.6Z"></path> </svg> </span> <span class="theme-icon theme-icon-sun" aria-hidden="true"> <svg viewBox="0 0 24 24" focusable="false"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path> </svg> </span> <span class="sr-only" data-theme-toggle-text>切换主题</span> </button> <article class="post-content"> <h1 style="view-transition-name: post-title-arch-linux;">archlinux 简明安装指南</h1> <p class="meta" style="view-transition-name: post-meta-arch-linux;"> 2023-10-14  · 约 972 字  · 约 3 分钟读完  · 标签： <a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a> , <a href="/index.html?tag=Linux">Linux</a>  </p>  <p>装了很多回<code>archlinux</code>，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</p>
+}</script><style>.astro-route-announcer{position:absolute;left:0;top:0;clip:rect(0 0 0 0);clip-path:inset(50%);overflow:hidden;white-space:nowrap;width:1px;height:1px}@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0;mix-blend-mode:plus-lighter}to{opacity:1;mix-blend-mode:plus-lighter}}@keyframes astroFadeOut{0%{opacity:1;mix-blend-mode:plus-lighter}to{opacity:0;mix-blend-mode:plus-lighter}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media(prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+</style><style>[data-astro-transition-scope="astro-nvmbnjo7-1"] { view-transition-name: post-body; }@layer astro { ::view-transition-old(post-body) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(post-body) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(post-body) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(post-body) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-nvmbnjo7-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-nvmbnjo7-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-nvmbnjo7-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-nvmbnjo7-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-nvmbnjo7-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-nvmbnjo7-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-nvmbnjo7-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-nvmbnjo7-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body> <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题"> <span class="theme-icon theme-icon-moon" aria-hidden="true"> <svg viewBox="0 0 24 24" focusable="false"> <path d="M21 14.6A8.3 8.3 0 0 1 9.4 3 9.2 9.2 0 1 0 21 14.6Z"></path> </svg> </span> <span class="theme-icon theme-icon-sun" aria-hidden="true"> <svg viewBox="0 0 24 24" focusable="false"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path> </svg> </span> <span class="sr-only" data-theme-toggle-text>切换主题</span> </button> <article class="post-content"> <h1 style="view-transition-name: post-title-arch-linux;">archlinux 简明安装指南</h1> <p class="meta" style="view-transition-name: post-meta-arch-linux;"> 2023-10-14  · 约 972 字  · 约 3 分钟读完  · 标签： <a href="/index.html?tag=%E7%A7%91%E6%8A%80">科技</a> , <a href="/index.html?tag=Linux">Linux</a>  </p> <div class="post-body" data-astro-transition-scope="astro-nvmbnjo7-1">  <p>装了很多回<code>archlinux</code>，跟了很多遍各种教程和官方 wiki ，也来自己写一个简单的笔记吧。</p>
 <p>安装之前的准备略去不写，就从<code>archlinux</code>的 iso 启动之后开始吧。其实<code>archlinux</code>也只是安装过程<strong>看上去</strong>高级一点，滚动更新的理念和大部分所谓主流发行版有点区别，用惯了 TUI 操作的人对于无 GUI 操作应当还是比较适应的，更何况提供了好几个 terminal 可以多线程操作，避免在等待的时候没事干（不是），甚至看到有老哥速通<code>archlinux</code>安装（这居然也有速通？）</p>
 <p>至于跟<code>archlinux</code>这个话题有关的争议，反正不在这个笔记的叙述范围之内，快速进入正题吧。</p>
 <p>进入<code>archlinux</code>安装环境之后，我们选择 <code>Arch Linux install medium (x86_64, UEFI)</code> 进入<code>archlinux</code>的安装环境，这是一个比较小的 live 系统，其 bash 已经可以给我们完成很多任务。</p>
@@ -138,4 +174,4 @@
 <span class="line"><span style="color:#6F42C1">nmcli</span><span style="color:#032F62"> dev</span><span style="color:#032F62"> wifi</span><span style="color:#032F62"> list</span><span style="color:#6A737D"> # 显示附近的 Wi-Fi 网络</span></span>
 <span class="line"><span style="color:#6F42C1">nmcli</span><span style="color:#032F62"> dev</span><span style="color:#032F62"> wifi</span><span style="color:#032F62"> connect</span><span style="color:#032F62"> &quot;Wi-Fi名（SSID）&quot;</span><span style="color:#032F62"> password</span><span style="color:#032F62"> &quot;网络密码&quot;</span><span style="color:#6A737D"> # 连接指定的无线网络</span></span>
 <span class="line"><span style="color:#6F42C1">neofetch</span><span style="color:#6A737D"> #你会爱上它的</span></span></code></pre>
-<p>大功告成。</p>  </article> </body></html>
+<p>大功告成。</p>  <nav class="post-nav" aria-label="文章导航"> <div class="post-nav-item post-nav-prev"> <a href="/posts/financial-crisis.html">上一篇文章（A Brief Research into the 2007-2008 Financial Crisis）</a> </div> <div class="post-nav-item post-nav-home"> <a class="post-nav-link" href="/index.html" style="view-transition-name: post-nav-home;">返回首页</a> </div> <div class="post-nav-item post-nav-next"> <a href="/posts/zhongguo-zai-liangzhuang.html">下一篇文章（知识分子的回望——读《中国在梁庄》）</a> </div> </nav> </div> </article> </body></html>
