@@ -1,5 +1,7 @@
 ---
 import { absoluteUrl, formatDate, normalizeTags, site } from "../lib/site";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title: string;
@@ -10,6 +12,9 @@ interface Props {
   image?: string;
   wordCount?: number;
   readingMinutes?: number;
+  transitionKey?: string;
+  previousPost?: { title: string; url: string };
+  nextPost?: { title: string; url: string };
   jsonLd?: Record<string, unknown>;
 }
 
@@ -22,6 +27,9 @@ const {
   image = site.defaultCover,
   wordCount,
   readingMinutes,
+  transitionKey,
+  previousPost,
+  nextPost,
   jsonLd,
 } = Astro.props;
 
@@ -30,6 +38,8 @@ const tagList = normalizeTags(tags);
 const canonicalUrl = absoluteUrl(canonicalPath);
 const imageUrl = image.startsWith("http") ? image : absoluteUrl(image);
 const excerpt = description || site.homeDescription;
+const titleTransition = transitionKey ? `view-transition-name: post-title-${transitionKey};` : undefined;
+const metaTransition = transitionKey ? `view-transition-name: post-meta-${transitionKey};` : undefined;
 ---
 
 <!doctype html>
@@ -58,14 +68,28 @@ const excerpt = description || site.homeDescription;
     <meta name="post-excerpt" content={excerpt} />
     <meta name="post-cover" content={image.replace(/^\//, "")} />
     <meta name="post-url" content={canonicalPath.replace(/^\//, "")} />
+    <script is:inline>
+      (() => {
+        let saved = null;
+        try {
+          saved = localStorage.getItem("pnc-theme");
+        } catch (error) {
+          saved = null;
+        }
+        const theme = saved === "dark" || saved === "light" ? saved : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <link rel="stylesheet" href="/assets/css/style.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+    <ClientRouter />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />}
   </head>
   <body>
+    <ThemeToggle />
     <article class="post-content">
-      <h1>{title}</h1>
-      <p class="meta">
+      <h1 style={titleTransition}>{title}</h1>
+      <p class="meta" style={metaTransition}>
         {dateText}
         {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
         {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
@@ -77,7 +101,20 @@ const excerpt = description || site.homeDescription;
           </>
         ))}
       </p>
-      <slot />
+      <div class="post-body" transition:name="post-body" transition:animate="fade">
+        <slot />
+        <nav class="post-nav" aria-label="文章导航">
+          <div class="post-nav-item post-nav-prev">
+            {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
+          </div>
+          <div class="post-nav-item post-nav-home">
+            <a class="post-nav-link" href="/index.html" style="view-transition-name: post-nav-home;">返回首页</a>
+          </div>
+          <div class="post-nav-item post-nav-next">
+            {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
+          </div>
+        </nav>
+      </div>
     </article>
   </body>
 </html>

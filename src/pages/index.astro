@@ -12,6 +12,15 @@ for (const post of posts) {
   for (const tag of post.tags) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
 }
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+function getPostMeta(post: (typeof posts)[number]) {
+  return [
+    post.date,
+    `约 ${post.reading.wordCount.toLocaleString("zh-CN")} 字`,
+    `约 ${post.reading.readingMinutes} 分钟读完`,
+    post.tags.length > 0 ? post.tags.join(" / ") : "",
+  ].filter(Boolean);
+}
 ---
 
 <BaseLayout
@@ -37,7 +46,7 @@ const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeC
     <p class="latest-note-link"><a href="/notes.html">查看全部随想</a></p>
   </aside>
 
-  <aside class="directory" id="posts">
+  <aside class="directory" id="posts" transition:animate="fade">
     <nav class="tag-nav" id="tag-nav" aria-label="标签筛选" data-forced-tag="">
       <a href="/index.html" class="tag top active">全部</a>
       {tags.map(([tag, count]) => <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag} ({count})</a>)}
@@ -46,8 +55,12 @@ const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeC
     <div class="dir-list" id="post-list-region">
       {posts.map((post) => (
         <div class="dir-item">
-          <a href={`/${post.url}`}>{post.title}</a>
-          <span class="meta">{post.date}</span>
+          <a class="dir-item-title" href={`/${post.url}`} style={`view-transition-name: post-title-${post.slug};`}>
+            {post.title}
+          </a>
+          <span class="meta dir-item-meta" style={`view-transition-name: post-meta-${post.slug};`}>
+            {getPostMeta(post).join(" · ")}
+          </span>
         </div>
       ))}
     </div>

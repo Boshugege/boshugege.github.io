@@ -6,6 +6,7 @@ const dist = path.join(root, "dist");
 
 const rootOutputs = [
   ".nojekyll",
+  "_astro",
   "CNAME",
   "about.html",
   "assets",

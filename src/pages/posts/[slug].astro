@@ -5,13 +5,21 @@ import { absoluteUrl } from "../../lib/site";
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({
+  return posts.map((post, index) => ({
     params: { slug: post.slug },
-    props: { post },
+    props: {
+      post,
+      previousPost: posts[index - 1],
+      nextPost: posts[index + 1],
+    },
   }));
 }
 
-const { post } = Astro.props as { post: PostSummary };
+const { post, previousPost, nextPost } = Astro.props as {
+  post: PostSummary;
+  previousPost?: PostSummary;
+  nextPost?: PostSummary;
+};
 const rendered = await post.entry.render();
 const Content = rendered?.Content;
 ---
@@ -25,6 +33,9 @@ const Content = rendered?.Content;
   image={post.cover}
   wordCount={post.reading.wordCount}
   readingMinutes={post.reading.readingMinutes}
+  transitionKey={post.slug}
+  previousPost={previousPost && { title: previousPost.title, url: `/${previousPost.url}` }}
+  nextPost={nextPost && { title: nextPost.title, url: `/${nextPost.url}` }}
   jsonLd={{
     "@context": "https://schema.org",
     "@type": "BlogPosting",

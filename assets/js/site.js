@@ -5,6 +5,7 @@
   let fullTextMap = null;
   let fullTextPromise = null;
   let searchDebounceTimer = null;
+  let initializedGlobalEvents = false;
 
   function getContainer(id) {
     return document.getElementById(id);
@@ -35,6 +36,123 @@
         '"': "&quot;",
         "'": "&#39;",
       }[c];
+    });
+  }
+
+  function getPreferredTheme() {
+    let saved = null;
+    try {
+      saved = localStorage.getItem("pnc-theme");
+    } catch (error) {
+      saved = null;
+    }
+    if (saved === "dark" || saved === "light") return saved;
+    return "light";
+  }
+
+  function applyThemeToDocument(doc, theme) {
+    const target = doc && doc.documentElement ? doc.documentElement : document.documentElement;
+    target.dataset.theme = theme;
+  }
+
+  function setTheme(theme) {
+    applyThemeToDocument(document, theme);
+    try {
+      localStorage.setItem("pnc-theme", theme);
+    } catch (error) {
+      // Theme still works for the current page even if storage is unavailable.
+    }
+    document.querySelectorAll("[data-theme-toggle-text]").forEach((el) => {
+      el.textContent = theme === "dark" ? "切换到日间主题" : "切换到夜间主题";
+    });
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+      const label = theme === "dark" ? "切换到日间主题" : "切换到夜间主题";
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+    });
+  }
+
+  function initThemeToggle() {
+    setTheme(getPreferredTheme());
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+      if (button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => {
+        const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+        setTheme(current === "dark" ? "light" : "dark");
+      });
+    });
+  }
+
+  function syncThemeBeforeSwap(event) {
+    const theme = getPreferredTheme();
+    applyThemeToDocument(document, theme);
+    if (event && event.newDocument) {
+      applyThemeToDocument(event.newDocument, theme);
+    }
+  }
+
+  function getCodeText(pre) {
+    const code = pre.querySelector("code");
+    return code ? code.innerText : pre.innerText;
+  }
+
+  const COPY_ICON =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path></svg>';
+  const CHECK_ICON =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg>';
+
+  async function copyText(value) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+  }
+
+  function initCodeCopyButtons() {
+    document.querySelectorAll(".post-content pre").forEach((pre) => {
+      if (pre.dataset.copyBound === "true") return;
+      const code = pre.querySelector("code");
+      if (!code) return;
+
+      pre.dataset.copyBound = "true";
+      pre.classList.add("has-copy-button");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "code-copy-button";
+      button.innerHTML = COPY_ICON;
+      button.title = "复制代码";
+      button.setAttribute("aria-label", "复制代码");
+      button.addEventListener("click", async () => {
+        try {
+          await copyText(getCodeText(pre));
+          button.innerHTML = CHECK_ICON;
+          button.classList.add("copied");
+          button.title = "已复制";
+          setTimeout(() => {
+            button.innerHTML = COPY_ICON;
+            button.classList.remove("copied");
+            button.title = "复制代码";
+          }, 1400);
+        } catch (error) {
+          console.warn(error);
+          button.title = "复制失败";
+          setTimeout(() => {
+            button.title = "复制代码";
+          }, 1400);
+        }
+      });
+      pre.appendChild(button);
     });
   }
 
@@ -128,7 +246,7 @@
     if (!activeTag) allLink.classList.add("active");
     nav.appendChild(allLink);
 
-    const VISIBLE_COUNT = 8;
+    const VISIBLE_COUNT = 5;
     const list = document.createElement("div");
     list.className = "tags-list";
 
@@ -216,12 +334,22 @@
 
     const items = shown
       .map(
-        (p) => `
+        (p) => {
+          const tags = getTags(p);
+          const meta = [
+            p.date || "",
+            p.wordCount ? `约 ${Number(p.wordCount).toLocaleString("zh-CN")} 字` : "",
+            p.readingMinutes ? `约 ${escapeHtml(p.readingMinutes)} 分钟读完` : "",
+            tags.length ? tags.join(" / ") : "",
+          ].filter(Boolean);
+          const transitionKey = String(p.slug || p.url || p.id || "").replace(/[^a-zA-Z0-9_-]/g, "-");
+          return `
           <div class="dir-item">
-            <a href="/${escapeHtml(p.url)}">${escapeHtml(p.title)}</a>
-            <span class="meta">${escapeHtml(p.date || "")}</span>
+            <a class="dir-item-title" href="/${escapeHtml(p.url)}" style="view-transition-name: post-title-${escapeHtml(transitionKey)};">${escapeHtml(p.title)}</a>
+            <span class="meta dir-item-meta" style="view-transition-name: post-meta-${escapeHtml(transitionKey)};">${escapeHtml(meta.join(" · "))}</span>
           </div>
-        `,
+        `;
+        },
       )
       .join("");
 
@@ -233,17 +361,12 @@
     if (!container) return;
 
     const searchValue = escapeHtml(query || "");
-    const filterMeta = activeTag
-      ? `<span class="meta">当前标签：${escapeHtml(activeTag)}</span>`
-      : "";
-
     container.innerHTML = `
       <h2 class="dir-title">文章目录</h2>
       <div class="dir-tools">
         <input id="post-search" class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" value="${searchValue}" />
-        ${filterMeta}
+        <nav class="tag-nav in-directory" id="tag-nav" aria-label="标签筛选"></nav>
       </div>
-      <nav class="tag-nav in-directory" id="tag-nav" aria-label="标签筛选"></nav>
       <div id="post-list-region"></div>
     `;
 
@@ -426,6 +549,8 @@
   }
 
   async function init() {
+    initThemeToggle();
+    initCodeCopyButtons();
     initNowStatus();
     initLatestNotePreview();
 
@@ -449,5 +574,17 @@
     }
   }
 
-  init();
+  function boot() {
+    init();
+    if (initializedGlobalEvents) return;
+    initializedGlobalEvents = true;
+    document.addEventListener("astro:before-swap", syncThemeBeforeSwap);
+    document.addEventListener("astro:page-load", init);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
 })();
