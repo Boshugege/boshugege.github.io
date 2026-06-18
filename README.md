@@ -32,6 +32,23 @@
    - `index.json` / `search.json` / `notes.json`
    - `rss.xml` / `sitemap.xml`
 
+4. 提交前验证：
+
+   ```bash
+   npm run verify
+   ```
+
+   该命令会检查浏览器脚本类型、内容工具单元测试、全部静态路由、按需 KaTeX、图片属性和体积预算。
+
+## 工程结构
+
+- `src/layouts/DocumentLayout.astro`：统一 HTML、SEO、主题和 View Transition。
+- `src/lib/content/`：文章规范化、特征检测和站点统计。
+- `src/scripts/`：按页面加载的主题、搜索、日历与代码复制功能。
+- `src/styles/`：共享、文章、About 和 Notes 样式边界。
+- `src/components/about/`：About MDX 可复用组件。
+- `scripts/verify-build.mjs`：构建输出与历史 URL 合约。
+
 ## 写文章
 
 在 `src/content/posts/` 新建 `.mdx` 文件，例如：
@@ -66,6 +83,34 @@ $$
 ## 写简历页
 
 `about.html` 的正文来自 `src/content/about/resume.mdx`。直接编辑这个文件即可更新个人介绍、教育经历、项目经历和联系方式；页面布局、侧边栏、SEO 和构建输出仍由 Astro 处理。正文下方的网站数据由 Astro 在构建时读取文章和随想自动生成。
+
+About frontmatter 还支持以下可选字段，旧内容无需修改：
+
+```yaml
+headline: "一句话介绍"
+location: "Beijing, China"
+availability: "Open to collaboration"
+links:
+  - label: "GitHub"
+    href: "https://github.com/Boshugege"
+showSiteStats: true
+showWritingHistory: true
+```
+
+About MDX 已预注册 `ResumeSection`、`Timeline`、`ProjectList`、`SkillList`、`LinkList` 和 `MetricStrip`，无需在 MDX 中逐个 import。例如：
+
+```mdx
+<ProjectList
+  items={[
+    {
+      name: "Project Name",
+      summary: "项目简介",
+      href: "https://example.com",
+      tags: ["Astro", "TypeScript"],
+    },
+  ]}
+/>
+```
 
 ## 每天随想（单文件增量写作）
 

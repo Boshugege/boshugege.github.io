@@ -102,6 +102,9 @@ html,
 body {
   height: 100%;
 }
+html {
+  scrollbar-gutter: stable;
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -206,6 +209,11 @@ a:visited {
 a:hover,
 a:focus {
   text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .plain-link {

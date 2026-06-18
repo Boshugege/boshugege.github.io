@@ -2,6 +2,7 @@ import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeImageAttributes from "./src/plugins/rehype-image-attributes.mjs";
 
 export default defineConfig({
   site: "https://parityncsvt.top",
@@ -15,7 +16,7 @@ export default defineConfig({
       theme: "github-light",
     },
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [rehypeKatex, rehypeImageAttributes],
   },
   build: {
     format: "file",

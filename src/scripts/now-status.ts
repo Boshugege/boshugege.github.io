@@ -5,6 +5,8 @@ interface CalendarEvent {
   end: Date;
 }
 
+let eventsPromise: Promise<CalendarEvent[]> | undefined;
+
 function normalizeEvents(payload: unknown): CalendarEvent[] {
   if (!payload || typeof payload !== "object" || !("events" in payload) || !Array.isArray(payload.events)) return [];
   return payload.events.flatMap((item) => {
@@ -51,9 +53,11 @@ async function initializeNowStatus() {
   if (!status || status.dataset.loaded === "true") return;
   status.dataset.loaded = "true";
   try {
-    const response = await fetch("/now.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`now.json: ${response.status}`);
-    const events = normalizeEvents(await response.json());
+    eventsPromise ||= fetch("/now.json", { cache: "no-store" }).then(async (response) => {
+      if (!response.ok) throw new Error(`now.json: ${response.status}`);
+      return normalizeEvents(await response.json());
+    });
+    const events = await eventsPromise;
     const now = new Date();
     const current = events.find((event) => now >= event.start && now < event.end);
     const next = events.find((event) => event.start > now);
@@ -62,6 +66,7 @@ async function initializeNowStatus() {
       : "空闲";
     renderEvent(next);
   } catch (error) {
+    eventsPromise = undefined;
     console.warn(error);
     status.textContent = "暂时无法读取状态";
     status.classList.add("is-error");
