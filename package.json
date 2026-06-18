@@ -2,6 +2,9 @@
   "name": "boshugege-github-io",
   "type": "module",
   "private": true,
+  "engines": {
+    "node": ">=22.6"
+  },
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/publish-root.mjs",
