@@ -1,0 +1,24 @@
+.notes-timeline { display: grid; gap: 10px; margin-top: 8px; }
+.note-item {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+  align-items: start;
+  border-top: 1px dashed var(--border);
+  padding-top: 10px;
+}
+.note-item:first-child { border-top: 0; padding-top: 0; }
+.note-date { color: var(--muted); font-size: 13px; line-height: 1.5; padding-top: 2px; }
+.notes-timeline .note-body.post-content { max-width: none; margin: 0; padding: 0; text-align: left; }
+.notes-timeline .note-body.post-content h1,
+.notes-timeline .note-body.post-content h2,
+.notes-timeline .note-body.post-content h3,
+.notes-timeline .note-body.post-content h4,
+.notes-timeline .note-body.post-content h5,
+.notes-timeline .note-body.post-content h6 { margin-top: 0; }
+.note-body p { margin: 0 0 8px; }
+.note-body p:last-child { margin-bottom: 0; }
+.note-title { margin: 0 0 8px; font-size: 16px; }
+@media (max-width: 800px) {
+  .note-item { grid-template-columns: 1fr; gap: 4px; }
+}

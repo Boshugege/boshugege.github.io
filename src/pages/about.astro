@@ -13,6 +13,7 @@ import { getNotes } from "../lib/notes";
 import { getAllPosts } from "../lib/content/posts";
 import { buildSiteStatistics } from "../lib/content/site-stats";
 import { site } from "../lib/site";
+import "../styles/about.css";
 
 const about = await getEntry("about", "resume");
 if (!about) {
