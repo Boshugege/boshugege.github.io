@@ -70,11 +70,11 @@
 }
 
 ::view-transition-new(root) {
-  animation: page-fade-in 220ms ease-out 80ms both;
+  animation: page-fade-in 180ms ease-out both;
 }
 
 ::view-transition-group(root) {
-  animation-duration: 440ms;
+  animation-duration: 180ms;
 }
 
 ::view-transition-group(*) {
@@ -86,13 +86,17 @@
 ::view-transition-new(site-sidebar),
 ::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle),
+::view-transition-old(site-brand),
+::view-transition-new(site-brand),
 ::view-transition-old(site-footer),
 ::view-transition-new(site-footer) {
   mix-blend-mode: normal;
 }
 
-::view-transition-new(post-body) {
-  animation-delay: 180ms;
+::view-transition-old(theme-toggle),
+::view-transition-new(theme-toggle) {
+  opacity: 1 !important;
+  animation: none !important;
 }
 
 * {
@@ -169,6 +173,22 @@ body {
     border-color 140ms ease,
     color 140ms ease;
 }
+
+.site-brand {
+  display: inline-block;
+  color: var(--text);
+  background: transparent;
+  font-weight: 700;
+  text-decoration: none;
+}
+.site-brand:visited {
+  color: var(--text);
+}
+.site-brand:hover,
+.site-brand:focus {
+  color: var(--text);
+  text-decoration: underline;
+}
 .theme-icon {
   width: 18px;
   height: 18px;
@@ -236,6 +256,8 @@ a:focus {
 }
 .site-title {
   font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
   margin: 0;
 }
 .site-desc {

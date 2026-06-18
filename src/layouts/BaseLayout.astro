@@ -39,14 +39,12 @@ const {
   jsonLd={jsonLd}
 >
   <a class="skip-link" href={skipHref}>{skipText}</a>
-  <div class="theme-transition-anchor" transition:name="theme-toggle" transition:animate="none">
-    <ThemeToggle />
-  </div>
+  <ThemeToggle />
   <div class="layout">
     <div class="sidebar-transition-anchor" transition:name="site-sidebar" transition:animate="none">
       <Sidebar {...sidebarProps} />
     </div>
-    <section class="content" transition:animate="fade">
+    <section class="content">
       <slot />
     </section>
   </div>

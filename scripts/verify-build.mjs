@@ -28,10 +28,21 @@ for (const file of [
   await assertFile(file);
 }
 
-const postSources = (await fs.readdir(path.join(root, "src/content/posts")))
-  .filter((name) => /\.mdx?$/.test(name));
+async function collectPostSources(directory, prefix = "") {
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  const sources = [];
+  for (const entry of entries) {
+    const relativePath = path.join(prefix, entry.name);
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) sources.push(...await collectPostSources(fullPath, relativePath));
+    else if (/\.mdx?$/.test(entry.name)) sources.push(relativePath);
+  }
+  return sources;
+}
+
+const postSources = await collectPostSources(path.join(root, "src/content/posts"));
 for (const source of postSources) {
-  await assertFile(`posts/${source.replace(/\.mdx?$/, ".html")}`);
+  await assertFile(`posts/${source.replace(/\/index\.mdx?$/, ".html").replace(/\.mdx?$/, ".html")}`);
 }
 
 const indexHtml = await read("index.html");

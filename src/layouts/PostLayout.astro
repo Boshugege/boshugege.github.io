@@ -14,7 +14,6 @@ interface Props {
   wordCount?: number;
   readingMinutes?: number;
   hasMath?: boolean;
-  transitionKey?: string;
   previousPost?: { title: string; url: string };
   nextPost?: { title: string; url: string };
   jsonLd?: Record<string, unknown>;
@@ -30,7 +29,6 @@ const {
   wordCount,
   readingMinutes,
   hasMath = false,
-  transitionKey,
   previousPost,
   nextPost,
   jsonLd,
@@ -39,8 +37,6 @@ const {
 const dateText = formatDate(date);
 const tagList = normalizeTags(tags);
 const excerpt = description || site.homeDescription;
-const titleTransition = transitionKey ? `view-transition-name: post-title-${transitionKey};` : undefined;
-const metaTransition = transitionKey ? `view-transition-name: post-meta-${transitionKey};` : undefined;
 ---
 
 <DocumentLayout
@@ -54,10 +50,20 @@ const metaTransition = transitionKey ? `view-transition-name: post-meta-${transi
   jsonLd={jsonLd}
   postMeta={{ title, date: dateText, tags: tagList, excerpt, cover: image, url: canonicalPath }}
 >
-  <ThemeToggle />
   <article class="post-content">
-    <h1 style={titleTransition}>{title}</h1>
-    <p class="meta" style={metaTransition}>
+    <header class="post-topbar">
+      <a class="site-title site-brand post-site-brand" href="/index.html" transition:name="site-brand">{site.name}</a>
+      <nav class="post-topnav" aria-label="站点导航">
+        <a href="/about.html">About</a>
+        <a href="/notes.html">随想</a>
+        <a href={`mailto:${site.email}`}>Email</a>
+        <a href="/rss.xml">RSS</a>
+        <a href={site.github}>GitHub</a>
+      </nav>
+      <ThemeToggle />
+    </header>
+    <h1>{title}</h1>
+    <p class="meta">
       {dateText}
       {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
       {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
@@ -69,14 +75,14 @@ const metaTransition = transitionKey ? `view-transition-name: post-meta-${transi
         </>
       ))}
     </p>
-    <div class="post-body" transition:name="post-body" transition:animate="fade">
+    <div class="post-body">
       <slot />
       <nav class="post-nav" aria-label="文章导航">
         <div class="post-nav-item post-nav-prev">
           {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
         </div>
         <div class="post-nav-item post-nav-home">
-          <a class="post-nav-link" href="/index.html" style="view-transition-name: post-nav-home;">返回首页</a>
+          <a class="post-nav-link" href="/index.html">返回首页</a>
         </div>
         <div class="post-nav-item post-nav-next">
           {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}

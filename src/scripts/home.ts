@@ -43,11 +43,9 @@ function renderPosts(posts: PostIndexDocument[]) {
     title.className = "dir-item-title";
     title.href = `/${post.url}`;
     title.dataset.astroPrefetch = "";
-    title.style.viewTransitionName = `post-title-${post.slug}`;
     title.textContent = post.title;
     const meta = document.createElement("span");
     meta.className = "meta dir-item-meta";
-    meta.style.viewTransitionName = `post-meta-${post.slug}`;
     meta.textContent = [
       post.date,
       `约 ${post.wordCount.toLocaleString("zh-CN")} 字`,
@@ -68,8 +66,13 @@ function updateTagState(activeTag: string) {
     else link.removeAttribute("aria-current");
   });
   const activeLink = document.querySelector<HTMLElement>("[data-tag].active");
-  if (activeLink && !activeLink.classList.contains("visible")) {
+  if (activeTag && activeLink && !activeLink.classList.contains("visible")) {
     document.querySelector("[data-tag-list]")?.classList.remove("collapsed");
+    const button = document.querySelector<HTMLButtonElement>("[data-tag-toggle]");
+    if (button) {
+      button.ariaExpanded = "true";
+      button.textContent = "收起标签";
+    }
   }
 }
 

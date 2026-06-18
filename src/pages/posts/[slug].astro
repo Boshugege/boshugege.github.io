@@ -34,7 +34,6 @@ const Content = rendered?.Content;
   wordCount={post.reading.wordCount}
   readingMinutes={post.reading.readingMinutes}
   hasMath={post.features.hasMath}
-  transitionKey={post.slug}
   previousPost={previousPost && { title: previousPost.title, url: `/${previousPost.url}` }}
   nextPost={nextPost && { title: nextPost.title, url: `/${nextPost.url}` }}
   jsonLd={{

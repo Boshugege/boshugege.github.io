@@ -32,7 +32,7 @@ function normalizeCover(cover?: string) {
 }
 
 function inferSlug(entry: CollectionEntry<"posts">) {
-  return entry.id.replace(/\.(md|mdx)$/, "");
+  return entry.id.replace(/\/index\.(md|mdx)$/, "").replace(/\.(md|mdx)$/, "");
 }
 
 export async function getAllPosts() {

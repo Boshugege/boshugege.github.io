@@ -3,7 +3,7 @@
 说明（简体中文）
 
 - 这是一个使用 Astro + MDX 重构的静态博客，保留原来的古早风布局和旧文章 URL。
-- 新文章写在 `src/content/posts/*.mdx`，支持 Markdown、MDX、代码高亮和 `$...$` / `$$...$$` 数学公式。
+- 新文章写在 `src/content/posts/*.mdx` 或 `src/content/posts/<slug>/index.mdx`，支持 Markdown、MDX、代码高亮、就近图片和 `$...$` / `$$...$$` 数学公式。
 - 所有历史文章都已经迁移到 MDX；根目录的 HTML/JSON/RSS 是构建产物，可直接由 GitHub Pages 从仓库根目录发布。
 
 维护与部署
@@ -79,6 +79,25 @@ $$
 ````
 
 默认输出 URL 由文件名决定：`src/content/posts/arch-linux.mdx` 会生成 `/posts/arch-linux.html`。想让 URL 带日期，就把文件命名为 `2026-01-20-sample.mdx`。
+
+如果文章有图片，推荐使用目录式文章，把图片和正文放在一起：
+
+```text
+src/content/posts/my-post/
+├── index.mdx
+├── cover.jpg
+└── screenshot.png
+```
+
+然后在 `index.mdx` 里直接写相对路径：
+
+```mdx
+![封面](./cover.jpg)
+
+![截图](./screenshot.png)
+```
+
+这样会生成 `/posts/my-post.html`，图片会由 Astro 优化并自动补齐 `loading`、`decoding`、`width` 和 `height`。
 
 ## 写简历页
 
