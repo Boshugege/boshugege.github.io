@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { absoluteUrl, site } from "../lib/site";
+import "../styles/global.css";
 
 interface Props {
   title?: string;
@@ -80,7 +81,6 @@ const postUrl = postMeta?.url.replace(/^\//, "");
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <link rel="stylesheet" href="/assets/css/style.css" />
     {includeKatex && <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />}
     <ClientRouter />
     <slot name="head" />

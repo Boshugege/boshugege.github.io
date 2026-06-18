@@ -1,4 +1,4 @@
-/* 古早风格：经典白底黑字、系统默认字体、蓝色超链接 */
+/* Global tokens, document defaults and shared site chrome. */
 :root {
   --bg: #ffffff;
   --text: #000000;
