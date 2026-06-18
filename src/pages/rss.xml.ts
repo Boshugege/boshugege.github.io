@@ -1,5 +1,5 @@
 import rss from "@astrojs/rss";
-import { getAllPosts } from "../lib/posts";
+import { getAllPosts } from "../lib/content/posts";
 import { site } from "../lib/site";
 
 export async function GET(context: { site: URL }) {

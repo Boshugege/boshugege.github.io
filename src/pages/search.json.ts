@@ -1,16 +1,8 @@
-import { getAllPosts } from "../lib/posts";
+import { getAllPosts, toPostSearchDocument } from "../lib/content/posts";
 
 export async function GET() {
   const posts = await getAllPosts();
   return Response.json(
-    posts.map(({ id, title, date, tags, excerpt, url, content }) => ({
-      id,
-      title,
-      date,
-      tags,
-      excerpt,
-      url,
-      content: content || "",
-    })),
+    posts.map(toPostSearchDocument),
   );
 }

@@ -1,7 +1,7 @@
 ---
-import { absoluteUrl, formatDate, normalizeTags, site } from "../lib/site";
+import { formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
-import { ClientRouter } from "astro:transitions";
+import DocumentLayout from "./DocumentLayout.astro";
 
 interface Props {
   title: string;
@@ -12,6 +12,7 @@ interface Props {
   image?: string;
   wordCount?: number;
   readingMinutes?: number;
+  hasMath?: boolean;
   transitionKey?: string;
   previousPost?: { title: string; url: string };
   nextPost?: { title: string; url: string };
@@ -27,6 +28,7 @@ const {
   image = site.defaultCover,
   wordCount,
   readingMinutes,
+  hasMath = false,
   transitionKey,
   previousPost,
   nextPost,
@@ -35,86 +37,50 @@ const {
 
 const dateText = formatDate(date);
 const tagList = normalizeTags(tags);
-const canonicalUrl = absoluteUrl(canonicalPath);
-const imageUrl = image.startsWith("http") ? image : absoluteUrl(image);
 const excerpt = description || site.homeDescription;
 const titleTransition = transitionKey ? `view-transition-name: post-title-${transitionKey};` : undefined;
 const metaTransition = transitionKey ? `view-transition-name: post-meta-${transitionKey};` : undefined;
 ---
 
-<!doctype html>
-<html lang={site.language}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={excerpt} />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg" />
-    <link rel="apple-touch-icon" href="/assets/img/icon.jpg" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={excerpt} />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:image" content={imageUrl} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={excerpt} />
-    <meta name="twitter:image" content={imageUrl} />
-    <meta name="post-title" content={title} />
-    <meta name="post-date" content={dateText} />
-    <meta name="post-tags" content={tagList.join(",")} />
-    <meta name="post-excerpt" content={excerpt} />
-    <meta name="post-cover" content={image.replace(/^\//, "")} />
-    <meta name="post-url" content={canonicalPath.replace(/^\//, "")} />
-    <script is:inline>
-      (() => {
-        let saved = null;
-        try {
-          saved = localStorage.getItem("pnc-theme");
-        } catch (error) {
-          saved = null;
-        }
-        const theme = saved === "dark" || saved === "light" ? saved : "light";
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
-    <link rel="stylesheet" href="/assets/css/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
-    <ClientRouter />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />}
-  </head>
-  <body>
-    <ThemeToggle />
-    <article class="post-content">
-      <h1 style={titleTransition}>{title}</h1>
-      <p class="meta" style={metaTransition}>
-        {dateText}
-        {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
-        {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
-        {tagList.length > 0 && " · 标签："}
-        {tagList.map((tag, index) => (
-          <>
-            {index > 0 && ", "}
-            <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
-          </>
-        ))}
-      </p>
-      <div class="post-body" transition:name="post-body" transition:animate="fade">
-        <slot />
-        <nav class="post-nav" aria-label="文章导航">
-          <div class="post-nav-item post-nav-prev">
-            {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
-          </div>
-          <div class="post-nav-item post-nav-home">
-            <a class="post-nav-link" href="/index.html" style="view-transition-name: post-nav-home;">返回首页</a>
-          </div>
-          <div class="post-nav-item post-nav-next">
-            {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
-          </div>
-        </nav>
-      </div>
-    </article>
-  </body>
-</html>
+<DocumentLayout
+  title={title}
+  pageTitle={title}
+  description={excerpt}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  image={image}
+  includeKatex={hasMath}
+  jsonLd={jsonLd}
+  postMeta={{ title, date: dateText, tags: tagList, excerpt, cover: image, url: canonicalPath }}
+>
+  <ThemeToggle />
+  <article class="post-content">
+    <h1 style={titleTransition}>{title}</h1>
+    <p class="meta" style={metaTransition}>
+      {dateText}
+      {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
+      {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
+      {tagList.length > 0 && " · 标签："}
+      {tagList.map((tag, index) => (
+        <>
+          {index > 0 && ", "}
+          <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
+        </>
+      ))}
+    </p>
+    <div class="post-body" transition:name="post-body" transition:animate="fade">
+      <slot />
+      <nav class="post-nav" aria-label="文章导航">
+        <div class="post-nav-item post-nav-prev">
+          {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
+        </div>
+        <div class="post-nav-item post-nav-home">
+          <a class="post-nav-link" href="/index.html" style="view-transition-name: post-nav-home;">返回首页</a>
+        </div>
+        <div class="post-nav-item post-nav-next">
+          {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
+        </div>
+      </nav>
+    </div>
+  </article>
+</DocumentLayout>

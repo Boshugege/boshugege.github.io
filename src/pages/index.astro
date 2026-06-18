@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getNotes } from "../lib/notes";
-import { getAllPosts } from "../lib/posts";
+import { getAllPosts } from "../lib/content/posts";
 import { absoluteUrl, site } from "../lib/site";
 
 const posts = await getAllPosts();

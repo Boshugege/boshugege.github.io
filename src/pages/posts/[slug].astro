@@ -1,6 +1,6 @@
 ---
 import PostLayout from "../../layouts/PostLayout.astro";
-import { getAllPosts, type PostSummary } from "../../lib/posts";
+import { getAllPosts, type PostSummary } from "../../lib/content/posts";
 import { absoluteUrl } from "../../lib/site";
 
 export async function getStaticPaths() {
@@ -33,6 +33,7 @@ const Content = rendered?.Content;
   image={post.cover}
   wordCount={post.reading.wordCount}
   readingMinutes={post.reading.readingMinutes}
+  hasMath={post.features.hasMath}
   transitionKey={post.slug}
   previousPost={previousPost && { title: previousPost.title, url: `/${previousPost.url}` }}
   nextPost={nextPost && { title: nextPost.title, url: `/${nextPost.url}` }}

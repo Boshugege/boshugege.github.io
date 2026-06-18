@@ -1,0 +1,92 @@
+---
+import { ClientRouter } from "astro:transitions";
+import { absoluteUrl, site } from "../lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  ogType?: "website" | "article";
+  image?: string;
+  pageTitle?: string;
+  includeKatex?: boolean;
+  jsonLd?: Record<string, unknown>;
+  postMeta?: {
+    title: string;
+    date: string;
+    tags: string[];
+    excerpt: string;
+    cover: string;
+    url: string;
+  };
+}
+
+const {
+  title = site.name,
+  description = site.homeDescription,
+  canonicalPath = Astro.url.pathname,
+  ogType = "website",
+  image = site.defaultCover,
+  pageTitle = title === site.name ? title : `${title} - ${site.name}`,
+  includeKatex = false,
+  jsonLd,
+  postMeta,
+} = Astro.props;
+
+const canonicalUrl = absoluteUrl(canonicalPath);
+const imageUrl = image.startsWith("http") ? image : absoluteUrl(image);
+const postCover = postMeta?.cover.replace(/^\//, "");
+const postUrl = postMeta?.url.replace(/^\//, "");
+---
+
+<!doctype html>
+<html lang={site.language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href={absoluteUrl("/rss.xml")} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="/assets/img/icon.jpg" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="theme-color" content={site.themeColor} />
+    {postMeta && <meta name="post-title" content={postMeta.title} />}
+    {postMeta && <meta name="post-date" content={postMeta.date} />}
+    {postMeta && <meta name="post-tags" content={postMeta.tags.join(",")} />}
+    {postMeta && <meta name="post-excerpt" content={postMeta.excerpt} />}
+    {postMeta && <meta name="post-cover" content={postCover} />}
+    {postMeta && <meta name="post-url" content={postUrl} />}
+    <script is:inline>
+      (() => {
+        let saved = null;
+        try {
+          saved = localStorage.getItem("pnc-theme");
+        } catch (error) {
+          saved = null;
+        }
+        const theme = saved === "dark" || saved === "light" ? saved : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    {includeKatex && <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />}
+    <ClientRouter />
+    <slot name="head" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

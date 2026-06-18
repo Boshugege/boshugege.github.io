@@ -1,8 +1,8 @@
 ---
 import Sidebar from "../components/Sidebar.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
-import { absoluteUrl, site } from "../lib/site";
-import { ClientRouter } from "astro:transitions";
+import DocumentLayout from "./DocumentLayout.astro";
+import { site } from "../lib/site";
 
 interface Props {
   title?: string;
@@ -28,70 +28,25 @@ const {
   jsonLd,
 } = Astro.props;
 
-const pageTitle = title === site.name ? title : `${title} - ${site.name}`;
-const canonicalUrl = absoluteUrl(canonicalPath);
-const imageUrl = image.startsWith("http") ? image : absoluteUrl(image);
 ---
 
-<!doctype html>
-<html lang={site.language}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS`} href={absoluteUrl("/rss.xml")} />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/assets/img/icon.jpg" type="image/jpeg" />
-    <link rel="apple-touch-icon" href="/assets/img/icon.jpg" />
-    <meta property="og:type" content={ogType} />
-    <meta property="og:site_name" content={site.name} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:image" content={imageUrl} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={imageUrl} />
-    <meta name="theme-color" content={site.themeColor} />
-    <script is:inline>
-      (() => {
-        let saved = null;
-        try {
-          saved = localStorage.getItem("pnc-theme");
-        } catch (error) {
-          saved = null;
-        }
-        const theme = saved === "dark" || saved === "light" ? saved : "light";
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
-    <link rel="stylesheet" href="/assets/css/style.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
-    <ClientRouter />
-    <slot name="head" />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd, null, 2)} />}
-  </head>
-  <body>
-    <a class="skip-link" href={skipHref}>{skipText}</a>
-    <div class="theme-transition-anchor" transition:name="theme-toggle" transition:animate="none">
-      <ThemeToggle />
+<DocumentLayout title={title} description={description} canonicalPath={canonicalPath} ogType={ogType} image={image} jsonLd={jsonLd}>
+  <a class="skip-link" href={skipHref}>{skipText}</a>
+  <div class="theme-transition-anchor" transition:name="theme-toggle" transition:animate="none">
+    <ThemeToggle />
+  </div>
+  <div class="layout">
+    <div class="sidebar-transition-anchor" transition:name="site-sidebar" transition:animate="none">
+      <Sidebar {...sidebarProps} />
     </div>
-    <div class="layout">
-      <div class="sidebar-transition-anchor" transition:name="site-sidebar" transition:animate="none">
-        <Sidebar {...sidebarProps} />
-      </div>
-      <section class="content" transition:animate="fade">
-        <slot />
-      </section>
-    </div>
+    <section class="content" transition:animate="fade">
+      <slot />
+    </section>
+  </div>
 
-    <footer class="site-footer" transition:name="site-footer" transition:animate="none">
-      <p>© 2026 — {site.footerOwner}</p>
-    </footer>
+  <footer class="site-footer" transition:name="site-footer" transition:animate="none">
+    <p>© 2026 — {site.footerOwner}</p>
+  </footer>
 
-    <script src="/assets/js/site.js" defer></script>
-  </body>
-</html>
+  <script src="/assets/js/site.js" defer></script>
+</DocumentLayout>

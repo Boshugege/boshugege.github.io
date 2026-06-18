@@ -1,4 +1,4 @@
-import { getAllPosts } from "../lib/posts";
+import { getAllPosts } from "../lib/content/posts";
 import { site } from "../lib/site";
 
 export async function GET() {
