@@ -30,7 +30,14 @@ const {
 
 ---
 
-<DocumentLayout title={title} description={description} canonicalPath={canonicalPath} ogType={ogType} image={image} jsonLd={jsonLd}>
+<DocumentLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  ogType={ogType}
+  image={image}
+  jsonLd={jsonLd}
+>
   <a class="skip-link" href={skipHref}>{skipText}</a>
   <div class="theme-transition-anchor" transition:name="theme-toggle" transition:animate="none">
     <ThemeToggle />
@@ -48,5 +55,4 @@ const {
     <p>© 2026 — {site.footerOwner}</p>
   </footer>
 
-  <script src="/assets/js/site.js" defer></script>
 </DocumentLayout>

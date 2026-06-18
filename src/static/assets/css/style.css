@@ -309,7 +309,7 @@ a:focus {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-#now-status-text.is-error {
+[data-now-status].is-error {
   color: #b00020;
 }
 

@@ -47,12 +47,26 @@ function getPostMeta(post: (typeof posts)[number]) {
   </aside>
 
   <aside class="directory" id="posts" transition:animate="fade">
-    <nav class="tag-nav" id="tag-nav" aria-label="标签筛选" data-forced-tag="">
-      <a href="/index.html" class="tag top active">全部</a>
-      {tags.map(([tag, count]) => <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag} ({count})</a>)}
-    </nav>
-    <h2 class="dir-title">最新文章</h2>
-    <div class="dir-list" id="post-list-region">
+    <h2 class="dir-title">文章目录</h2>
+    <div class="dir-tools">
+      <input class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" aria-label="搜索文章" data-post-search />
+      <nav class="tag-nav in-directory" aria-label="标签筛选">
+        <a href="/index.html" class="tag top active" data-tag="">全部</a>
+        <div class="tags-list collapsed" data-tag-list>
+          {tags.map(([tag, count], index) => (
+            <a href={`/index.html?tag=${encodeURIComponent(tag)}`} class:list={["tag", { visible: index < 5 }]} data-tag={tag}>
+              {tag} ({count})
+            </a>
+          ))}
+        </div>
+        {tags.length > 5 && (
+          <button class="tag-toggle" type="button" aria-expanded="false" data-tag-toggle data-collapsed-label={`展开全部标签 (${tags.length})`}>
+            展开全部标签 ({tags.length})
+          </button>
+        )}
+      </nav>
+    </div>
+    <div class="dir-list" data-post-list>
       {posts.map((post) => (
         <div class="dir-item">
           <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch style={`view-transition-name: post-title-${post.slug};`}>
@@ -65,4 +79,7 @@ function getPostMeta(post: (typeof posts)[number]) {
       ))}
     </div>
   </aside>
+  <script>
+    import "../scripts/home";
+  </script>
 </BaseLayout>
