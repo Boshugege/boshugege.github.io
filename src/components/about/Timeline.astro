@@ -1,0 +1,56 @@
+---
+import type { TimelineItem } from "./types";
+
+interface Props {
+  items: TimelineItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<ol class="resume-timeline">
+  {items.map((item) => (
+    <li>
+      <span class="resume-timeline-period">{item.period}</span>
+      <div>
+        <strong>{item.title}</strong>
+        {item.subtitle && <span class="resume-timeline-subtitle">{item.subtitle}</span>}
+        {item.description?.map((line) => <p>{line}</p>)}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .resume-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .resume-timeline li {
+    display: grid;
+    grid-template-columns: minmax(90px, 130px) 1fr;
+    gap: 12px;
+    border-top: 1px dashed var(--border);
+    padding: 10px 0;
+  }
+  .resume-timeline li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .resume-timeline-period,
+  .resume-timeline-subtitle {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .resume-timeline p {
+    margin: 4px 0 0;
+  }
+  @media (max-width: 640px) {
+    .resume-timeline li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

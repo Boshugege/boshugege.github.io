@@ -1,0 +1,41 @@
+---
+import type { SkillGroup } from "./types";
+
+interface Props {
+  groups: SkillGroup[];
+}
+
+const { groups } = Astro.props;
+---
+
+<dl class="resume-skills">
+  {groups.map((group) => (
+    <div>
+      <dt>{group.label}</dt>
+      <dd>{group.items.join(" · ")}</dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .resume-skills {
+    margin: 0;
+  }
+  .resume-skills div {
+    display: grid;
+    grid-template-columns: minmax(90px, 130px) 1fr;
+    gap: 12px;
+    border-top: 1px dashed var(--border);
+    padding: 7px 0;
+  }
+  .resume-skills div:first-child {
+    border-top: 0;
+  }
+  .resume-skills dt {
+    font-weight: 700;
+  }
+  .resume-skills dd {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>

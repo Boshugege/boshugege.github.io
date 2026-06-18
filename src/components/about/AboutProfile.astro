@@ -1,0 +1,44 @@
+---
+import type { AboutLink } from "./types";
+
+interface Props {
+  headline?: string;
+  location?: string;
+  availability?: string;
+  links?: AboutLink[];
+}
+
+const { headline, location, availability, links = [] } = Astro.props;
+const hasProfile = Boolean(headline || location || availability || links.length > 0);
+---
+
+{hasProfile && (
+  <header class="about-profile">
+    {headline && <p class="about-profile-headline">{headline}</p>}
+    {(location || availability) && <p class="about-profile-facts">{[location, availability].filter(Boolean).join(" · ")}</p>}
+    {links.length > 0 && (
+      <p class="about-profile-links">
+        {links.map((link, index) => <>{index > 0 && " · "}<a href={link.href}>{link.label}</a></>)}
+      </p>
+    )}
+  </header>
+)}
+
+<style>
+  .about-profile {
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+  .about-profile p {
+    margin: 3px 0;
+  }
+  .about-profile-headline {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .about-profile-facts {
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>

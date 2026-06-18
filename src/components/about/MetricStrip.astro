@@ -1,0 +1,43 @@
+---
+import type { MetricItem } from "./types";
+
+interface Props {
+  items: MetricItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="resume-metrics">
+  {items.map((item) => (
+    <div>
+      <dt>{item.label}</dt>
+      <dd>{item.value}</dd>
+      {item.detail && <small>{item.detail}</small>}
+    </div>
+  ))}
+</dl>
+
+<style>
+  .resume-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .resume-metrics div {
+    border-left: 2px solid var(--border);
+    padding-left: 8px;
+  }
+  .resume-metrics dt,
+  .resume-metrics small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .resume-metrics dd {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+</style>

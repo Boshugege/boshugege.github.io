@@ -1,0 +1,27 @@
+---
+interface Props {
+  title: string;
+  id?: string;
+}
+
+const { title, id } = Astro.props;
+---
+
+<section class="resume-section" id={id}>
+  <h2>{title}</h2>
+  <div class="resume-section-content"><slot /></div>
+</section>
+
+<style>
+  .resume-section {
+    border-top: 1px dashed var(--border);
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+  .resume-section h2 {
+    border: 0;
+    margin: 0 0 8px;
+    padding: 0;
+    font-size: 16px;
+  }
+</style>

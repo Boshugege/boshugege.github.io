@@ -1,0 +1,33 @@
+---
+import type { AboutLink } from "./types";
+
+interface Props {
+  links: AboutLink[];
+}
+
+const { links } = Astro.props;
+---
+
+<ul class="resume-links">
+  {links.map((link) => (
+    <li>
+      <a href={link.href}>{link.label}</a>
+      {link.detail && <span>{link.detail}</span>}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .resume-links {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .resume-links li {
+    margin: 4px 0;
+  }
+  .resume-links span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+  }
+</style>

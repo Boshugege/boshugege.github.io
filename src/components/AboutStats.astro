@@ -9,9 +9,10 @@ interface Props {
   stats: Stat[];
   highlights: Stat[];
   yearlyPosts: [string, number][];
+  showWritingHistory?: boolean;
 }
 
-const { stats, highlights, yearlyPosts } = Astro.props;
+const { stats, highlights, yearlyPosts, showWritingHistory = true } = Astro.props;
 const maxYearCount = Math.max(...yearlyPosts.map(([, count]) => count), 1);
 ---
 
@@ -37,18 +38,20 @@ const maxYearCount = Math.max(...yearlyPosts.map(([, count]) => count), 1);
     ))}
   </div>
 
-  <section class="about-data-section about-yearly">
-    <h3>写作年份</h3>
-    <div class="about-year-bars">
-      {yearlyPosts.map(([year, count]) => (
-        <div class="about-year-row">
-          <span>{year}</span>
-          <div class="about-year-track" aria-hidden="true">
-            <i style={`width: ${(count / maxYearCount) * 100}%`}></i>
+  {showWritingHistory && (
+    <section class="about-data-section about-yearly">
+      <h3>写作年份</h3>
+      <div class="about-year-bars">
+        {yearlyPosts.map(([year, count]) => (
+          <div class="about-year-row">
+            <span>{year}</span>
+            <div class="about-year-track" aria-hidden="true">
+              <i style={`width: ${(count / maxYearCount) * 100}%`}></i>
+            </div>
+            <span>{count}</span>
           </div>
-          <span>{count}</span>
-        </div>
-      ))}
-    </div>
-  </section>
+        ))}
+      </div>
+    </section>
+  )}
 </section>

@@ -1,0 +1,40 @@
+---
+import type { ProjectItem } from "./types";
+
+interface Props {
+  items: ProjectItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="resume-projects">
+  {items.map((project) => (
+    <article>
+      <h3>{project.href ? <a href={project.href}>{project.name}</a> : project.name}</h3>
+      {project.role && <p class="resume-project-role">{project.role}</p>}
+      <p>{project.summary}</p>
+      {project.tags?.length && <p class="resume-project-tags">{project.tags.join(" · ")}</p>}
+    </article>
+  ))}
+</div>
+
+<style>
+  .resume-projects article {
+    border-top: 1px dashed var(--border);
+    padding: 10px 0;
+  }
+  .resume-projects article:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .resume-projects h3,
+  .resume-projects p {
+    margin: 0 0 5px;
+  }
+  .resume-project-role,
+  .resume-project-tags {
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
