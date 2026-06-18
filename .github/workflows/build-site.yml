@@ -1,0 +1,29 @@
+name: Verify Site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: site-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - name: Verify committed root output
+        run: |
+          npm run build
+          git diff --exit-code -- . ':!now.json'

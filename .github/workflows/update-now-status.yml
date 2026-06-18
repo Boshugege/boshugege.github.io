@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: calendar-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   update-now-status:
     runs-on: ubuntu-latest

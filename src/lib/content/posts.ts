@@ -2,12 +2,8 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import crypto from "node:crypto";
 import { getReadingStats, type ReadingStats } from "../reading";
 import { formatDate, normalizeTags, site } from "../site";
-
-export interface PostFeatures {
-  codeBlocks: number;
-  images: number;
-  hasMath: boolean;
-}
+import type { PostIndexDocument, PostSearchDocument } from "../search";
+import { getPostFeatures, type PostFeatures } from "./features";
 
 export interface PostSummary {
   id: string;
@@ -24,29 +20,6 @@ export interface PostSummary {
   entry: CollectionEntry<"posts">;
 }
 
-export interface PostIndexDocument {
-  id: string;
-  title: string;
-  date: string;
-  tags: string[];
-  excerpt: string;
-  cover: string;
-  url: string;
-  slug: string;
-  wordCount: number;
-  readingMinutes: number;
-}
-
-export interface PostSearchDocument {
-  id: string;
-  title: string;
-  date: string;
-  tags: string[];
-  excerpt: string;
-  url: string;
-  content: string;
-}
-
 function stableId(value: string) {
   return crypto.createHash("sha256").update(value.toLowerCase()).digest("hex").slice(0, 32);
 }
@@ -60,15 +33,6 @@ function normalizeCover(cover?: string) {
 
 function inferSlug(entry: CollectionEntry<"posts">) {
   return entry.id.replace(/\.(md|mdx)$/, "");
-}
-
-export function getPostFeatures(content: string): PostFeatures {
-  const prose = content.replace(/^```[^\n]*\n[\s\S]*?^```\s*$/gm, "");
-  return {
-    codeBlocks: Math.floor((content.match(/^```/gm)?.length || 0) / 2),
-    images: content.match(/!\[[^\]]*\]\([^)]+\)/g)?.length || 0,
-    hasMath: /\$\$[\s\S]*?\$\$|(?<!\\)\$[^$\n]+(?<!\\)\$/m.test(prose),
-  };
 }
 
 export async function getAllPosts() {

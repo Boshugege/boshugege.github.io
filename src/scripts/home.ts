@@ -1,4 +1,4 @@
-import type { PostIndexDocument, PostSearchDocument } from "../lib/content/posts";
+import { filterPosts, type PostIndexDocument, type PostSearchDocument } from "../lib/search";
 
 const SEARCH_DELAY = 120;
 let postsPromise: Promise<PostIndexDocument[]> | undefined;
@@ -22,24 +22,6 @@ function loadSearchIndex() {
       row.id,
       [row.title, row.excerpt, row.tags.join(" "), row.content].join("\n").toLowerCase(),
     ])));
-}
-
-function filterPosts(posts: PostIndexDocument[], tag: string, query: string, fullText?: Map<string, string>) {
-  const normalized = query.trim().toLowerCase();
-  return posts
-    .filter((post) => !tag || post.tags.includes(tag))
-    .map((post) => {
-      if (!normalized) return { post, score: 1 };
-      let score = 0;
-      if (post.title.toLowerCase().includes(normalized)) score += 20;
-      if (post.tags.join(" ").toLowerCase().includes(normalized)) score += 14;
-      if (post.excerpt.toLowerCase().includes(normalized)) score += 10;
-      if (fullText?.get(post.id)?.includes(normalized)) score += 4;
-      return { post, score };
-    })
-    .filter(({ score }) => score > 0)
-    .sort((a, b) => b.score - a.score || b.post.date.localeCompare(a.post.date))
-    .map(({ post }) => post);
 }
 
 function renderPosts(posts: PostIndexDocument[]) {

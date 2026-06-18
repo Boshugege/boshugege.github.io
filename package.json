@@ -6,7 +6,10 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/publish-root.mjs",
     "build:dist": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "typecheck": "tsc -p tsconfig.client.json",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "verify": "npm run typecheck && npm test && npm run build:dist && node scripts/verify-build.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.0",
