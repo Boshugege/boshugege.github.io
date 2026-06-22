@@ -15,6 +15,7 @@ const rootOutputs = [
   "manifest.webmanifest",
   "notes.html",
   "notes.json",
+  "now.json",
   "posts",
   "robots.txt",
   "rss.xml",
@@ -46,11 +47,6 @@ async function copyDirectory(source, target) {
 
 if (!(await exists(dist))) {
   throw new Error("dist does not exist. Run astro build before publishing.");
-}
-
-const nowJson = path.join(root, "now.json");
-if (await exists(nowJson)) {
-  await fs.copyFile(nowJson, path.join(dist, "now.json"));
 }
 
 for (const item of rootOutputs) {

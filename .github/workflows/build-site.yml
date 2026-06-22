@@ -26,4 +26,4 @@ jobs:
       - name: Verify committed root output
         run: |
           npm run build
-          git diff --exit-code -- . ':!now.json'
+          git diff --exit-code

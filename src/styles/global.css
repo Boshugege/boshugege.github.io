@@ -301,20 +301,6 @@ a:focus {
   margin-left: 6px;
   font-size: 13px;
 }
-.profile-info.now-status {
-  font-weight: 600;
-}
-.next-event {
-  margin-top: 8px;
-  border-top: 1px dashed var(--border);
-  padding-top: 8px;
-}
-.next-event p {
-  margin: 2px 0;
-}
-.next-event-title {
-  font-weight: 600;
-}
 .latest-note-preview {
   margin-top: 0;
   margin-bottom: 10px;
@@ -339,10 +325,6 @@ a:focus {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-[data-now-status].is-error {
-  color: #b00020;
-}
-
 /* 标签导航 */
 .tag-nav {
   display: flex;

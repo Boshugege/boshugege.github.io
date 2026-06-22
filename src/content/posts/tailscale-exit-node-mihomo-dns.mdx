@@ -1,0 +1,118 @@
+---
+title: "折腾笔记：Tailscale Exit Node 做虚拟内网总 Proxy"
+date: "2026-06-22"
+tags: ["科技","网络"]
+---
+
+> **⚠️ 注意：**
+>
+> 本内容为网络实验和校园内网设备访问，不涉及且不适用于其他通信
+
+最近在 Codex 的帮助下实现一个构想：有一台长期在线并接入 Tailscale 的服务器设为 Exit Node。这样手机和电脑只需要接入 Tailscale 的内网就能把流量交给这台机器处理，再接入统一的 Proxy 。更重要的是 Proxy 的线路走常规网络的优化有问题，可能要绕大半个地球回来，而 Exit Node 的线路优化比较充分，可以通过中转减少延迟。
+
+这种多层结构特别容易出现回环或者是莫名其妙的情况，我这种小白肯定只好交给 Codex 了。Codex 老哥一开始搞的也不是特别清楚。好在折腾来折腾去外加自己的一些引导，烧了不少 token，也基本搞明白了。
+
+## 网络拓扑
+
+网络拓扑可以简单画成：
+
+```text
+Tailnet 设备
+    |
+    | 选择服务器作为 Tailscale Exit Node
+    v
+Tailscale / tailscale0
+    |
+    | 透明接管流量与 DNS
+    v
+M核心 TUN
+    | ------------------------|
+    | DIRECT                  | PROXY
+    v                         v
+物理网卡直连              本地 SOCKS 端口
+                              |
+                              v
+                        N协议客户端多实例
+                              |
+                              v
+                          Proxy 节点
+```
+
+N协议不直接暴露给任何内网设备，而是在本机启动三个实例，分别监听 `127.0.0.1` 上的三个 SOCKS 端口。M核心把它们作为三个上游 Proxy 放进一个 `select` 组，主节点排在第一位，另外两个只作为手动备选。
+
+这样做比在 M核心里塞一整套复杂节点配置更清楚一点：N协议负责和远端建立连接，M核心只负责透明接管、规则匹配和选择上游。
+
+## 解决回环问题
+
+Codex 的处理方式是给 N协议单独创建一个系统用户，让所有 N协议实例都以这个用户运行，然后在 M核心 TUN 配置中排除这个 UID。同时， Proxy 服务器的域名和解析出的 IP 地址也加入直连或路由排除范围。（我靠，聪明啊！）
+
+大致类似：
+
+```yaml
+tun:
+  enable: true
+  auto-route: true
+  strict-route: true
+  exclude-uid:
+    -  Proxy 进程的 UID
+```
+
+## 内网安全靠内网
+
+内网安全靠内网，有些端口不能乱开。
+
+因此所有服务端口只监听回环地址：
+
+```yaml
+allow-lan: false
+bind-address: 127.0.0.1
+external-controller: 127.0.0.1:9091
+```
+
+三个 N协议 SOCKS 端口同样只监听 `127.0.0.1`。Tailscale 客户端也不直接连接这些端口，而是通过 Exit Node 的透明路由使用它们。
+
+这里需要分清「允许 Tailscale 设备使用 Exit Node」和「在 Tailscale 地址上开放一个 Proxy 端口」是两回事。前者是正常的路由转发，后者则会把一个可以被直接调用的 Proxy 服务暴露给整个 Tailnet，完全没有必要。
+
+## 真正麻烦的是 DNS 和 DIRECT
+
+以下是 Codex 同学的思考：
+
+> 一开始出现的问题通过修改策略可以解决。大致正常以后，又遇到了一个更奇怪的问题：某个域名在 Tailscale 客户端上无法访问，但它明明不需要 Proxy ，从服务器所在网络直接连接就能打开。
+>
+> 于是重新检查整个 DNS 和直连链路。
+>
+> M核心开启 `fake-ip` 后，DNS 返回 `198.18.0.0/16` 中的地址是正常现象。这个地址不是真实服务器 IP，而是 M核心 用来把后续连接映射回域名的内部地址。因此看到 `198.18.x.x` 不能直接得出「DNS 被污染了」的结论。
+>
+> 真正有价值的现象是：
+>
+> 1. 让一个被排除出 TUN 的进程直接访问，该域名可以正常打开；
+> 2. 让流量经过 M核心的透明 Proxy 或本地 SOCKS，即使规则命中 `DIRECT`，连接仍然失败；
+> 3. M核心日志中出现了 `dns resolve failed`；
+> 4. 不只是这一个域名，其他直连域名也可能触发相同问题。
+>
+> 所以根因不是「这个域名应该走 Proxy 还是直连」，而是 M核心在 TUN 环境下的直连出站没有一条稳定、独立的解析和物理出站路径。
+>
+> 最后没有继续给域名打补丁，而是把 DNS 的职责拆开：
+>
+> - Tailscale 和 MagicDNS 域名交给 Tailscale 自己的 DNS；
+> - 普通解析使用 DoH；
+> - 需要直连的流量使用独立的 `direct-nameserver`；
+> - 可信 DNS 作为 fallback；
+> - DoH 域名本身使用 IP 型 DNS 完成 bootstrap，避免出现「为了访问 DNS，首先需要访问 DNS」的问题；
+> - N协议上游域名和进程本身绕过 TUN，防止 Proxy 回环。
+>
+> 同时增加一个绑定物理网卡的 direct outbound，让最终没有命中规则的流量明确从物理接口出去：
+
+这样才算是从整体上解决问题。
+
+## Tailscale DNS 怎样交给 M核心
+
+M核心的 DNS 仍然只监听 `127.0.0.1`，不能为了让 Tailnet 客户端使用它，就把 DNS 服务直接开到 `0.0.0.0:53`。
+
+我的做法是在服务器上增加一条仅匹配 `tailscale0` 入站的 nftables 重定向，把来自 Tailnet 的 TCP/UDP 53 端口流量转到本机 M核心 DNS 端口。这样内网物理接口上没有开放 DNS 服务，Tailnet 客户端发来的查询却仍然可以进入 M核心。
+
+这部分最好独立做成一个 systemd oneshot 服务，在 M核心启动后加载规则，停止时删除对应 nftables table。比起把几条临时命令散落在 shell history 里，至少重启以后不会突然失忆。
+
+## 额外踩坑
+
+tailscaled 自己会给控制连接打“绕过 Tailscale 路由”的标记，但系统 DNS 被 M核心劫持后给 controlplane.tailscale.com 返回了 fake-IP 198.18.x.x。普通 curl 会进入 M软件 TUN，所以能访问；tailscaled 绕过 TUN 后却拿 fake-IP 当公网地址直连，于是一直超时。应当把 Tailscale 控制域名从 fake-IP 中排除，并强制物理直连。

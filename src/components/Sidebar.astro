@@ -32,14 +32,6 @@ const contactLinks = [
     <p class="profile-info">{profile1}</p>
     <p class="profile-info">{profile2}</p>
     <p class="profile-info">{profile3}</p>
-    <p class="profile-info now-status">
-      我正在：<span data-now-status>等待状态更新</span>
-    </p>
-    <div class="profile-info next-event" data-next-event hidden>
-      <p class="next-event-title">下一个日程：<span data-event-summary></span></p>
-      <p class="next-event-time">时间：<span data-event-time></span></p>
-      <p class="next-event-location">地点：<span data-event-location></span></p>
-    </div>
     <p class="contact">
       {contactLinks.map((link, index) => (
         <>
@@ -50,7 +42,3 @@ const contactLinks = [
     </p>
   </section>
 </aside>
-
-<script>
-  import "../scripts/now-status";
-</script>

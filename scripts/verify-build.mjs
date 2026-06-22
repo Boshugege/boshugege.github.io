@@ -16,6 +16,15 @@ async function assertFile(relativePath) {
   }
 }
 
+async function assertMissing(relativePath) {
+  try {
+    await fs.access(path.join(dist, relativePath));
+  } catch {
+    return;
+  }
+  throw new Error(`Unexpected build output: ${relativePath}`);
+}
+
 for (const file of [
   "index.html",
   "about.html",
@@ -27,6 +36,7 @@ for (const file of [
 ]) {
   await assertFile(file);
 }
+await assertMissing("now.json");
 
 async function collectPostSources(directory, prefix = "") {
   const entries = await fs.readdir(directory, { withFileTypes: true });
@@ -73,6 +83,9 @@ if (indexHtml.includes("katex.min.css") || aboutHtml.includes("katex.min.css")) 
 for (const html of [indexHtml, aboutHtml, notesHtml, samplePost]) {
   if (html.includes("/assets/js/site.js")) {
     throw new Error("Legacy site.js is still referenced");
+  }
+  if (html.includes("data-now-status") || html.includes("/now.json")) {
+    throw new Error("Calendar status integration is still referenced");
   }
 }
 

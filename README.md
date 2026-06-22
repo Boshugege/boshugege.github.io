@@ -44,7 +44,7 @@
 
 - `src/layouts/DocumentLayout.astro`：统一 HTML、SEO、主题和 View Transition。
 - `src/lib/content/`：文章规范化、特征检测和站点统计。
-- `src/scripts/`：按页面加载的主题、搜索、日历与代码复制功能。
+- `src/scripts/`：按页面加载的主题、搜索与代码复制功能。
 - `src/styles/`：共享、文章、About 和 Notes 样式边界。
 - `src/components/about/`：About MDX 可复用组件。
 - `scripts/verify-build.mjs`：构建输出与历史 URL 合约。
