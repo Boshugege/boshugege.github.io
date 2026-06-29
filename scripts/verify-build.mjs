@@ -42,7 +42,7 @@ async function collectPostSources(directory, prefix = "") {
   const entries = await fs.readdir(directory, { withFileTypes: true });
   const sources = [];
   for (const entry of entries) {
-    const relativePath = path.join(prefix, entry.name);
+    const relativePath = path.posix.join(prefix, entry.name);
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) sources.push(...await collectPostSources(fullPath, relativePath));
     else if (/\.mdx?$/.test(entry.name)) sources.push(relativePath);

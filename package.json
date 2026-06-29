@@ -6,10 +6,10 @@
     "node": ">=22.6"
   },
   "scripts": {
-    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/publish-root.mjs",
-    "build:dist": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "dev": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/publish-root.mjs",
+    "build:dist": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "typecheck": "tsc -p tsconfig.client.json",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "verify": "npm run typecheck && npm test && npm run build:dist && node scripts/verify-build.mjs"
@@ -21,5 +21,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
 }
