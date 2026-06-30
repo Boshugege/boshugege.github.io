@@ -1,7 +1,7 @@
 ---
 import PostLayout from "../../layouts/PostLayout.astro";
 import { getAllPosts, type PostSummary } from "../../lib/content/posts";
-import { absoluteUrl } from "../../lib/site";
+import { absoluteUrl, site } from "../../lib/site";
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -28,9 +28,12 @@ const Content = rendered?.Content;
   title={post.title}
   description={post.excerpt}
   date={post.date}
+  updated={post.updated}
   tags={post.tags}
-  canonicalPath={`/${post.url}`}
+  canonicalPath={post.canonical || `/${post.url}`}
   image={post.cover}
+  imageAlt={post.coverAlt}
+  contentClass={post.slug === "cg-final-path-tracing" ? "images-centered" : undefined}
   wordCount={post.reading.wordCount}
   readingMinutes={post.reading.readingMinutes}
   hasMath={post.features.hasMath}
@@ -40,8 +43,26 @@ const Content = rendered?.Content;
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
+    description: post.excerpt,
     datePublished: post.date,
-    url: absoluteUrl(`/${post.url}`),
+    dateModified: post.updated || post.date,
+    author: {
+      "@type": "Person",
+      name: "ParityNonconservation",
+      url: absoluteUrl("/about.html"),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: site.name,
+      url: site.url,
+      logo: {
+        "@type": "ImageObject",
+        url: absoluteUrl(site.defaultCover),
+      },
+    },
+    keywords: post.tags,
+    mainEntityOfPage: absoluteUrl(`/${post.url}`),
+    url: post.canonical || absoluteUrl(`/${post.url}`),
     image: post.cover.startsWith("http") ? post.cover : absoluteUrl(post.cover),
   }}
 >

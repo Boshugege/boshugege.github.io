@@ -1,86 +1,58 @@
-# Astro + MDX 古早风博客
+# PNC's Blog
 
-说明（简体中文）
+一个用 Astro + MDX 维护的静态个人博客。源码集中在 `src/`，仓库根目录是 GitHub Pages 的发布产物；不要直接手改根目录 HTML/JSON/RSS，改源码后运行构建同步。
 
-- 这是一个使用 Astro + MDX 重构的静态博客，保留原来的古早风布局和旧文章 URL。
-- 新文章写在 `src/content/posts/*.mdx` 或 `src/content/posts/<slug>/index.mdx`，支持 Markdown、MDX、代码高亮、就近图片和 `$...$` / `$$...$$` 数学公式。
-- 所有历史文章都已经迁移到 MDX；根目录的 HTML/JSON/RSS 是构建产物，可直接由 GitHub Pages 从仓库根目录发布。
+站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、RSS/sitemap、全文搜索索引和按需加载的本地 KaTeX。
 
-维护与部署
+## 快速使用
 
-1. 安装依赖：
+安装依赖：
 
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-2. 本地预览：
+本地开发：
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
-3. 生成静态站点：
+完整验证：
 
-   ```bash
-   npm run build
-   ```
+```bash
+npm run verify
+```
 
-   Astro 会先生成 `dist/`，然后同步到仓库根目录，包括：
-   - `index.html` / `about.html` / `notes.html`
-   - `posts/*.html`
-   - `index.json` / `search.json` / `notes.json`
-   - `rss.xml` / `sitemap.xml`
+生成并发布到仓库根目录：
 
-4. 提交前验证：
+```bash
+npm run build
+```
 
-   ```bash
-   npm run verify
-   ```
+常用命令说明：
 
-   该命令会检查浏览器脚本类型、内容工具单元测试、全部静态路由、按需 KaTeX、图片属性和体积预算。
-
-## 工程结构
-
-- `src/layouts/DocumentLayout.astro`：统一 HTML、SEO、主题和 View Transition。
-- `src/lib/content/`：文章规范化、特征检测和站点统计。
-- `src/scripts/`：按页面加载的主题、搜索与代码复制功能。
-- `src/styles/`：共享、文章、About 和 Notes 样式边界。
-- `src/components/about/`：About MDX 可复用组件。
-- `scripts/verify-build.mjs`：构建输出与历史 URL 合约。
+- `npm run dev`：启动 Astro dev server。
+- `npm run build:dist`：只生成 `dist/`，并清理未引用的 `_astro` 资产。
+- `npm run build`：生成 `dist/`，清理构建垃圾，再同步到仓库根目录。
+- `npm run verify`：类型检查、单元测试、构建 `dist/`，并检查静态输出契约。
 
 ## 写文章
 
-在 `src/content/posts/` 新建 `.mdx` 文件，例如：
+文章源码放在 `src/content/posts/`：
 
-````mdx
----
-title: "示例：代码与公式"
-date: "2026-01-20"
-tags: ["数学", "代码"]
-excerpt: "示例文章，包含行内代码、代码块、行内数学与独立数学公式。"
----
-
-行内代码：`x = 42`。
-
-行内数学：$e^{i\theta}=\cos\theta+i\sin\theta$。
-
-```python
-def fib(n):
-    a, b = 0, 1
-    for _ in range(n):
-        a, b = b, a + b
-    return a
+```text
+src/content/posts/example.mdx
+src/content/posts/my-post/index.mdx
 ```
 
-$$
-\int_0^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
-$$
-````
+普通文件会生成同名 URL：
 
-默认输出 URL 由文件名决定：`src/content/posts/arch-linux.mdx` 会生成 `/posts/arch-linux.html`。想让 URL 带日期，就把文件命名为 `2026-01-20-sample.mdx`。
+```text
+src/content/posts/arch-linux.mdx -> /posts/arch-linux.html
+```
 
-如果文章有图片，推荐使用目录式文章，把图片和正文放在一起：
+目录式文章会生成目录名 URL，适合放就近图片：
 
 ```text
 src/content/posts/my-post/
@@ -89,64 +61,163 @@ src/content/posts/my-post/
 └── screenshot.png
 ```
 
-然后在 `index.mdx` 里直接写相对路径：
+文章 frontmatter：
 
 ```mdx
-![封面](./cover.jpg)
+---
+title: "示例文章"
+date: "2026-01-20"
+updated: "2026-01-22"
+tags: ["数学", "代码"]
+excerpt: "首页、RSS 和 SEO 使用的摘要。"
+cover: "./cover.jpg"
+coverAlt: "封面图片说明"
+canonical: "https://example.com/original.html"
+draft: false
+---
+```
 
+字段说明：
+
+- `title`、`date` 是必填字段。
+- `tags` 可以写数组，也可以写逗号分隔字符串，构建时会统一成数组。
+- `updated` 会进入文章页元数据和 sitemap 的 `lastmod`。
+- `excerpt` 用于首页索引、RSS、搜索摘要和 SEO 描述。
+- `cover` 使用 Astro 的 `image()` schema 校验，推荐使用相对路径。
+- `coverAlt` 会写入 Open Graph / Twitter 图片说明。
+- `canonical` 可为转载或外部首发文章指定规范 URL。
+- `draft: true` 会让文章从构建输出中排除。
+
+正文支持 Markdown、MDX、代码高亮、相对路径图片，以及 `$...$` / `$$...$$` 数学公式。
+
+## 图片规则
+
+文章图片优先放在文章目录里，并用相对路径引用：
+
+```mdx
 ![截图](./screenshot.png)
 ```
 
-这样会生成 `/posts/my-post.html`，图片会由 Astro 优化并自动补齐 `loading`、`decoding`、`width` 和 `height`。
+Astro 会在构建时优化这些图片，输出到 `/_astro/`，并生成 `width`、`height`、`loading`、`decoding` 等属性。文章封面也走同一套图片管线，避免 SEO 元数据指向不存在的源码路径。
 
-## 写简历页
+只有真正需要固定公开路径的静态资源才放在 `src/static/`，例如：
 
-`about.html` 的正文来自 `src/content/about/resume.mdx`。直接编辑这个文件即可更新个人介绍、教育经历、项目经历和联系方式；页面布局、侧边栏、SEO 和构建输出仍由 Astro 处理。正文下方的网站数据由 Astro 在构建时读取文章和随想自动生成。
-
-About frontmatter 还支持以下可选字段，旧内容无需修改：
-
-```yaml
-headline: "一句话介绍"
-location: "Beijing, China"
-availability: "Open to collaboration"
-links:
-  - label: "GitHub"
-    href: "https://github.com/Boshugege"
-showSiteStats: true
-showWritingHistory: true
+```text
+src/static/assets/img/icon.jpg
+src/static/manifest.webmanifest
+src/static/robots.txt
+src/static/CNAME
 ```
 
-About MDX 已预注册 `ResumeSection`、`Timeline`、`ProjectList`、`SkillList`、`LinkList` 和 `MetricStrip`，无需在 MDX 中逐个 import。例如：
+`scripts/cleanup-build.mjs` 会在构建后清理 `dist/_astro` 中没有被 HTML、CSS、JS、JSON、XML 等文本输出引用的资产，避免优化过程中留下未使用的原图副产物。
+
+## 数学公式
+
+Markdown 中可以直接写：
 
 ```mdx
-<ProjectList
-  items={[
-    {
-      name: "Project Name",
-      summary: "项目简介",
-      href: "https://example.com",
-      tags: ["Astro", "TypeScript"],
-    },
-  ]}
-/>
+行内公式：$e^{i\theta}=\cos\theta+i\sin\theta$
+
+$$
+\int_0^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+$$
 ```
 
-## 每天随想（单文件增量写作）
+构建会通过 `remark-math` + `rehype-katex` 渲染公式。站点只在检测到文章包含数学公式时加载 KaTeX 样式，并使用 `src/styles/katex-local.css` 本地打包的 woff2 字体，不依赖 CDN。
 
-- 你可以把每天随想都写在 `src/content/notes.md`（单个文件，持续追加）。
-- 推荐格式：
+## About 和随想
 
-  ```md
-  ## 2026-04-07 | 可选标题
-  这里写正文，可以多段。
-  ```
+About 页面正文来自：
 
-- 生成页面与首页预览数据：
+```text
+src/content/about/resume.mdx
+```
 
-  ```bash
-  npm run build
-  ```
+该页面已预注册这些 MDX 组件：
 
-- 该命令会生成：
-  - `notes.html`：时间线页面（单页浏览全部随想）；
-  - `notes.json`：首页“最近随想”预览数据。
+- `ResumeSection`
+- `Timeline`
+- `ProjectList`
+- `SkillList`
+- `LinkList`
+- `MetricStrip`
+
+每天随想写在：
+
+```text
+src/content/notes.md
+```
+
+推荐格式：
+
+```md
+## 2026-04-07 | 可选标题
+这里写正文，可以多段。
+```
+
+构建会生成：
+
+- `notes.html`：随想时间线页面。
+- `notes.json`：首页最近随想预览数据。
+
+## 工程结构
+
+```text
+src/
+├── components/          # Astro 组件
+├── content/             # posts / about / notes 源内容
+├── layouts/             # 文档布局、站点布局、文章布局
+├── lib/                 # 内容规范化、搜索、阅读统计、站点配置
+├── pages/               # Astro 页面和静态 JSON/XML endpoints
+├── scripts/             # 浏览器端增强脚本
+├── static/              # 固定公开路径静态文件
+└── styles/              # 全局、文章、About、Notes、KaTeX 样式
+
+scripts/
+├── cleanup-build.mjs    # 删除 dist/_astro 中未引用的构建副产物
+├── publish-root.mjs     # 将 dist 同步到仓库根目录
+└── verify-build.mjs     # 检查静态输出契约
+```
+
+核心约定：
+
+- `src/` 是唯一源码树。
+- `dist/` 是 Astro 构建输出。
+- 仓库根目录是 GitHub Pages 发布目标，由 `npm run build` 自动同步。
+- `_astro/` 和根目录 HTML/JSON/XML 是发布产物，需要随构建结果一起提交。
+
+## 构建与验证细节
+
+`npm run verify` 会执行：
+
+```bash
+npm run typecheck
+npm test
+npm run build:dist
+node scripts/verify-build.mjs
+```
+
+验证脚本会检查：
+
+- 首页、About、Notes、RSS、sitemap、JSON 索引存在。
+- 每个 `src/content/posts/**/*.mdx` 都生成对应的 `posts/*.html`。
+- 数学文章加载本地 KaTeX CSS，非数学页面不加载 KaTeX。
+- 文章图片有懒加载、解码和尺寸属性。
+- 文章封面元数据使用 Astro 优化后的公开图片。
+- 旧的 now-status / calendar 输出没有复活。
+- 搜索索引和首页 HTML 没有超过体积预算。
+- 已移除的旧静态垃圾不会重新出现在构建输出里。
+
+## 发布流程
+
+1. 修改 `src/` 下的源码或内容。
+2. 运行 `npm run verify`。
+3. 运行 `npm run build` 同步根目录发布产物。
+4. 检查 `git status`，确认源码变更和生成产物都符合预期。
+5. 提交。
+
+如果只想检查源码和 `dist/`，不要刷新根目录产物，可以运行：
+
+```bash
+npm run build:dist
+```

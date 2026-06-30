@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { getImage } from "astro:assets";
 import crypto from "node:crypto";
 import { getReadingStats, type ReadingStats } from "../reading";
 import { formatDate, normalizeTags, site } from "../site";
@@ -9,9 +10,12 @@ export interface PostSummary {
   id: string;
   title: string;
   date: string;
+  updated?: string;
   tags: string[];
   excerpt: string;
   cover: string;
+  coverAlt: string;
+  canonical?: string;
   url: string;
   slug: string;
   content: string;
@@ -24,11 +28,10 @@ function stableId(value: string) {
   return crypto.createHash("sha256").update(value.toLowerCase()).digest("hex").slice(0, 32);
 }
 
-function normalizeCover(cover?: string) {
-  const value = (cover || "").trim();
-  if (!value) return site.defaultCover;
-  if (/^https?:\/\//i.test(value)) return value;
-  return `/${value.replace(/^\//, "")}`;
+async function normalizeCover(cover?: CollectionEntry<"posts">["data"]["cover"]) {
+  if (!cover) return site.defaultCover;
+  const image = await getImage({ src: cover, format: "webp" });
+  return image.src;
 }
 
 function inferSlug(entry: CollectionEntry<"posts">) {
@@ -37,9 +40,11 @@ function inferSlug(entry: CollectionEntry<"posts">) {
 
 export async function getAllPosts() {
   const entries = await getCollection("posts");
-  return entries
-    .map((entry): PostSummary => {
+  const posts = await Promise.all(entries
+    .filter((entry) => !entry.data.draft)
+    .map(async (entry): Promise<PostSummary> => {
       const date = formatDate(entry.data.date);
+      const updated = entry.data.updated ? formatDate(entry.data.updated) : undefined;
       const slug = inferSlug(entry);
       const url = `posts/${slug}.html`;
       const tags = normalizeTags(entry.data.tags);
@@ -47,9 +52,12 @@ export async function getAllPosts() {
         id: stableId(url),
         title: entry.data.title,
         date,
+        updated,
         tags,
         excerpt: entry.data.excerpt || entry.body.slice(0, 180).replace(/\s+/g, " "),
-        cover: normalizeCover(entry.data.cover),
+        cover: await normalizeCover(entry.data.cover),
+        coverAlt: entry.data.coverAlt || site.defaultCoverAlt,
+        canonical: entry.data.canonical,
         url,
         slug,
         content: entry.body,
@@ -57,8 +65,8 @@ export async function getAllPosts() {
         features: getPostFeatures(entry.body),
         entry,
       };
-    })
-    .sort((a, b) => b.date.localeCompare(a.date));
+    }));
+  return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export function toPostIndexDocument(post: PostSummary): PostIndexDocument {
@@ -69,6 +77,7 @@ export function toPostIndexDocument(post: PostSummary): PostIndexDocument {
     tags: post.tags,
     excerpt: post.excerpt,
     cover: post.cover.replace(/^\//, ""),
+    coverAlt: post.coverAlt,
     url: post.url,
     slug: post.slug,
     wordCount: post.reading.wordCount,

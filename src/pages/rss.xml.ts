@@ -8,12 +8,16 @@ export async function GET(context: { site: URL }) {
     title: site.name,
     description: "静态 HTML 技术博客 RSS",
     site: context.site,
-    items: posts.map((post) => ({
-      title: post.title,
-      pubDate: new Date(post.date),
-      description: post.excerpt,
-      link: `/${post.url}`,
-      categories: post.tags,
-    })),
+    items: posts.map((post) => {
+      const updated = post.updated ? { customData: `<updated>${new Date(post.updated).toISOString()}</updated>` } : {};
+      return {
+        title: post.title,
+        pubDate: new Date(post.date),
+        description: post.excerpt,
+        link: `/${post.url}`,
+        categories: post.tags,
+        ...updated,
+      };
+    }),
   });
 }

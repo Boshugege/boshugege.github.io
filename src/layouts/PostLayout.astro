@@ -11,6 +11,9 @@ interface Props {
   tags?: string[] | string;
   canonicalPath: string;
   image?: string;
+  imageAlt?: string;
+  updated?: Date | string;
+  contentClass?: string;
   wordCount?: number;
   readingMinutes?: number;
   hasMath?: boolean;
@@ -26,6 +29,9 @@ const {
   tags = [],
   canonicalPath,
   image = site.defaultCover,
+  imageAlt = site.defaultCoverAlt,
+  updated,
+  contentClass = "",
   wordCount,
   readingMinutes,
   hasMath = false,
@@ -35,6 +41,7 @@ const {
 } = Astro.props;
 
 const dateText = formatDate(date);
+const updatedText = updated ? formatDate(updated) : undefined;
 const tagList = normalizeTags(tags);
 const excerpt = description || site.homeDescription;
 ---
@@ -46,11 +53,14 @@ const excerpt = description || site.homeDescription;
   canonicalPath={canonicalPath}
   ogType="article"
   image={image}
+  imageAlt={imageAlt}
   includeKatex={hasMath}
+  articlePublishedTime={dateText}
+  articleModifiedTime={updatedText || dateText}
   jsonLd={jsonLd}
-  postMeta={{ title, date: dateText, tags: tagList, excerpt, cover: image, url: canonicalPath }}
+  postMeta={{ title, date: dateText, updated: updatedText, tags: tagList, excerpt, cover: image, coverAlt: imageAlt, url: canonicalPath }}
 >
-  <article class="post-content">
+  <article class:list={["post-content", contentClass]}>
     <header class="post-topbar">
       <a class="site-title site-brand post-site-brand" href="/index.html" transition:name="site-brand">{site.name}</a>
       <nav class="post-topnav" aria-label="站点导航">
@@ -65,6 +75,7 @@ const excerpt = description || site.homeDescription;
     <h1>{title}</h1>
     <p class="meta">
       {dateText}
+      {updatedText && updatedText !== dateText && ` · 更新：${updatedText}`}
       {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
       {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
       {tagList.length > 0 && " · 标签："}

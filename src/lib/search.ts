@@ -8,6 +8,7 @@ export interface SearchablePost {
 
 export interface PostIndexDocument extends SearchablePost {
   cover: string;
+  coverAlt: string;
   url: string;
   slug: string;
   wordCount: number;

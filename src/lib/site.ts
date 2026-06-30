@@ -7,6 +7,7 @@ export const site = {
   footerOwner: "ParityNonconservation",
   url: "https://parityncsvt.top",
   defaultCover: "/assets/img/icon.jpg",
+  defaultCoverAlt: "PNC's Blog icon",
   aboutTitle: "About Me",
   aboutLines: [
     "一个正在学习的小朋友。",

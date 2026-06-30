@@ -50,6 +50,7 @@
   .post-content { padding-left: 48px; padding-right: 48px; }
 }
 .post-content img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
+.post-content.images-centered img { margin-left: auto; margin-right: auto; }
 .post-content h2 { margin: 28px 0 10px; font-size: 22px; line-height: 1.35; }
 .post-content h3 { margin: 24px 0 8px; font-size: 19px; line-height: 1.4; }
 .post-content h4 { margin: 20px 0 8px; font-size: 17px; line-height: 1.4; }

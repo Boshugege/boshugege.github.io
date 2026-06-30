@@ -1,13 +1,24 @@
 import { defineCollection, z } from "astro:content";
 
+const tags = z.union([z.array(z.string()), z.string()])
+  .default([])
+  .transform((value) => {
+    const items = Array.isArray(value) ? value : value.split(",");
+    return items.map((tag) => tag.trim()).filter(Boolean);
+  });
+
 const posts = defineCollection({
   type: "content",
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     date: z.coerce.date(),
-    tags: z.union([z.array(z.string()), z.string()]).default([]),
+    updated: z.coerce.date().optional(),
+    tags,
     excerpt: z.string().optional(),
-    cover: z.string().optional(),
+    cover: image().optional(),
+    coverAlt: z.string().optional(),
+    canonical: z.string().url().optional(),
+    draft: z.boolean().default(false),
   }),
 });
 
