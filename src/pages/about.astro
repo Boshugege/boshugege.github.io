@@ -8,7 +8,7 @@ import ProjectList from "../components/about/ProjectList.astro";
 import ResumeSection from "../components/about/ResumeSection.astro";
 import SkillList from "../components/about/SkillList.astro";
 import Timeline from "../components/about/Timeline.astro";
-import { getEntry } from "astro:content";
+import { getEntry, render } from "astro:content";
 import { getNotes } from "../lib/notes";
 import { getAllPosts } from "../lib/content/posts";
 import { buildSiteStatistics } from "../lib/content/site-stats";
@@ -20,7 +20,7 @@ if (!about) {
   throw new Error("Missing src/content/about/resume.mdx");
 }
 
-const { Content } = await about.render();
+const { Content } = await render(about);
 const updated = about.data.updated?.toISOString().slice(0, 10);
 const posts = await getAllPosts();
 const notes = await getNotes();
