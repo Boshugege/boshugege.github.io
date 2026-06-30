@@ -1,5 +1,6 @@
 ---
 import PostLayout from "../../layouts/PostLayout.astro";
+import { render } from "astro:content";
 import { getAllPosts, type PostSummary } from "../../lib/content/posts";
 import { absoluteUrl, site } from "../../lib/site";
 
@@ -20,7 +21,7 @@ const { post, previousPost, nextPost } = Astro.props as {
   previousPost?: PostSummary;
   nextPost?: PostSummary;
 };
-const rendered = await post.entry.render();
+const rendered = await render(post.entry);
 const Content = rendered?.Content;
 ---
 

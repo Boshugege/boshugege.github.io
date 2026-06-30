@@ -1,8 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const rootDir = process.cwd();
 const notesPath = path.join(rootDir, "src/content/notes.md");
 
 export interface NoteEntry {
