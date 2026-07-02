@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>火星车远程控制</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: rgba(255, 255, 255, 0.13);
+      --panel-strong: rgba(255, 255, 255, 0.2);
+      --line: rgba(255, 255, 255, 0.28);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.62);
+      --danger: rgba(255, 70, 70, 0.72);
+      --ok: rgba(80, 210, 130, 0.72);
+      --warn: rgba(255, 188, 68, 0.78);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      touch-action: none;
+      user-select: none;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+    }
+
+    .camera-slot {
+      position: fixed;
+      inset: 0;
+      background: #000;
+    }
+
+    .hud {
+      position: fixed;
+      inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      min-width: 320px;
+    }
+
+    .top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: grid;
+      grid-template-columns: minmax(140px, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      z-index: 5;
+    }
+
+    .connection {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) 74px 84px;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    input,
+    button {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    input {
+      min-width: 0;
+      padding: 0 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    button {
+      padding: 0 12px;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+
+    button:active,
+    button.active {
+      background: var(--panel-strong);
+      transform: translateY(1px);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .danger {
+      background: var(--danger);
+      border-color: rgba(255, 150, 150, 0.7);
+    }
+
+    .ok {
+      background: var(--ok);
+      border-color: rgba(150, 255, 190, 0.7);
+    }
+
+    .warn {
+      background: var(--warn);
+      border-color: rgba(255, 220, 120, 0.72);
+      color: #111;
+    }
+
+    .status {
+      position: absolute;
+      top: 70px;
+      left: 12px;
+      right: 12px;
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .drive-controls {
+      position: absolute;
+      inset: 0;
+      transition: opacity 0.16s ease;
+    }
+
+    .drive-controls.disabled {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+
+    .left-bank {
+      position: absolute;
+      left: 16px;
+      bottom: 22px;
+      width: min(44vw, 310px);
+      display: grid;
+      gap: 18px;
+    }
+
+    .right-bank {
+      position: absolute;
+      right: 20px;
+      bottom: 22px;
+      height: min(48vh, 380px);
+      width: min(26vw, 150px);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.2;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .value {
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
+    .pad {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .pad.horizontal {
+      height: 64px;
+      width: 100%;
+    }
+
+    .pad.vertical {
+      height: 100%;
+      min-height: 240px;
+      width: 76px;
+      justify-self: end;
+    }
+
+    .axis {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .horizontal .axis {
+      left: 12px;
+      right: 12px;
+      top: calc(50% - 1px);
+      height: 2px;
+    }
+
+    .vertical .axis {
+      top: 12px;
+      bottom: 12px;
+      left: calc(50% - 1px);
+      width: 2px;
+    }
+
+    .midline {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.52);
+    }
+
+    .horizontal .midline {
+      top: 13px;
+      bottom: 13px;
+      left: calc(50% - 1px);
+      width: 2px;
+    }
+
+    .vertical .midline {
+      left: 13px;
+      right: 13px;
+      top: calc(50% - 1px);
+      height: 2px;
+    }
+
+    .thumb {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      left: calc(50% - 21px);
+      top: calc(50% - 21px);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+      transform: translate3d(0, 0, 0);
+    }
+
+    .arm-panel {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 18px;
+      display: none;
+      grid-template-columns: repeat(5, minmax(48px, 1fr));
+      gap: 12px;
+      align-items: end;
+      z-index: 3;
+    }
+
+    .arm-panel.active {
+      display: grid;
+    }
+
+    .arm-panel .control {
+      min-width: 0;
+    }
+
+    .arm-panel .pad.vertical {
+      width: 100%;
+      min-height: min(40vh, 300px);
+    }
+
+    .arm-home {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      top: 116px;
+      display: none;
+      z-index: 4;
+    }
+
+    .arm-home.active {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    @media (max-width: 760px) {
+      .top {
+        grid-template-columns: 1fr;
+      }
+
+      .connection {
+        grid-template-columns: minmax(120px, 1fr) 70px 76px;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .status {
+        top: 126px;
+      }
+
+      .left-bank {
+        width: min(52vw, 260px);
+        bottom: 18px;
+        gap: 14px;
+      }
+
+      .right-bank {
+        width: 90px;
+        right: 14px;
+        bottom: 18px;
+        height: min(44vh, 330px);
+      }
+
+      .arm-panel {
+        grid-template-columns: repeat(5, minmax(42px, 1fr));
+        gap: 8px;
+      }
+
+      .label {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="camera-slot" aria-hidden="true"></div>
+  <main class="hud">
+    <section class="top">
+      <div class="connection">
+        <input id="ip" inputmode="decimal" autocomplete="off" placeholder="ESP32 IP，例如 192.168.43.120">
+        <input id="port" inputmode="numeric" autocomplete="off" value="8080" aria-label="端口">
+        <button id="ping">测试连接</button>
+      </div>
+      <div class="actions">
+        <button id="enable" class="ok">电机使能</button>
+        <button id="disable">电机失能</button>
+        <button id="stop" class="danger">立即停车</button>
+        <button id="armMode">机械臂模式</button>
+        <button id="exit">退出控制</button>
+      </div>
+    </section>
+
+    <div id="status" class="status">未填写 IP 时为本地界面模拟；填写 IP 后会向 ESP32 发送控制命令。</div>
+
+    <div id="armHome" class="arm-home">
+      <button id="homeArm" class="warn">机械臂回初始位 / 相机回零</button>
+    </div>
+
+    <section id="driveControls" class="drive-controls" aria-label="底盘控制">
+      <div class="left-bank">
+        <div class="control">
+          <div class="label">普通转向<span id="steerValue" class="value">0</span></div>
+          <div class="pad horizontal" data-control="steer" data-axis="x">
+            <div class="axis"></div>
+            <div class="midline"></div>
+            <div class="thumb"></div>
+          </div>
+        </div>
+        <div class="control">
+          <div class="label">原地转向<span id="pivotValue" class="value">0</span></div>
+          <div class="pad horizontal" data-control="pivot" data-axis="x">
+            <div class="axis"></div>
+            <div class="midline"></div>
+            <div class="thumb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-bank">
+        <div class="control">
+          <div class="label">前进 / 后退<span id="throttleValue" class="value">0</span></div>
+          <div class="pad vertical" data-control="throttle" data-axis="y">
+            <div class="axis"></div>
+            <div class="midline"></div>
+            <div class="thumb"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="armPanel" class="arm-panel" aria-label="机械臂控制">
+      <div class="control">
+        <div class="label">底座旋转<span id="rollValue" class="value">0</span></div>
+        <div class="pad vertical" data-control="roll" data-axis="y">
+          <div class="axis"></div>
+          <div class="midline"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+      <div class="control">
+        <div class="label">大臂 Pitch1<span id="pitch1Value" class="value">0</span></div>
+        <div class="pad vertical" data-control="pitch1" data-axis="y">
+          <div class="axis"></div>
+          <div class="midline"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+      <div class="control">
+        <div class="label">小臂 Pitch2<span id="pitch2Value" class="value">0</span></div>
+        <div class="pad vertical" data-control="pitch2" data-axis="y">
+          <div class="axis"></div>
+          <div class="midline"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+      <div class="control">
+        <div class="label">腕部 Pitch3<span id="pitch3Value" class="value">0</span></div>
+        <div class="pad vertical" data-control="pitch3" data-axis="y">
+          <div class="axis"></div>
+          <div class="midline"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+      <div class="control">
+        <div class="label">相机旋转<span id="cameraValue" class="value">0</span></div>
+        <div class="pad vertical" data-control="camera" data-axis="y">
+          <div class="axis"></div>
+          <div class="midline"></div>
+          <div class="thumb"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      armMode: false,
+      values: {
+        steer: 0,
+        pivot: 0,
+        throttle: 0,
+        roll: 0,
+        pitch1: 0,
+        pitch2: 0,
+        pitch3: 0,
+        camera: 0,
+      },
+      activePointers: new Map(),
+      lastCommand: '',
+      lastSentAt: 0,
+    };
+
+    const el = {
+      ip: document.getElementById('ip'),
+      port: document.getElementById('port'),
+      status: document.getElementById('status'),
+      armMode: document.getElementById('armMode'),
+      driveControls: document.getElementById('driveControls'),
+      armPanel: document.getElementById('armPanel'),
+      armHome: document.getElementById('armHome'),
+    };
+
+    const valueLabels = {
+      steer: document.getElementById('steerValue'),
+      pivot: document.getElementById('pivotValue'),
+      throttle: document.getElementById('throttleValue'),
+      roll: document.getElementById('rollValue'),
+      pitch1: document.getElementById('pitch1Value'),
+      pitch2: document.getElementById('pitch2Value'),
+      pitch3: document.getElementById('pitch3Value'),
+      camera: document.getElementById('cameraValue'),
+    };
+
+    function clamp(value, low, high) {
+      return Math.max(low, Math.min(high, value));
+    }
+
+    function endpoint() {
+      const ip = el.ip.value.trim();
+      const port = el.port.value.trim() || '8080';
+      if (!ip) return '';
+      return `http://${ip}:${port}/cmd`;
+    }
+
+    async function sendCommand(command, options = {}) {
+      state.lastCommand = command;
+      const url = endpoint();
+      if (!url) {
+        el.status.textContent = `本地模拟：${command}`;
+        return 'SIMULATED';
+      }
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          mode: 'cors',
+          cache: 'no-store',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: command,
+        });
+        const text = await res.text();
+        el.status.textContent = `${command} -> ${text}`;
+        return text;
+      } catch (err) {
+        if (!options.quiet) {
+          el.status.textContent = `发送失败：${err.message}`;
+        }
+        return 'FAILED';
+      }
+    }
+
+    function updateModeUi() {
+      el.armMode.classList.toggle('active', state.armMode);
+      el.armMode.textContent = state.armMode ? '退出机械臂模式' : '机械臂模式';
+      el.driveControls.classList.toggle('disabled', state.armMode);
+      el.armPanel.classList.toggle('active', state.armMode);
+      el.armHome.classList.toggle('active', state.armMode);
+    }
+
+    function resetValue(name) {
+      state.values[name] = 0;
+      updatePad(name);
+    }
+
+    function resetDriveValues() {
+      ['steer', 'pivot', 'throttle'].forEach(resetValue);
+    }
+
+    function resetArmValues() {
+      ['roll', 'pitch1', 'pitch2', 'pitch3', 'camera'].forEach(resetValue);
+    }
+
+    function commandForState() {
+      if (state.armMode) {
+        const v = state.values;
+        return `ARM ${v.roll} ${v.pitch1} ${v.pitch2} ${v.pitch3} ${v.camera}`;
+      }
+      const v = state.values;
+      if (Math.abs(v.pivot) > 0) {
+        return `PIVOT ${v.pivot}`;
+      }
+      return `MOVE ${v.throttle} ${v.steer}`;
+    }
+
+    function sendCurrentState(force = false) {
+      const now = performance.now();
+      if (!force && now - state.lastSentAt < 75) return;
+      state.lastSentAt = now;
+      sendCommand(commandForState(), { quiet: true });
+    }
+
+    function updatePad(name) {
+      const pad = document.querySelector(`[data-control="${name}"]`);
+      if (!pad) return;
+      const thumb = pad.querySelector('.thumb');
+      const value = state.values[name];
+      const axis = pad.dataset.axis;
+      if (axis === 'x') {
+        const max = Math.max(1, (pad.clientWidth - thumb.clientWidth) / 2 - 8);
+        thumb.style.transform = `translate3d(${max * value / 100}px, 0, 0)`;
+      } else {
+        const max = Math.max(1, (pad.clientHeight - thumb.clientHeight) / 2 - 8);
+        thumb.style.transform = `translate3d(0, ${-max * value / 100}px, 0)`;
+      }
+      valueLabels[name].textContent = String(value);
+    }
+
+    function setPadFromPointer(pad, event) {
+      const name = pad.dataset.control;
+      const rect = pad.getBoundingClientRect();
+      let value;
+      if (pad.dataset.axis === 'x') {
+        value = ((event.clientX - rect.left) / rect.width - 0.5) * 200;
+      } else {
+        value = (0.5 - (event.clientY - rect.top) / rect.height) * 200;
+      }
+      state.values[name] = Math.round(clamp(value, -100, 100));
+      updatePad(name);
+      sendCurrentState();
+    }
+
+    function attachPad(pad) {
+      const name = pad.dataset.control;
+      pad.addEventListener('pointerdown', (event) => {
+        if (!state.armMode && ['roll', 'pitch1', 'pitch2', 'pitch3', 'camera'].includes(name)) return;
+        if (state.armMode && ['steer', 'pivot', 'throttle'].includes(name)) return;
+        pad.setPointerCapture(event.pointerId);
+        state.activePointers.set(event.pointerId, pad);
+        setPadFromPointer(pad, event);
+      });
+      pad.addEventListener('pointermove', (event) => {
+        if (state.activePointers.get(event.pointerId) !== pad) return;
+        setPadFromPointer(pad, event);
+      });
+      const finish = (event) => {
+        if (state.activePointers.get(event.pointerId) !== pad) return;
+        state.activePointers.delete(event.pointerId);
+        resetValue(name);
+        sendCurrentState(true);
+      };
+      pad.addEventListener('pointerup', finish);
+      pad.addEventListener('pointercancel', finish);
+    }
+
+    document.querySelectorAll('.pad').forEach(attachPad);
+    window.addEventListener('resize', () => {
+      Object.keys(state.values).forEach(updatePad);
+    });
+
+    document.getElementById('ping').addEventListener('click', () => sendCommand('PING'));
+    document.getElementById('enable').addEventListener('click', () => sendCommand('ENABLE'));
+    document.getElementById('disable').addEventListener('click', () => sendCommand('DISABLE'));
+    document.getElementById('stop').addEventListener('click', () => {
+      resetDriveValues();
+      resetArmValues();
+      sendCommand('STOP');
+    });
+    document.getElementById('exit').addEventListener('click', () => {
+      resetDriveValues();
+      resetArmValues();
+      sendCommand('EXIT');
+    });
+    document.getElementById('homeArm').addEventListener('click', () => sendCommand('ARM_HOME'));
+
+    el.armMode.addEventListener('click', async () => {
+      resetDriveValues();
+      resetArmValues();
+      state.armMode = !state.armMode;
+      updateModeUi();
+      await sendCommand(state.armMode ? 'ARM_MODE' : 'DRIVE_MODE');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        resetDriveValues();
+        resetArmValues();
+        sendCommand('STOP', { quiet: true });
+      }
+    });
+
+    setInterval(() => {
+      if (state.activePointers.size > 0) {
+        sendCurrentState(true);
+      }
+    }, 90);
+
+    updateModeUi();
+    Object.keys(state.values).forEach(updatePad);
+  </script>
+</body>
+</html>
