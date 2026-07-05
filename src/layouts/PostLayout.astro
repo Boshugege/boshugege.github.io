@@ -1,6 +1,7 @@
 ---
 import { formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
+import Comments from "../components/Comments.astro";
 import DocumentLayout from "./DocumentLayout.astro";
 import "../styles/content.css";
 
@@ -88,6 +89,7 @@ const excerpt = description || site.homeDescription;
     </p>
     <div class="post-body">
       <slot />
+      <Comments postSlug={canonicalPath} />
       <nav class="post-nav" aria-label="文章导航">
         <div class="post-nav-item post-nav-prev">
           {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}

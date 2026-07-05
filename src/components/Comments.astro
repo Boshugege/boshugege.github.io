@@ -1,0 +1,40 @@
+---
+interface Props {
+  postSlug: string;
+}
+
+const { postSlug } = Astro.props;
+const commentsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+---
+
+<section
+  class="comments"
+  data-comments
+  data-comments-api={commentsApi}
+  data-post-slug={postSlug}
+  data-turnstile-site-key={turnstileSiteKey}
+  aria-label="评论区"
+>
+  <h2>评论</h2>
+  <div class="comments-status" data-comments-status>正在加载评论...</div>
+  <div class="comments-list" data-comments-list></div>
+  <form class="comments-form" data-comments-form>
+    <label>
+      <span>用户名</span>
+      <input name="authorName" autocomplete="name" maxlength="40" required />
+    </label>
+    <label>
+      <span>评论</span>
+      <textarea name="content" rows="4" maxlength="1200" required></textarea>
+    </label>
+    <div class="comments-turnstile" data-comments-turnstile></div>
+    <div class="comments-form-row">
+      <p class="comments-form-note">评论会直接显示，浏览器和地区信息会随评论一起记录。</p>
+      <button type="submit" data-comments-submit>发送</button>
+    </div>
+  </form>
+  <script>
+    import "../scripts/comments";
+  </script>
+</section>
