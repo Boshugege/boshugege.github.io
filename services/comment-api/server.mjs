@@ -1,19 +1,27 @@
 import http from "node:http";
 import crypto from "node:crypto";
+import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const env = process.env;
+async function envOrFile(name, fallback = "") {
+  if (env[name]) return String(env[name]).trim();
+  if (env[`${name}_FILE`]) return (await fs.readFile(env[`${name}_FILE`], "utf8")).trim();
+  return fallback;
+}
+
 const host = env.HOST || "127.0.0.1";
 const port = Number.parseInt(env.PORT || "46215", 10);
 const siteOrigin = (env.SITE_ORIGIN || "https://parityncsvt.top").replace(/\/$/, "");
 const directusUrl = (env.DIRECTUS_URL || "http://127.0.0.1:46214").replace(/\/$/, "");
+const directusStaticToken = await envOrFile("DIRECTUS_TOKEN");
 const directusEmail = env.DIRECTUS_EMAIL || "";
 const directusPassword = env.DIRECTUS_PASSWORD || "";
-const turnstileSiteKey = env.TURNSTILE_SITE_KEY || "";
-const turnstileSecretKey = env.TURNSTILE_SECRET_KEY || "";
+const turnstileSiteKey = await envOrFile("TURNSTILE_SITE_KEY");
+const turnstileSecretKey = await envOrFile("TURNSTILE_SECRET_KEY");
 const rateLimitWindowMs = Number.parseInt(env.COMMENT_RATE_LIMIT_WINDOW_MS || "600000", 10);
 const rateLimitMax = Number.parseInt(env.COMMENT_RATE_LIMIT_MAX || "3", 10);
-const hashSecret = env.COMMENT_HASH_SECRET || "dev-comment-hash-secret";
+const hashSecret = await envOrFile("COMMENT_HASH_SECRET", "dev-comment-hash-secret");
 
 let directusToken = "";
 let directusTokenExpiresAt = 0;
@@ -118,8 +126,9 @@ async function directusRequest(path, options = {}) {
 }
 
 async function getDirectusToken() {
+  if (directusStaticToken) return directusStaticToken;
   if (directusToken && Date.now() < directusTokenExpiresAt) return directusToken;
-  if (!directusEmail || !directusPassword) throw new Error("Directus credentials are not configured");
+  if (!directusEmail || !directusPassword) throw new Error("Directus token is not configured");
 
   const response = await fetch(`${directusUrl}/auth/login`, {
     method: "POST",
