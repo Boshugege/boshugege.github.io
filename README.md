@@ -186,6 +186,18 @@ scripts/
 - 仓库根目录是 GitHub Pages 发布目标，由 `npm run build` 自动同步。
 - `_astro/` 和根目录 HTML/JSON/XML 是发布产物，需要随构建结果一起提交。
 
+## 生产服务
+
+本仓库是博客文章、随想、About、前端源码和 GitHub Pages 发布产物的权威来源。服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
+
+- `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
+- `deploy.sh` 从 `origin/main` 拉取源码，完成验证和构建后创建新的 release，并将 `current` 原子切换到该 release。
+- `releases/` 用于本机快速回退；长期可重建的内容仍应提交并推送到 Git。
+
+`/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置与评论数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
+
+仓库内的 `services/comment-api/` 用于维护和测试评论 API 实现；它不会自动替换正在运行的 `/home/lyy/services/pnc-comment-api` 服务。部署评论 API 的变更时，应显式更新生产服务源码和配置。
+
 ## 构建与验证细节
 
 `npm run verify` 会执行：
