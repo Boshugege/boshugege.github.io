@@ -191,8 +191,10 @@ scripts/
 本仓库是博客文章、随想、About、前端源码和 GitHub Pages 发布产物的权威来源。服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
 
 - `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
-- `deploy.sh` 从 `origin/main` 拉取源码，完成验证和构建后创建新的 release，并将 `current` 原子切换到该 release。
-- `releases/` 用于本机快速回退；长期可重建的内容仍应提交并推送到 Git。
+- `deploy.sh` 获取 `origin/main`，在临时 worktree 中验证并构建指定提交，再将 `current` 原子切换到新 release。
+- `releases/` 在部署健康检查期间保留旧版本用于回滚；部署成功后只保留当前 release。
+
+`main` push 会先在 GitHub 托管 Runner 上执行完整验证；通过后，由标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`。部署脚本只构建该次 workflow 已验证的提交 SHA，健康检查失败会自动回滚，成功后只保留当前 release。
 
 `/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
 
