@@ -1,7 +1,9 @@
 import type { NoteEntry } from "../notes";
 import type { PostSummary } from "./posts";
+import { site } from "../site";
 
 export interface StatItem {
+  key?: "totalViews" | "siteAge" | "mostViewed" | "commentCount";
   label: string;
   value: string | number;
   detail?: string;
@@ -13,8 +15,7 @@ export interface SiteStatistics {
   yearlyPosts: [string, number][];
 }
 
-export function buildSiteStatistics(posts: PostSummary[], notes: NoteEntry[]): SiteStatistics {
-  const allTags = new Set(posts.flatMap((post) => post.tags));
+export function buildSiteStatistics(posts: PostSummary[], _notes: NoteEntry[]): SiteStatistics {
   const yearCounts = new Map<string, number>();
   for (const post of posts) {
     const year = post.date.slice(0, 4);
@@ -22,8 +23,6 @@ export function buildSiteStatistics(posts: PostSummary[], notes: NoteEntry[]): S
   }
 
   const yearlyPosts = [...yearCounts.entries()].sort((a, b) => b[0].localeCompare(a[0]));
-  const years = yearlyPosts.map(([year]) => Number(year)).filter(Number.isFinite);
-  const writingYears = years.length ? `${Math.min(...years)}-${Math.max(...years)}` : "暂无";
   const totalWords = posts.reduce((sum, post) => sum + post.reading.wordCount, 0);
   const averageWords = posts.length ? Math.round(totalWords / posts.length) : 0;
   const longestPost = posts.reduce<PostSummary | undefined>(
@@ -35,10 +34,10 @@ export function buildSiteStatistics(posts: PostSummary[], notes: NoteEntry[]): S
   return {
     yearlyPosts,
     stats: [
-      { label: "文章", value: posts.length, detail: writingYears },
-      { label: "标签", value: allTags.size, detail: "主题跨度" },
-      { label: "随想", value: notes.length, detail: notes[0] ? `最近 ${notes[0].date}` : "暂无" },
-      { label: "字数", value: `${Math.round(totalWords / 1000)}k`, detail: "粗略估算" },
+      { key: "totalViews", label: "总阅读", value: "—", detail: `${posts.length} 篇文章累计` },
+      { key: "siteAge", label: "建站时间", value: "—", detail: `始于 ${site.foundedAt}` },
+      { key: "mostViewed", label: "最多阅读", value: "—", detail: "暂无阅读记录" },
+      { key: "commentCount", label: "评论", value: "—", detail: "公开评论" },
     ],
     highlights: [
       { label: "代码块", value: posts.reduce((sum, post) => sum + post.features.codeBlocks, 0), detail: "技术笔记密度" },

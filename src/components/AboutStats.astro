@@ -1,5 +1,8 @@
 ---
+import { site } from "../lib/site";
+
 interface Stat {
+  key?: "totalViews" | "siteAge" | "mostViewed" | "commentCount";
   label: string;
   value: string | number;
   detail?: string;
@@ -14,16 +17,24 @@ interface Props {
 
 const { stats, highlights, yearlyPosts, showWritingHistory = true } = Astro.props;
 const maxYearCount = Math.max(...yearlyPosts.map(([, count]) => count), 1);
+const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
 ---
 
-<section class="about-stats" aria-label="网站数据">
+<section
+  class="about-stats"
+  aria-label="网站数据"
+  data-site-stats
+  data-api-base={statsApi}
+  data-site-founded-at={site.foundedAt}
+  data-site-time-zone={site.timeZone}
+>
   <h2>站点侧写</h2>
   <div class="about-stat-grid">
     {stats.map((stat) => (
-      <div class="about-stat">
-        <span class="about-stat-value">{stat.value}</span>
+      <div class="about-stat" data-stat-key={stat.key}>
+        <span class="about-stat-value" data-stat-value>{stat.value}</span>
         <span class="about-stat-label">{stat.label}</span>
-        {stat.detail && <span class="about-stat-detail">{stat.detail}</span>}
+        {stat.detail && <span class="about-stat-detail" data-stat-detail>{stat.detail}</span>}
       </div>
     ))}
   </div>
@@ -54,4 +65,7 @@ const maxYearCount = Math.max(...yearlyPosts.map(([, count]) => count), 1);
       </div>
     </section>
   )}
+  <script>
+    import "../scripts/site-stats";
+  </script>
 </section>

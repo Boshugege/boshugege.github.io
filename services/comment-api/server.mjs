@@ -22,10 +22,25 @@ const turnstileSecretKey = await envOrFile("TURNSTILE_SECRET_KEY");
 const rateLimitWindowMs = Number.parseInt(env.COMMENT_RATE_LIMIT_WINDOW_MS || "600000", 10);
 const rateLimitMax = Number.parseInt(env.COMMENT_RATE_LIMIT_MAX || "3", 10);
 const hashSecret = await envOrFile("COMMENT_HASH_SECRET", "dev-comment-hash-secret");
+const blogIndexFile = env.BLOG_INDEX_FILE || "/home/lyy/services/pnc-blog/current/index.json";
+const viewTimeZone = env.VIEW_TIME_ZONE || "Asia/Shanghai";
+const postCatalogTtlMs = Number.parseInt(env.POST_CATALOG_TTL_MS || "60000", 10);
 
 let directusToken = "";
 let directusTokenExpiresAt = 0;
 const rateLimitBuckets = new Map();
+let postCatalogCache = { expiresAt: 0, posts: new Map() };
+
+const postSlugPattern = /^\/posts\/[a-zA-Z0-9._-]+\.html$/;
+
+class DirectusRequestError extends Error {
+  constructor(message, status, code = "") {
+    super(message);
+    this.name = "DirectusRequestError";
+    this.status = status;
+    this.code = code;
+  }
+}
 
 function sendJson(res, status, body, headers = {}) {
   res.writeHead(status, {
@@ -52,6 +67,72 @@ function getClientIp(req) {
 
 function hashValue(value) {
   return crypto.createHmac("sha256", hashSecret).update(String(value)).digest("hex");
+}
+
+export function validatePostSlug(value) {
+  const slug = String(value || "").trim();
+  if (!postSlugPattern.test(slug)) throw new Error("文章地址无效。");
+  return slug;
+}
+
+export function validateViewInput(input) {
+  return { slug: validatePostSlug(input?.slug) };
+}
+
+export function getViewDate(date = new Date(), timeZone = viewTimeZone) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function parseAggregateCount(row) {
+  const raw = row?.count;
+  if (typeof raw === "number" || typeof raw === "string") {
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (raw && typeof raw === "object") {
+    const value = Number(raw["*"] ?? Object.values(raw)[0]);
+    return Number.isFinite(value) ? value : 0;
+  }
+  return 0;
+}
+
+export function summarizeViewGroups(rows, postCatalog = new Map()) {
+  const groups = (Array.isArray(rows) ? rows : []).map((row) => ({
+    slug: String(row?.post_slug || row?.group?.post_slug || ""),
+    views: parseAggregateCount(row),
+  })).filter((row) => postSlugPattern.test(row.slug) && row.views > 0);
+  const visibleGroups = postCatalog.size > 0
+    ? groups.filter((row) => postCatalog.has(row.slug))
+    : groups;
+  const totalViews = visibleGroups.reduce((sum, row) => sum + row.views, 0);
+  const mostViewedRow = [...visibleGroups].sort((a, b) => b.views - a.views || a.slug.localeCompare(b.slug))[0];
+  const fallbackTitle = mostViewedRow?.slug.split("/").pop()?.replace(/\.html$/, "") || "";
+
+  return {
+    totalViews,
+    mostViewed: mostViewedRow ? {
+      slug: mostViewedRow.slug,
+      title: postCatalog.get(mostViewedRow.slug) || fallbackTitle,
+      views: mostViewedRow.views,
+    } : null,
+  };
+}
+
+export function buildViewCounts(rows, postCatalog = new Map()) {
+  const counts = {};
+  for (const row of Array.isArray(rows) ? rows : []) {
+    const slug = String(row?.post_slug || row?.group?.post_slug || "");
+    if (!postSlugPattern.test(slug) || (postCatalog.size > 0 && !postCatalog.has(slug))) continue;
+    counts[slug] = parseAggregateCount(row);
+  }
+  return counts;
 }
 
 export function parseUserAgent(userAgent = "") {
@@ -84,12 +165,11 @@ export function parseUserAgent(userAgent = "") {
 }
 
 export function validateCommentInput(input) {
-  const slug = String(input?.slug || "").trim();
+  const slug = validatePostSlug(input?.slug);
   const authorName = String(input?.authorName || "").trim();
   const content = String(input?.content || "").trim();
   const turnstileToken = String(input?.turnstileToken || "").trim();
 
-  if (!/^\/posts\/[a-zA-Z0-9._-]+\.html$/.test(slug)) throw new Error("文章地址无效。");
   if (authorName.length < 1 || authorName.length > 40) throw new Error("用户名长度需要在 1 到 40 个字符之间。");
   if (content.length < 1 || content.length > 1200) throw new Error("评论长度需要在 1 到 1200 个字符之间。");
   if (!turnstileToken) throw new Error("请先完成人机验证。");
@@ -120,9 +200,59 @@ async function directusRequest(path, options = {}) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(body?.errors?.[0]?.message || body?.error || "Directus request failed");
+    throw new DirectusRequestError(
+      body?.errors?.[0]?.message || body?.error || "Directus request failed",
+      response.status,
+      body?.errors?.[0]?.extensions?.code || "",
+    );
   }
   return body;
+}
+
+async function loadPostCatalog() {
+  const now = Date.now();
+  if (now < postCatalogCache.expiresAt) return postCatalogCache.posts;
+
+  const posts = new Map();
+  try {
+    const rows = JSON.parse(await fs.readFile(blogIndexFile, "utf8"));
+    for (const row of Array.isArray(rows) ? rows : []) {
+      const slug = `/${String(row?.url || "").replace(/^\/+/, "")}`;
+      if (postSlugPattern.test(slug)) posts.set(slug, String(row?.title || slug));
+    }
+  } catch (error) {
+    if (error?.code !== "ENOENT") console.warn(`Unable to read blog index: ${error.message}`);
+  }
+
+  postCatalogCache = { expiresAt: now + Math.max(1000, postCatalogTtlMs), posts };
+  return posts;
+}
+
+async function assertKnownPostSlug(slug) {
+  const posts = await loadPostCatalog();
+  if (posts.size > 0 && !posts.has(slug)) throw new Error("文章地址无效。");
+}
+
+function aggregateQuery(filter, groupBy) {
+  const params = new URLSearchParams();
+  params.set("aggregate[count]", "*");
+  if (filter) params.set("filter", JSON.stringify(filter));
+  if (groupBy) params.append("groupBy[]", groupBy);
+  return params.toString();
+}
+
+async function countItems(collection, filter) {
+  const body = await directusRequest(`/items/${collection}?${aggregateQuery(filter)}`);
+  return parseAggregateCount(body.data?.[0]);
+}
+
+async function getPostViewCount(slug) {
+  return countItems("post_views", { post_slug: { _eq: slug } });
+}
+
+function isUniqueConstraintError(error) {
+  return error instanceof DirectusRequestError
+    && (error.status === 409 || /unique|duplicate|constraint/i.test(`${error.code} ${error.message}`));
 }
 
 async function getDirectusToken() {
@@ -169,7 +299,7 @@ function checkRateLimit(ip, slug) {
 
 async function listComments(req, res, url) {
   const slug = url.searchParams.get("slug") || "";
-  if (!/^\/posts\/[a-zA-Z0-9._-]+\.html$/.test(slug)) {
+  if (!postSlugPattern.test(slug)) {
     sendJson(res, 400, { error: "文章地址无效。" });
     return;
   }
@@ -214,6 +344,67 @@ async function createComment(req, res) {
   sendJson(res, 201, { ok: true });
 }
 
+async function getViews(req, res, url) {
+  const slugValue = url.searchParams.get("slug");
+  if (slugValue) {
+    const slug = validatePostSlug(slugValue);
+    await assertKnownPostSlug(slug);
+    sendJson(res, 200, { views: await getPostViewCount(slug) });
+    return;
+  }
+
+  const [viewGroupsBody, postCatalog] = await Promise.all([
+    directusRequest(`/items/post_views?${aggregateQuery(undefined, "post_slug")}`),
+    loadPostCatalog(),
+  ]);
+  sendJson(res, 200, { views: buildViewCounts(viewGroupsBody.data, postCatalog) });
+}
+
+async function recordView(req, res) {
+  const bodyText = await readBody(req);
+  const { slug } = validateViewInput(JSON.parse(bodyText || "{}"));
+  await assertKnownPostSlug(slug);
+
+  const ip = String(getClientIp(req));
+  const userAgent = String(req.headers["user-agent"] || "");
+  const visitorHash = hashValue(`${ip}\n${userAgent}`);
+  const viewedOn = getViewDate();
+  const viewKey = hashValue(`${slug}\n${visitorHash}\n${viewedOn}`);
+  const filter = encodeURIComponent(JSON.stringify({ view_key: { _eq: viewKey } }));
+  const existing = await directusRequest(`/items/post_views?filter=${filter}&fields=id&limit=1`);
+  let counted = false;
+
+  if (!existing.data?.length) {
+    try {
+      await directusRequest("/items/post_views", {
+        method: "POST",
+        body: JSON.stringify({
+          post_slug: slug,
+          view_key: viewKey,
+          visitor_hash: visitorHash,
+          viewed_on: viewedOn,
+          created_at: new Date().toISOString(),
+        }),
+      });
+      counted = true;
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) throw error;
+    }
+  }
+
+  sendJson(res, 200, { views: await getPostViewCount(slug), counted });
+}
+
+async function getSiteStats(res) {
+  const [viewGroupsBody, commentCount, postCatalog] = await Promise.all([
+    directusRequest(`/items/post_views?${aggregateQuery(undefined, "post_slug")}`),
+    countItems("comments", { status: { _eq: "visible" } }),
+    loadPostCatalog(),
+  ]);
+  const viewStats = summarizeViewGroups(viewGroupsBody.data, postCatalog);
+  sendJson(res, 200, { ...viewStats, commentCount });
+}
+
 async function handle(req, res) {
   const url = new URL(req.url || "/", `http://${req.headers.host || `${host}:${port}`}`);
   if (req.method === "OPTIONS") {
@@ -230,6 +421,12 @@ async function handle(req, res) {
       await listComments(req, res, url);
     } else if (req.method === "POST" && url.pathname === "/comments") {
       await createComment(req, res);
+    } else if (req.method === "GET" && url.pathname === "/views") {
+      await getViews(req, res, url);
+    } else if (req.method === "POST" && url.pathname === "/views") {
+      await recordView(req, res);
+    } else if (req.method === "GET" && url.pathname === "/stats") {
+      await getSiteStats(res);
     } else {
       sendJson(res, 404, { error: "Not found" });
     }

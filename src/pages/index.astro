@@ -16,6 +16,7 @@ const activeTag = Astro.url.searchParams.get("tag") || "";
 const activeTagIndex = tags.findIndex(([tag]) => tag === activeTag);
 const tagsExpanded = activeTagIndex >= 5;
 const visiblePosts = activeTag ? posts.filter((post) => post.tags.includes(activeTag)) : posts;
+const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
 
 function getPostMeta(post: (typeof posts)[number]) {
   return [
@@ -75,7 +76,7 @@ function getPostMeta(post: (typeof posts)[number]) {
         )}
       </nav>
     </div>
-    <div class="dir-list" data-post-list>
+    <div class="dir-list" data-post-list data-views-api={statsApi}>
       {visiblePosts.map((post) => (
         <div class="dir-item">
           <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch>
@@ -83,6 +84,7 @@ function getPostMeta(post: (typeof posts)[number]) {
           </a>
           <span class="meta dir-item-meta">
             {getPostMeta(post).join(" · ")}
+            {" · 阅读："}<span data-post-list-view data-post-slug={`/${post.url}`}>—</span>{" 次"}
           </span>
         </div>
       ))}

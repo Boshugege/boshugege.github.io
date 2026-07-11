@@ -65,14 +65,25 @@ const coverPost = await read("posts/cg-final-path-tracing.html");
 if (!indexHtml.includes("data-post-list") || !indexHtml.includes("data-post-search")) {
   throw new Error("Home page is missing its progressively enhanced post directory");
 }
+if (!indexHtml.includes("data-post-list-view") || !indexHtml.includes("阅读：")) {
+  throw new Error("Home article metadata is missing dynamic view counts");
+}
 if (!aboutHtml.includes("站点侧写") || !aboutHtml.includes("resume-content")) {
   throw new Error("About page is missing resume or site statistics content");
+}
+for (const key of ["totalViews", "siteAge", "mostViewed", "commentCount"]) {
+  if (!aboutHtml.includes(`data-stat-key="${key}"`)) {
+    throw new Error(`About page is missing dynamic statistic: ${key}`);
+  }
 }
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");
 }
 if (!/href="\/_astro\/katex-local\.[^"]+\.css"/.test(samplePost) || !samplePost.includes("post-content")) {
   throw new Error("Math post is missing KaTeX or article markup");
+}
+if (!samplePost.includes("data-post-view") || !samplePost.includes("data-post-view-count") || !samplePost.includes("阅读：")) {
+  throw new Error("Article metadata is missing its dynamic view count");
 }
 if (!/<img[^>]+loading="lazy"[^>]+decoding="async"[^>]+width="\d+"[^>]+height="\d+"/.test(imagePost)) {
   throw new Error("Article images are missing lazy loading or intrinsic dimensions");

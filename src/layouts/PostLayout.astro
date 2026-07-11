@@ -45,6 +45,8 @@ const dateText = formatDate(date);
 const updatedText = updated ? formatDate(updated) : undefined;
 const tagList = normalizeTags(tags);
 const excerpt = description || site.homeDescription;
+const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
+const postSlug = Astro.url.pathname;
 ---
 
 <DocumentLayout
@@ -74,7 +76,7 @@ const excerpt = description || site.homeDescription;
       <ThemeToggle />
     </header>
     <h1>{title}</h1>
-    <p class="meta">
+    <p class="meta" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
       {dateText}
       {updatedText && updatedText !== dateText && ` · 更新：${updatedText}`}
       {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
@@ -86,6 +88,7 @@ const excerpt = description || site.homeDescription;
           <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
         </>
       ))}
+      {" · 阅读："}<span data-post-view-count>—</span>{" 次"}
     </p>
     <div class="post-body">
       <slot />
@@ -105,5 +108,6 @@ const excerpt = description || site.homeDescription;
   </article>
   <script>
     import "../scripts/code-copy";
+    import "../scripts/site-stats";
   </script>
 </DocumentLayout>

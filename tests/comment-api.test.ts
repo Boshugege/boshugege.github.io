@@ -32,3 +32,34 @@ test("rejects invalid post slugs", () => {
     turnstileToken: "token",
   }));
 });
+
+test("validates article view payloads and uses the configured calendar day", () => {
+  assert.deepEqual(api.validateViewInput({ slug: "/posts/arch-linux.html" }), {
+    slug: "/posts/arch-linux.html",
+  });
+  assert.equal(api.getViewDate(new Date("2026-07-10T16:30:00.000Z"), "Asia/Shanghai"), "2026-07-11");
+});
+
+test("summarizes Directus view aggregates for known posts", () => {
+  const rows = [
+    { post_slug: "/posts/a.html", count: "4" },
+    { post_slug: "/posts/b.html", count: { "*": 7 } },
+    { post_slug: "/posts/unknown.html", count: 100 },
+  ];
+  const catalog = new Map([
+    ["/posts/a.html", "文章 A"],
+    ["/posts/b.html", "文章 B"],
+  ]);
+  const stats = api.summarizeViewGroups(rows, catalog);
+
+  assert.equal(stats.totalViews, 11);
+  assert.deepEqual(stats.mostViewed, {
+    slug: "/posts/b.html",
+    title: "文章 B",
+    views: 7,
+  });
+  assert.deepEqual(api.buildViewCounts(rows, catalog), {
+    "/posts/a.html": 4,
+    "/posts/b.html": 7,
+  });
+});

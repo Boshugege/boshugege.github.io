@@ -6,6 +6,8 @@ export const site = {
   language: "zh-CN",
   footerOwner: "ParityNonconservation",
   url: "https://parityncsvt.top",
+  foundedAt: "2022-05-10",
+  timeZone: "Asia/Shanghai",
   defaultCover: "/assets/img/icon.jpg",
   defaultCoverAlt: "PNC's Blog icon",
   aboutTitle: "About Me",

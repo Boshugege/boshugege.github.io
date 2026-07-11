@@ -2,7 +2,7 @@
 
 一个用 Astro + MDX 维护的静态个人博客。源码集中在 `src/`，仓库根目录是 GitHub Pages 的发布产物；不要直接手改根目录 HTML/JSON/RSS，改源码后运行构建同步。
 
-站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、RSS/sitemap、全文搜索索引和按需加载的本地 KaTeX。
+站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、RSS/sitemap、全文搜索索引和按需加载的本地 KaTeX。本机部署还通过同源 `/api/*` 提供评论、按日去重的文章阅读次数与 About 动态站点统计。
 
 ## 快速使用
 
@@ -194,7 +194,9 @@ scripts/
 - `deploy.sh` 从 `origin/main` 拉取源码，完成验证和构建后创建新的 release，并将 `current` 原子切换到该 release。
 - `releases/` 用于本机快速回退；长期可重建的内容仍应提交并推送到 Git。
 
-`/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置与评论数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
+`/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
+
+动态统计使用 Directus 的 `post_views` collection：同一 IP + User-Agent、同一文章、同一天只计一次。文章页负责记录阅读，首页批量读取各文章次数，About 页面读取总阅读、最多阅读文章和公开评论数量；接口不可用时保留静态排版和占位值。
 
 仓库内的 `services/comment-api/` 用于维护和测试评论 API 实现；它不会自动替换正在运行的 `/home/lyy/services/pnc-comment-api` 服务。部署评论 API 的变更时，应显式更新生产服务源码和配置。
 
@@ -217,6 +219,7 @@ node scripts/verify-build.mjs
 - 文章图片有懒加载、解码和尺寸属性。
 - 文章封面元数据使用 Astro 优化后的公开图片。
 - 旧的 now-status / calendar 输出没有复活。
+- 首页与文章页保留阅读次数挂载点，About 保留四项动态统计挂载点。
 - 搜索索引和首页 HTML 没有超过体积预算。
 - 已移除的旧静态垃圾不会重新出现在构建输出里。
 

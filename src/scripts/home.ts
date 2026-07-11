@@ -3,7 +3,14 @@ import { filterPosts, type PostIndexDocument, type PostSearchDocument } from "..
 const SEARCH_DELAY = 120;
 let postsPromise: Promise<PostIndexDocument[]> | undefined;
 let searchPromise: Promise<Map<string, string>> | undefined;
+let viewCountsPromise: Promise<Map<string, number>> | undefined;
+let viewCounts = new Map<string, number>();
+let viewCountsLoaded = false;
 let timer: number | undefined;
+
+interface ViewCountsResponse {
+  views?: Record<string, number>;
+}
 
 function loadPosts() {
   return postsPromise ||= fetch("/index.json").then((response) => {
@@ -22,6 +29,47 @@ function loadSearchIndex() {
       row.id,
       [row.title, row.excerpt, row.tags.join(" "), row.content].join("\n").toLowerCase(),
     ])));
+}
+
+function loadViewCounts(apiBase: string) {
+  return viewCountsPromise ||= fetch(`${apiBase}/views`)
+    .then((response) => {
+      if (!response.ok) throw new Error(`views: ${response.status}`);
+      return response.json() as Promise<ViewCountsResponse>;
+    })
+    .then((body) => {
+      viewCounts = new Map(Object.entries(body.views || {}).map(([slug, count]) => [slug, Number(count) || 0]));
+      viewCountsLoaded = true;
+      return viewCounts;
+    })
+    .catch((error) => {
+      viewCountsPromise = undefined;
+      throw error;
+    });
+}
+
+function formatViewCount(slug: string) {
+  const value = viewCounts.get(slug);
+  if (value === undefined && !viewCountsLoaded) return "—";
+  return (value || 0).toLocaleString("zh-CN");
+}
+
+function updateViewCountNodes() {
+  document.querySelectorAll<HTMLElement>("[data-post-list-view]").forEach((node) => {
+    node.textContent = formatViewCount(node.dataset.postSlug || "");
+  });
+}
+
+async function hydrateViewCounts() {
+  const region = document.querySelector<HTMLElement>("[data-post-list]");
+  const apiBase = region?.dataset.viewsApi;
+  if (!apiBase) return;
+  try {
+    await loadViewCounts(apiBase);
+    updateViewCountNodes();
+  } catch {
+    // Keep the static fallback when the local API is unavailable.
+  }
 }
 
 function renderPosts(posts: PostIndexDocument[]) {
@@ -46,12 +94,18 @@ function renderPosts(posts: PostIndexDocument[]) {
     title.textContent = post.title;
     const meta = document.createElement("span");
     meta.className = "meta dir-item-meta";
-    meta.textContent = [
+    const slug = `/${post.url}`;
+    const metaText = [
       post.date,
       `约 ${post.wordCount.toLocaleString("zh-CN")} 字`,
       `约 ${post.readingMinutes} 分钟读完`,
       post.tags.join(" / "),
     ].filter(Boolean).join(" · ");
+    const viewCount = document.createElement("span");
+    viewCount.dataset.postListView = "";
+    viewCount.dataset.postSlug = slug;
+    viewCount.textContent = formatViewCount(slug);
+    meta.append(document.createTextNode(`${metaText} · 阅读：`), viewCount, document.createTextNode(" 次"));
     item.append(title, meta);
     fragment.append(item);
   }
@@ -93,6 +147,7 @@ function initializeHome() {
   const query = params.get("q") || "";
   input.value = query;
   updateTagState(tag);
+  void hydrateViewCounts();
   if (tag || query) void applyFilters(tag, query);
 
   input.addEventListener("input", () => {
