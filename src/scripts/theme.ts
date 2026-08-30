@@ -46,7 +46,7 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("astro:before-swap", (event) => {
-  const nextDocument = (event as CustomEvent & { newDocument?: Document }).newDocument;
+  const nextDocument = (event as unknown as { newDocument?: Document }).newDocument;
   if (nextDocument) applyTheme(nextDocument, getTheme());
 });
 

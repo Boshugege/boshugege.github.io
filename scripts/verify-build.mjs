@@ -61,6 +61,7 @@ const notesHtml = await read("notes.html");
 const samplePost = await read("posts/2026-01-20-sample.html");
 const imagePost = await read("posts/2023-first-half-conclusion.html");
 const coverPost = await read("posts/cg-final-path-tracing.html");
+const legacyHeadingPost = await read("posts/wuxieyu.html");
 
 if (!indexHtml.includes("data-post-list") || !indexHtml.includes("data-post-search")) {
   throw new Error("Home page is missing its progressively enhanced post directory");
@@ -99,6 +100,32 @@ if (coverPost.includes("src/content/posts") || !coverPost.includes('property="og
 }
 if (!coverPost.includes('"dateModified"') || !coverPost.includes('property="article:modified_time"')) {
   throw new Error("Article metadata is missing modified-time fields");
+}
+
+function getAttributeValues(html, attribute) {
+  return [...html.matchAll(new RegExp(`${attribute}="([^"]+)"`, "g"))].map((match) => match[1]);
+}
+
+function assertTableOfContents(html, expectedHeadingCount, label) {
+  const tocSlugs = getAttributeValues(html, "data-toc-link");
+  const uniqueSlugs = [...new Set(tocSlugs)];
+  if (uniqueSlugs.length !== expectedHeadingCount || tocSlugs.length !== expectedHeadingCount * 2) {
+    throw new Error(`${label} table of contents does not render matching inline and rail links`);
+  }
+  for (const slug of uniqueSlugs) {
+    if (!html.includes(`id="${slug}"`)) {
+      throw new Error(`${label} table of contents points to a missing heading: ${slug}`);
+    }
+  }
+}
+
+assertTableOfContents(coverPost, 13, "Long article");
+assertTableOfContents(legacyHeadingPost, 3, "Legacy H4 article");
+if (samplePost.includes("data-post-toc")) {
+  throw new Error("Short article should not render a table of contents");
+}
+if (!coverPost.includes("post-toc-inline") || !coverPost.includes("post-toc-rail")) {
+  throw new Error("Article table of contents is missing a responsive variant");
 }
 
 for (const html of [indexHtml, aboutHtml, notesHtml, samplePost]) {

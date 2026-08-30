@@ -74,6 +74,7 @@ cover: "./cover.jpg"
 coverAlt: "封面图片说明"
 canonical: "https://example.com/original.html"
 draft: false
+toc: true
 ---
 ```
 
@@ -87,6 +88,7 @@ draft: false
 - `coverAlt` 会写入 Open Graph / Twitter 图片说明。
 - `canonical` 可为转载或外部首发文章指定规范 URL。
 - `draft: true` 会让文章从构建输出中排除。
+- `toc: false` 可关闭文章自动目录；默认开启，且只有 H2–H4 标题达到 3 个时才显示。
 
 正文支持 Markdown、MDX、代码高亮、相对路径图片，以及 `$...$` / `$$...$$` 数学公式。
 

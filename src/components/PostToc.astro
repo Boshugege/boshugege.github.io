@@ -1,0 +1,30 @@
+---
+import type { TocItem } from "../lib/toc";
+import PostTocList from "./PostTocList.astro";
+
+interface Props {
+  items: TocItem[];
+  count: number;
+  variant: "rail" | "inline";
+}
+
+const { items, count, variant } = Astro.props;
+---
+
+{
+  variant === "inline" ? (
+    <details class="post-toc post-toc-inline" data-post-toc>
+      <summary>目录 · {count} 节</summary>
+      <nav aria-label="文章目录">
+        <PostTocList items={items} />
+      </nav>
+    </details>
+  ) : (
+    <aside class="post-toc post-toc-rail" data-post-toc>
+      <nav aria-label="文章目录">
+        <p class="post-toc-title">目录</p>
+        <PostTocList items={items} />
+      </nav>
+    </aside>
+  )
+}

@@ -12,6 +12,7 @@
     "src/scripts/**/*.ts",
     "src/lib/search.ts",
     "src/lib/reading.ts",
-    "src/lib/content/features.ts"
+    "src/lib/content/features.ts",
+    "src/lib/toc.ts"
   ]
 }

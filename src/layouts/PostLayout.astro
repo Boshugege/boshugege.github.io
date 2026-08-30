@@ -2,7 +2,9 @@
 import { formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import Comments from "../components/Comments.astro";
+import PostToc from "../components/PostToc.astro";
 import DocumentLayout from "./DocumentLayout.astro";
+import type { TableOfContents } from "../lib/toc";
 import "../styles/content.css";
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
   wordCount?: number;
   readingMinutes?: number;
   hasMath?: boolean;
+  toc?: TableOfContents;
   previousPost?: { title: string; url: string };
   nextPost?: { title: string; url: string };
   jsonLd?: Record<string, unknown>;
@@ -36,6 +39,7 @@ const {
   wordCount,
   readingMinutes,
   hasMath = false,
+  toc,
   previousPost,
   nextPost,
   jsonLd,
@@ -90,24 +94,29 @@ const postSlug = Astro.url.pathname;
       ))}
       {" · 阅读："}<span data-post-view-count>—</span>{" 次"}
     </p>
-    <div class="post-body">
-      <slot />
-      <Comments postSlug={canonicalPath} />
-      <nav class="post-nav" aria-label="文章导航">
-        <div class="post-nav-item post-nav-prev">
-          {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
-        </div>
-        <div class="post-nav-item post-nav-home">
-          <a class="post-nav-link" href="/index.html">返回首页</a>
-        </div>
-        <div class="post-nav-item post-nav-next">
-          {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
-        </div>
-      </nav>
+    {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
+    <div class="post-reading-layout">
+      <div class="post-body" data-post-body>
+        <slot />
+        <Comments postSlug={canonicalPath} />
+        <nav class="post-nav" aria-label="文章导航">
+          <div class="post-nav-item post-nav-prev">
+            {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
+          </div>
+          <div class="post-nav-item post-nav-home">
+            <a class="post-nav-link" href="/index.html">返回首页</a>
+          </div>
+          <div class="post-nav-item post-nav-next">
+            {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
+          </div>
+        </nav>
+      </div>
+      {toc && <PostToc items={toc.items} count={toc.count} variant="rail" />}
     </div>
   </article>
   <script>
     import "../scripts/code-copy";
+    import "../scripts/post-toc";
     import "../scripts/site-stats";
   </script>
 </DocumentLayout>

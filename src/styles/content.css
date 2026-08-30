@@ -45,7 +45,107 @@
 .post-content > h1:first-of-type {
   margin-top: 0;
 }
+.post-reading-layout {
+  position: relative;
+}
 .post-body { display: flow-root; }
+.post-toc {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.post-toc-inline {
+  margin: 18px 0 20px;
+  padding: 9px 0;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+}
+.post-toc-inline summary {
+  width: fit-content;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.post-toc-inline nav {
+  margin-top: 9px;
+}
+.post-toc-rail {
+  display: none;
+}
+.post-toc-title {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+.post-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.post-toc-list .post-toc-list {
+  margin-top: 3px;
+  padding-left: 12px;
+}
+.post-toc-list li {
+  margin: 3px 0;
+}
+.post-toc-list a,
+.post-toc-list a:visited {
+  position: relative;
+  display: block;
+  padding: 2px 0 2px 10px;
+  color: var(--muted);
+  line-height: 1.4;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.post-toc-list a::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  background: transparent;
+}
+.post-toc-list a:hover,
+.post-toc-list a:focus,
+.post-toc-list a.active {
+  color: var(--text);
+  text-decoration: underline;
+}
+.post-toc-list a.active {
+  font-weight: 700;
+  text-decoration: none;
+}
+.post-toc-list a.active::before {
+  background: var(--text);
+}
+.post-body :is(h2, h3, h4) {
+  scroll-margin-top: 24px;
+}
+.heading-anchor,
+.heading-anchor:visited {
+  margin-left: 0.35em;
+  color: var(--muted);
+  font-size: 0.7em;
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  transition:
+    color 140ms ease,
+    opacity 140ms ease;
+}
+.post-body :is(h2, h3, h4):hover .heading-anchor,
+.heading-anchor:focus-visible,
+.heading-anchor.copied {
+  opacity: 1;
+}
+.heading-anchor:hover,
+.heading-anchor:focus,
+.heading-anchor.copied {
+  color: var(--text);
+  text-decoration: none;
+}
 .comments {
   margin-top: 36px;
   padding-top: 18px;
@@ -130,6 +230,28 @@
 }
 @media (min-width: 1200px) {
   .post-content { padding-left: 48px; padding-right: 48px; }
+}
+@media (min-width: 1280px) {
+  .post-toc-inline {
+    display: none;
+  }
+  .post-toc-rail {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: calc(100% + 24px);
+    bottom: 0;
+    width: 200px;
+    border-left: 1px solid var(--border);
+  }
+  .post-toc-rail nav {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    padding-left: 12px;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
 }
 .post-content img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
 .post-content.images-centered img { margin-left: auto; margin-right: auto; }
@@ -257,8 +379,14 @@
     width: 100%;
   }
 }
+@media (hover: none) {
+  .heading-anchor {
+    opacity: 0.65;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .post-content pre,
   .post-content :not(pre) > code,
-  .code-copy-button { transition: none; }
+  .code-copy-button,
+  .heading-anchor { transition: none; }
 }

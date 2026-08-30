@@ -3,6 +3,7 @@ import PostLayout from "../../layouts/PostLayout.astro";
 import { render } from "astro:content";
 import { getAllPosts, type PostSummary } from "../../lib/content/posts";
 import { absoluteUrl, site } from "../../lib/site";
+import { buildTableOfContents } from "../../lib/toc";
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -23,6 +24,7 @@ const { post, previousPost, nextPost } = Astro.props as {
 };
 const rendered = await render(post.entry);
 const Content = rendered?.Content;
+const toc = buildTableOfContents(rendered.headings, post.entry.data.toc);
 ---
 
 <PostLayout
@@ -38,6 +40,7 @@ const Content = rendered?.Content;
   wordCount={post.reading.wordCount}
   readingMinutes={post.reading.readingMinutes}
   hasMath={post.features.hasMath}
+  toc={toc}
   previousPost={previousPost && { title: previousPost.title, url: `/${previousPost.url}` }}
   nextPost={nextPost && { title: nextPost.title, url: `/${nextPost.url}` }}
   jsonLd={{
