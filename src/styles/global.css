@@ -344,10 +344,11 @@ a:focus {
   margin: 0;
   padding: 4px 10px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--control-bg);
   color: var(--text);
   line-height: 1.4;
+  white-space: nowrap;
   text-decoration: none;
   transition:
     background-color 140ms ease,
@@ -391,10 +392,11 @@ a:focus {
   margin: 0;
   padding: 4px 10px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--control-bg);
   color: var(--text);
   line-height: 1.4;
+  white-space: nowrap;
   text-decoration: none;
 }
 .tags-list.collapsed .tag:not(.visible) {
@@ -405,13 +407,14 @@ a:focus {
   margin-left: 0;
   background: transparent;
   border: 1px dashed var(--border);
-  border-radius: 999px;
+  border-radius: 2px;
   padding: 4px 10px;
   cursor: pointer;
   color: var(--muted);
   text-decoration: none;
   font-size: 13px;
   line-height: 1.4;
+  white-space: nowrap;
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
@@ -457,7 +460,7 @@ a:focus {
   width: min(300px, 100%);
   flex: 0 1 300px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--control-bg);
   color: var(--text);
   caret-color: var(--text);
@@ -599,8 +602,33 @@ a:focus {
   .dir-tools {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+  }
+  .search-input {
+    width: 100%;
+    height: 38px;
+    flex: none;
   }
   .tag-nav.in-directory {
-    flex-basis: auto;
+    width: 100%;
+    flex: none;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .tag-nav.in-directory::-webkit-scrollbar {
+    display: none;
+  }
+  .tag-nav.in-directory > a,
+  .tag-nav.in-directory .tag,
+  .tag-nav.in-directory .tag-toggle {
+    flex: 0 0 auto;
+  }
+  .tag-nav.in-directory .tag-toggle {
+    margin-top: 0;
   }
 }
