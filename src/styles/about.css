@@ -17,7 +17,11 @@
 .about-year-row { display: grid; grid-template-columns: 44px 1fr 28px; align-items: center; gap: 8px; font-size: 13px; }
 .about-year-track { height: 8px; border: 1px solid var(--border); background: var(--panel); }
 .about-year-track i { display: block; height: 100%; background: var(--text); }
-.resume-content { line-height: 1.7; }
+.resume-content {
+  min-width: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
 .resume-content h2 { border-top: 1px dashed var(--border); padding-top: 12px; margin: 14px 0 8px; font-size: 16px; }
 .resume-content h2:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
 .resume-content h3 { margin: 10px 0 6px; font-size: 15px; }
@@ -34,6 +38,14 @@
 .about-block p:last-child { margin-bottom: 0; }
 .about-inline-links { line-height: 1.8; }
 @media (max-width: 800px) {
-  .about-stat-grid,
+  .about-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .about-highlight-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .about-stat {
+    padding: 7px;
+  }
+  .about-stat-value {
+    font-size: 18px;
+  }
 }

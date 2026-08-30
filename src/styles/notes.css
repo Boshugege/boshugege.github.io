@@ -1,6 +1,12 @@
-.notes-timeline { display: grid; gap: 10px; margin-top: 8px; }
+.notes-timeline {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  margin-top: 8px;
+}
 .note-item {
   display: grid;
+  min-width: 0;
   grid-template-columns: 130px 1fr;
   gap: 10px;
   align-items: start;
@@ -9,7 +15,14 @@
 }
 .note-item:first-child { border-top: 0; padding-top: 0; }
 .note-date { color: var(--muted); font-size: 13px; line-height: 1.5; padding-top: 2px; }
-.notes-timeline .note-body.post-content { max-width: none; margin: 0; padding: 0; text-align: left; }
+.notes-timeline .note-body.post-content {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
 .notes-timeline .note-body.post-content h1,
 .notes-timeline .note-body.post-content h2,
 .notes-timeline .note-body.post-content h3,
@@ -21,4 +34,5 @@
 .note-title { margin: 0 0 8px; font-size: 16px; }
 @media (max-width: 800px) {
   .note-item { grid-template-columns: 1fr; gap: 4px; }
+  .note-date { padding-top: 0; }
 }

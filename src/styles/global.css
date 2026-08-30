@@ -108,9 +108,11 @@ body {
 }
 html {
   scrollbar-gutter: stable;
+  overflow-x: clip;
 }
 body {
   margin: 0;
+  min-width: 0;
   background: var(--bg);
   color: var(--text);
   font-family:
@@ -268,6 +270,7 @@ a:focus {
 
 /* 布局：左右两栏（桌面） */
 .layout {
+  width: 100%;
   max-width: 1100px;
   margin: 18px auto;
   display: flex;
@@ -277,10 +280,12 @@ a:focus {
 }
 .sidebar {
   width: 300px;
+  min-width: 0;
   flex: 0 0 300px;
 }
 .sidebar-transition-anchor {
   width: 300px;
+  min-width: 0;
   flex: 0 0 300px;
 }
 .sidebar-transition-anchor .sidebar {
@@ -288,6 +293,8 @@ a:focus {
   flex: none;
 }
 .about {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--border);
   padding: 12px;
   background: var(--panel);
@@ -324,6 +331,7 @@ a:focus {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
 }
 /* 标签导航 */
 .tag-nav {
@@ -436,8 +444,12 @@ a:focus {
 .content {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
 }
 .directory {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--border);
   padding: 12px;
   background: var(--panel);
@@ -500,6 +512,7 @@ a:focus {
   color: var(--text);
   font-weight: 700;
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 .dir-item-title:visited {
   color: var(--text);
@@ -513,6 +526,7 @@ a:focus {
   font-size: 12px;
   display: block;
   margin-top: 4px;
+  overflow-wrap: anywhere;
 }
 
 .site-footer {
@@ -572,19 +586,29 @@ a:focus {
 
 @media (max-width: 800px) {
   body {
-    overflow: visible;
+    overflow-x: hidden;
   }
   .layout {
     flex-direction: column;
+    gap: 12px;
+    margin: 12px auto 18px;
     padding: 0 12px;
   }
   .sidebar {
-    width: auto;
+    width: 100%;
+    max-width: 100%;
     flex: none;
   }
   .sidebar-transition-anchor {
-    width: auto;
+    width: 100%;
+    max-width: 100%;
     flex: none;
+  }
+  .content {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+    gap: 12px;
   }
   .site-title {
     font-size: 24px;
@@ -593,11 +617,16 @@ a:focus {
     position: absolute;
   }
   .site-header {
-    margin: 16px;
-    padding: 12px;
+    min-height: 32px;
+    margin: 0;
+    padding: 2px 44px 6px 2px;
   }
   .directory {
-    margin-top: 16px;
+    margin-top: 0;
+    padding: 12px;
+  }
+  .latest-note-panel {
+    margin-bottom: 0;
   }
   .dir-tools {
     flex-direction: column;
@@ -610,6 +639,8 @@ a:focus {
     flex: none;
   }
   .tag-nav.in-directory {
+    min-width: 0;
+    max-width: 100%;
     width: 100%;
     flex: none;
     flex-wrap: nowrap;
@@ -630,5 +661,22 @@ a:focus {
   }
   .tag-nav.in-directory .tag-toggle {
     margin-top: 0;
+  }
+  .site-footer {
+    margin: 22px auto;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .layout {
+    padding: 0 10px;
+  }
+  .about,
+  .directory {
+    padding: 10px;
+  }
+  .site-title {
+    font-size: 23px;
   }
 }
