@@ -37,6 +37,8 @@ for (const file of [
   await assertFile(file);
 }
 await assertMissing("now.json");
+await assertMissing("CNAME");
+await assertMissing(".nojekyll");
 
 async function collectPostSources(directory, prefix = "") {
   const entries = await fs.readdir(directory, { withFileTypes: true });

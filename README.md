@@ -1,6 +1,6 @@
 # PNC's Blog
 
-一个用 Astro + MDX 维护的静态个人博客。源码集中在 `src/`，仓库根目录是 GitHub Pages 的发布产物；不要直接手改根目录 HTML/JSON/RSS，改源码后运行构建同步。
+一个用 Astro + MDX 维护的静态个人博客。仓库只保存可重建的源码、配置、测试和部署入口；`dist/` 及其他静态构建产物不提交到 Git。
 
 站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、RSS/sitemap、全文搜索索引和按需加载的本地 KaTeX。本机部署还通过同源 `/api/*` 提供评论、按日去重的文章阅读次数与 About 动态站点统计。
 
@@ -24,7 +24,7 @@ npm run dev
 npm run verify
 ```
 
-生成并发布到仓库根目录：
+生成生产静态文件：
 
 ```bash
 npm run build
@@ -33,8 +33,7 @@ npm run build
 常用命令说明：
 
 - `npm run dev`：启动 Astro dev server。
-- `npm run build:dist`：只生成 `dist/`，并清理未引用的 `_astro` 资产。
-- `npm run build`：生成 `dist/`，清理构建垃圾，再同步到仓库根目录。
+- `npm run build`：生成 `dist/`，并清理未引用的 `_astro` 资产。
 - `npm run verify`：类型检查、单元测试、构建 `dist/`，并检查静态输出契约。
 
 ## 写文章
@@ -42,23 +41,22 @@ npm run build
 文章源码放在 `src/content/posts/`：
 
 ```text
-src/content/posts/example.mdx
-src/content/posts/my-post/index.mdx
-```
-
-普通文件会生成同名 URL：
-
-```text
-src/content/posts/arch-linux.mdx -> /posts/arch-linux.html
-```
-
-目录式文章会生成目录名 URL，适合放就近图片：
-
-```text
 src/content/posts/my-post/
 ├── index.mdx
 ├── cover.jpg
 └── screenshot.png
+```
+
+每篇文章使用独立目录，目录名就是文章 slug：
+
+```text
+src/content/posts/arch-linux/index.mdx -> /posts/arch-linux.html
+```
+
+文章引用的封面、插图和其他附件放在同一目录，通过相对路径引用：
+
+```md
+![截图](./screenshot.png)
 ```
 
 文章 frontmatter：
@@ -108,7 +106,6 @@ Astro 会在构建时优化这些图片，输出到 `/_astro/`，并生成 `widt
 src/static/assets/img/icon.jpg
 src/static/manifest.webmanifest
 src/static/robots.txt
-src/static/CNAME
 ```
 
 `scripts/cleanup-build.mjs` 会在构建后清理 `dist/_astro` 中没有被 HTML、CSS、JS、JSON、XML 等文本输出引用的资产，避免优化过程中留下未使用的原图副产物。
@@ -177,20 +174,19 @@ src/
 
 scripts/
 ├── cleanup-build.mjs    # 删除 dist/_astro 中未引用的构建副产物
-├── publish-root.mjs     # 将 dist 同步到仓库根目录
 └── verify-build.mjs     # 检查静态输出契约
 ```
 
 核心约定：
 
-- `src/` 是唯一源码树。
+- `src/` 是唯一前端源码树。
 - `dist/` 是 Astro 构建输出。
-- 仓库根目录是 GitHub Pages 发布目标，由 `npm run build` 自动同步。
-- `_astro/` 和根目录 HTML/JSON/XML 是发布产物，需要随构建结果一起提交。
+- `dist/`、`.astro/`、`node_modules/` 和仓库根目录的旧静态产物均由 Git 忽略。
+- 生产部署从指定 Git commit 重新构建 `dist/`，不读取仓库中的预生成 HTML。
 
 ## 生产服务
 
-本仓库是博客文章、随想、About、前端源码和 GitHub Pages 发布产物的权威来源。服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
+本仓库是博客文章、随想、About 和前端实现的权威来源。服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
 
 - `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
 - `deploy.sh` 获取 `origin/main`，在临时 worktree 中验证并构建指定提交，再将 `current` 原子切换到新 release。
@@ -202,7 +198,7 @@ scripts/
 
 动态统计使用 Directus 的 `post_views` collection：同一 IP + User-Agent、同一文章、同一天只计一次。文章页负责记录阅读，首页批量读取各文章次数，About 页面读取总阅读、最多阅读文章和公开评论数量；接口不可用时保留静态排版和占位值。
 
-仓库内的 `services/comment-api/` 用于维护和测试评论 API 实现；它不会自动替换正在运行的 `/home/lyy/services/pnc-comment-api` 服务。部署评论 API 的变更时，应显式更新生产服务源码和配置。
+仓库内的 `services/comment-api/` 暂时保存评论 API 的可版本化源码，但它不会自动替换正在运行的 `/home/lyy/services/pnc-comment-api` 服务。生产服务器不应成为唯一源码来源，也不应通过直接编辑生产文件完成长期开发；后端应迁入独立私有仓库并建立单独的验证、部署和回滚流程。环境变量、Directus 数据和上传文件只保存在服务器及加密备份中。
 
 ## 构建与验证细节
 
@@ -211,7 +207,7 @@ scripts/
 ```bash
 npm run typecheck
 npm test
-npm run build:dist
+npm run build
 node scripts/verify-build.mjs
 ```
 
@@ -231,12 +227,6 @@ node scripts/verify-build.mjs
 
 1. 修改 `src/` 下的源码或内容。
 2. 运行 `npm run verify`。
-3. 运行 `npm run build` 同步根目录发布产物。
-4. 检查 `git status`，确认源码变更和生成产物都符合预期。
-5. 提交。
-
-如果只想检查源码和 `dist/`，不要刷新根目录产物，可以运行：
-
-```bash
-npm run build:dist
-```
+3. 检查 `git status`，确认只有源码、配置和测试变更。
+4. 提交并推送到 `main`。
+5. GitHub 托管 Runner 验证该提交；通过后，自托管 Runner 调用服务器上的 `deploy.sh`，在临时 worktree 中重新构建并发布 `dist/`。
