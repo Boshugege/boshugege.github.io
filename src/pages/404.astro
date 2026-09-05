@@ -8,7 +8,12 @@ import "../styles/not-found.css";
 ---
 
 <DocumentLayout title="404 · 刚才好像还在这里" canonicalPath="/404.html" description="这个页面走丢了。">
-  <meta slot="head" name="robots" content="noindex, follow" />
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, follow" />
+    <script>
+      import "../scripts/impossible-404";
+    </script>
+  </Fragment>
   <a class="skip-link" href="#lost-page">跳转到页面内容</a>
   <ThemeToggle />
   <div class="not-found" data-impossible-404>
@@ -64,7 +69,3 @@ import "../styles/not-found.css";
     </footer>
   </div>
 </DocumentLayout>
-
-<script>
-  import "../scripts/impossible-404";
-</script>

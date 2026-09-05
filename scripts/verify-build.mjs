@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { brotliDecompressSync, gunzipSync } from "node:zlib";
 
 const root = process.cwd();
 const dist = path.join(root, "dist");
@@ -76,6 +77,18 @@ if (!notFoundHtml.includes('name="robots" content="noindex, follow"') || !notFou
 }
 if (indexHtml.includes("data-impossible-404")) {
   throw new Error("The 404 scene must not appear on the homepage");
+}
+const animationScript = notFoundHtml.match(/src="(\/_astro\/404\.[^"]+\.js)"/)?.[1];
+if (!animationScript || notFoundHtml.indexOf(animationScript) > notFoundHtml.indexOf("</head>")) {
+  throw new Error("The 404 animation script must be discovered in the document head");
+}
+const animationPath = path.join(dist, animationScript.slice(1));
+const animation = await fs.readFile(animationPath);
+for (const [suffix, decompress] of [["br", brotliDecompressSync], ["gz", gunzipSync]]) {
+  const compressed = await fs.readFile(`${animationPath}.${suffix}`);
+  if (compressed.length >= animation.length || !decompress(compressed).equals(animation)) {
+    throw new Error(`The 404 animation has an invalid ${suffix} sidecar`);
+  }
 }
 
 if (!indexHtml.includes("data-post-list") || !indexHtml.includes("data-post-search")) {

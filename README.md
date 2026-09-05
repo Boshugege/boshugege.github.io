@@ -41,7 +41,9 @@ npm run build
 
 `src/pages/404.astro` 构建为 `dist/404.html`，可在本地直接访问 `/404.html`。终端框中的 Three.js 场景把不同深度的零件正交投影成 `404`，旋转后通过 68 字符的灰度滤镜显示错位结构。画面只显示等宽字符，不叠加实体面底色或棱线；正侧面使用独立材质，字符网格保留桌面 6px、手机 4.5px 的尺寸，终端栏文字为 13–15px。支持暂停、重新对齐、鼠标微偏转和明暗主题，状态栏区分运行、对齐和暂停。每圈在正面停留 1.5 秒，期间及接近正面时禁用鼠标偏转，其余旋转仅在起止处短暂缓动。场景脚本只在 404 页面加载。
 
-系统开启“减少动态效果”时默认静止；没有 JavaScript 或 WebGL 时显示静态字符画，返回首页链接仍然可用。测试截图保存在被 Git 忽略的 `test-results/`。生产静态服务器需要将未找到的请求交给 `404.html` 并保留 HTTP 404 状态，本仓库不修改服务器配置。
+系统开启“减少动态效果”时默认静止；没有 JavaScript 或 WebGL 时显示静态字符画，返回首页链接仍然可用。动画脚本放在文档 head 中提前发现；同一页面只初始化一次，Astro 页面切换时释放并重建场景。测试截图保存在被 Git 忽略的 `test-results/`。
+
+生产静态服务器将 `/404` 和其他未找到的静态请求交给 `404.html`，保留 HTTP 404 状态和原始地址，并使用 `Cache-Control: no-store`，避免 CDN 缓存过期的缺页结果。直接访问 `/404.html` 仍返回 200。此行为由服务器上的 `server.mjs` 实现，Astro 的本地预览测试不能代替生产路由验证。
 
 ## 写文章
 
@@ -197,9 +199,11 @@ scripts/
 
 - `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
 - `deploy.sh` 获取 `origin/main`，在临时 worktree 中验证并构建指定提交，再将 `current` 原子切换到新 release。
+- 构建为较大的 `_astro/*.js` 和 CSS 生成 Brotli/gzip 旁文件。`server.mjs` 按 `Accept-Encoding` 返回压缩内容和正确的 `Content-Type`、`Content-Length`、`Vary`，旧版本没有旁文件时仍可返回原文件。
+- 哈希资源保持一年不可变缓存；源站预压缩响应使用 `no-transform` 避免 CDN 再压缩。Cloudflare 仍负责边缘缓存和客户端编码兼容，不需要缓存 `/api/*` 或错误页面。
 - `releases/` 在部署健康检查期间保留旧版本用于回滚；部署成功后只保留当前 release。
 
-`main` push 会先在 GitHub 托管 Runner 上执行完整验证；通过后，由标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`。部署脚本只构建该次 workflow 已验证的提交 SHA，健康检查失败会自动回滚，成功后只保留当前 release。
+`main` push 会先在 GitHub 托管 Runner 上执行完整验证；通过后，由标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`。部署脚本只构建该次 workflow 已验证的提交 SHA，健康检查覆盖首页、自定义 404 内容及状态码、评论 API；失败会自动回滚，成功后只保留当前 release。
 
 `/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
 

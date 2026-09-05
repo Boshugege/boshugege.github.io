@@ -3,14 +3,18 @@ import { ASCII_CHARACTERS, asciiCellSize, createFragments, HOVER_TILT, HOVER_YAW
 
 const characters = ASCII_CHARACTERS;
 let disposeScene: (() => void) | undefined;
+let activeRoot: HTMLElement | undefined;
 
 function initialize() {
+  const root = document.querySelector<HTMLElement>("[data-impossible-404]");
+  if (root && root === activeRoot) return;
   disposeScene?.();
   disposeScene = undefined;
-  const root = document.querySelector<HTMLElement>("[data-impossible-404]");
+  activeRoot = undefined;
   const container = root?.querySelector<HTMLElement>("[data-404-scene]");
   const canvas = root?.querySelector<HTMLCanvasElement>("[data-404-canvas]");
   if (!root || !container || !canvas) return;
+  activeRoot = root;
 
   let renderer: THREE.WebGLRenderer;
   try {
@@ -145,6 +149,9 @@ function initialize() {
   let disposed = false;
   let resetPending = false;
   let aligned = true;
+  let renderWidth = 0;
+  let renderHeight = 0;
+  let pixelRatio = 0;
   const pointer = new THREE.Vector2();
   const offset = new THREE.Vector2();
   const events = new AbortController();
@@ -209,7 +216,12 @@ function initialize() {
   function resize() {
     const { width, height } = container!.getBoundingClientRect();
     if (!width || !height) return;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    if (width === renderWidth && height === renderHeight && ratio === pixelRatio) return;
+    renderWidth = width;
+    renderHeight = height;
+    pixelRatio = ratio;
+    renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     const cell = asciiCellSize(width);
     const columns = Math.floor(width / cell);
@@ -223,7 +235,7 @@ function initialize() {
     camera.top = viewHeight / 2;
     camera.bottom = -viewHeight / 2;
     camera.updateProjectionMatrix();
-    render();
+    if (root!.dataset.ready === "true") render();
   }
 
   function syncTheme() {
@@ -231,7 +243,7 @@ function initialize() {
     // Composite in display space so light and dark terminals keep the same gray separation.
     asciiMaterial.uniforms.paper.value.set(style.getPropertyValue("--terminal-bg").trim()).convertLinearToSRGB();
     asciiMaterial.uniforms.ink.value.set(style.getPropertyValue("--terminal-ink").trim()).convertLinearToSRGB();
-    render();
+    if (root!.dataset.ready === "true") render();
   }
 
   function syncControls() {
@@ -308,6 +320,7 @@ function initialize() {
     asciiMaterial.dispose();
     quadGeometry.dispose();
     renderer.dispose();
+    activeRoot = undefined;
     root.removeAttribute("data-ready");
     controls.hidden = true;
     status.dataset.state = "static";
@@ -318,6 +331,7 @@ function initialize() {
     syncTheme();
     resize();
     syncControls();
+    render();
     root.dataset.ready = "true";
     controls.hidden = false;
     if (!paused) wake();
@@ -330,5 +344,6 @@ document.addEventListener("astro:page-load", initialize);
 document.addEventListener("astro:before-swap", () => {
   disposeScene?.();
   disposeScene = undefined;
+  activeRoot = undefined;
 });
 initialize();

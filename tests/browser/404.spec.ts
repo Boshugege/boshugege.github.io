@@ -199,13 +199,31 @@ test("WebGL failure retains the fallback", async ({ page }) => {
   await expect(page.getByRole("link", { name: "返回首页" })).toBeVisible();
 });
 
-test("client navigation disposes and recreates the scene", async ({ page }) => {
+test("the scene initializes only once per page and survives repeated page-load events", async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = window as Window & { sceneInitializations: number };
+    state.sceneInitializations = 0;
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type: string, ...args: unknown[]) {
+      if (type === "webgl2") state.sceneInitializations++;
+      return Reflect.apply(getContext, this, [type, ...args]);
+    } as typeof getContext;
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/404.html");
   await expect(page.locator("[data-impossible-404]")).toHaveAttribute("data-ready", "true");
+  await page.waitForLoadState("load");
+  const initializations = () => page.evaluate(() => (window as Window & { sceneInitializations: number }).sceneInitializations);
+  expect(await initializations()).toBe(1);
+  const front = await pixels(page);
+  await page.evaluate(() => document.dispatchEvent(new Event("astro:page-load")));
+  expect(await initializations()).toBe(1);
+  expect((await pixels(page)).image.equals(front.image)).toBe(true);
   await page.locator(".not-found-header .site-brand").click();
   await expect(page).toHaveURL("/");
   await expect(page.locator("[data-404-canvas]")).toHaveCount(0);
   await page.goBack();
   await expect(page.locator("[data-impossible-404]")).toHaveAttribute("data-ready", "true");
+  expect(await initializations()).toBe(2);
   expect((await pixels(page)).statistics.coverage).toBeGreaterThan(0.01);
 });
