@@ -1,6 +1,8 @@
 node_modules/
 .astro/
 dist/
+test-results/
+playwright-report/
 .DS_Store
 
 # Legacy repository-root build output. Production deploys dist/ from a

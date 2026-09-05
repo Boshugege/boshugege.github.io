@@ -1,0 +1,70 @@
+---
+import { ArrowLeft, Focus, Pause, Play, Terminal } from "@lucide/astro";
+import DocumentLayout from "../layouts/DocumentLayout.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import { fallback404 } from "../lib/impossible-404";
+import { site } from "../lib/site";
+import "../styles/not-found.css";
+---
+
+<DocumentLayout title="404 · 刚才好像还在这里" canonicalPath="/404.html" description="这个页面走丢了。">
+  <meta slot="head" name="robots" content="noindex, follow" />
+  <a class="skip-link" href="#lost-page">跳转到页面内容</a>
+  <ThemeToggle />
+  <div class="not-found" data-impossible-404>
+    <header class="not-found-header">
+      <a class="site-brand" href="/">{site.name}</a>
+      <span class="not-found-code">404 / NOT FOUND</span>
+    </header>
+
+    <main class="not-found-main" id="lost-page">
+      <div class="not-found-terminal" data-404-terminal>
+        <div class="not-found-terminal-bar">
+          <div class="not-found-terminal-title">
+            <Terminal size={18} stroke-width={1.5} aria-hidden="true" />
+            <span>~/lost+found</span>
+          </div>
+          <div class="not-found-controls" data-404-controls hidden>
+            <button type="button" data-404-align aria-label="重新对齐" title="重新对齐">
+              <Focus size={17} stroke-width={1.5} aria-hidden="true" />
+              <span class="not-found-tooltip" aria-hidden="true">重新对齐</span>
+            </button>
+            <button type="button" data-404-pause aria-label="暂停旋转" title="暂停旋转" aria-pressed="false">
+              <Pause size={17} stroke-width={1.5} data-404-pause-icon aria-hidden="true" />
+              <Play size={17} stroke-width={1.5} data-404-play-icon hidden aria-hidden="true" />
+              <span class="not-found-tooltip" data-404-pause-label aria-hidden="true">暂停旋转</span>
+            </button>
+          </div>
+        </div>
+        <div class="not-found-terminal-prompt" aria-hidden="true">
+          <span>pnc@localhost</span><span>:~$ ./404</span>
+        </div>
+        <div class="not-found-scene" data-404-scene role="img" aria-label="终端中由错位的三维碎片拼成的字符画 404">
+          <pre class="not-found-fallback" data-404-fallback aria-hidden="true">{fallback404}</pre>
+          <canvas class="not-found-canvas" data-404-canvas aria-hidden="true"></canvas>
+        </div>
+        <div class="not-found-terminal-status" aria-hidden="true">
+          <span data-404-status data-state="static">STATIC</span>
+          <span>exit 404</span>
+        </div>
+      </div>
+
+      <div class="not-found-caption">
+        <h1>刚才好像还在这里。</h1>
+        <p>这个页面走丢了。</p>
+        <a class="not-found-home" href="/" data-astro-reload>
+          <ArrowLeft size={16} stroke-width={1.5} aria-hidden="true" />
+          <span>返回首页</span>
+        </a>
+      </div>
+    </main>
+
+    <footer class="not-found-footer">
+      <span class="not-found-signature" aria-hidden="true">PNC / 404</span>
+    </footer>
+  </div>
+</DocumentLayout>
+
+<script>
+  import "../scripts/impossible-404";
+</script>

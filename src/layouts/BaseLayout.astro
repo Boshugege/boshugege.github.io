@@ -43,6 +43,7 @@ const {
   <div class="layout">
     <div class="sidebar-transition-anchor" transition:name="site-sidebar" transition:animate="none">
       <Sidebar {...sidebarProps} />
+      <slot name="sidebar-after" />
     </div>
     <section class="content">
       <slot />

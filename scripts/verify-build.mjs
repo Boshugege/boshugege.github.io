@@ -29,6 +29,7 @@ for (const file of [
   "index.html",
   "about.html",
   "notes.html",
+  "404.html",
   "index.json",
   "search.json",
   "rss.xml",
@@ -60,13 +61,34 @@ for (const source of postSources) {
 const indexHtml = await read("index.html");
 const aboutHtml = await read("about.html");
 const notesHtml = await read("notes.html");
+const notFoundHtml = await read("404.html");
 const samplePost = await read("posts/2026-01-20-sample.html");
 const imagePost = await read("posts/2023-first-half-conclusion.html");
 const coverPost = await read("posts/cg-final-path-tracing.html");
 const legacyHeadingPost = await read("posts/wuxieyu.html");
+const globalCss = await fs.readFile(path.join(root, "src/styles/global.css"), "utf8");
+
+for (const marker of ["data-impossible-404", "data-404-terminal", "data-404-status", "data-404-canvas", "data-404-fallback", "data-404-pause", "data-404-align"]) {
+  if (!notFoundHtml.includes(marker)) throw new Error(`404 page is missing ${marker}`);
+}
+if (!notFoundHtml.includes('name="robots" content="noindex, follow"') || !notFoundHtml.includes("返回首页")) {
+  throw new Error("404 page is missing its indexing policy or home link");
+}
+if (indexHtml.includes("data-impossible-404")) {
+  throw new Error("The 404 scene must not appear on the homepage");
+}
 
 if (!indexHtml.includes("data-post-list") || !indexHtml.includes("data-post-search")) {
   throw new Error("Home page is missing its progressively enhanced post directory");
+}
+const aboutIndex = indexHtml.indexOf('class="about"');
+const sidebarToolsIndex = indexHtml.indexOf('class="sidebar-home-tools"');
+const contentIndex = indexHtml.indexOf('class="content"');
+if (aboutIndex < 0 || sidebarToolsIndex < aboutIndex || contentIndex < sidebarToolsIndex) {
+  throw new Error("Home search and tags must appear below About Me in the desktop sidebar");
+}
+if (!/@media \(max-width: 800px\)[\s\S]*?\.sidebar-home-tools\s*\{\s*display:\s*none;/.test(globalCss)) {
+  throw new Error("Home search and tags must be hidden on mobile");
 }
 if (!indexHtml.includes("data-post-list-view") || !indexHtml.includes("阅读：")) {
   throw new Error("Home article metadata is missing dynamic view counts");

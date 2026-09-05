@@ -1,0 +1,355 @@
+.not-found {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  letter-spacing: 0;
+}
+
+.not-found-header,
+.not-found-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 40px;
+}
+
+.not-found-header {
+  padding-right: 72px;
+}
+
+.not-found-header .site-brand {
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.not-found-code,
+.not-found-signature {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.not-found-main {
+  min-width: 0;
+  align-self: center;
+  padding: 12px 0 20px;
+}
+
+.not-found-terminal {
+  --terminal-bg: #f5f6f7;
+  --terminal-ink: #15181b;
+  --terminal-bar: #eaedef;
+  --terminal-border: #cbd0d4;
+  --terminal-muted: #626970;
+  --terminal-accent: #32745c;
+  width: min(1040px, calc(100% - 64px));
+  margin: 0 auto;
+  border: 1px solid var(--terminal-border);
+  border-radius: 6px;
+  background: var(--terminal-bg);
+  color: var(--terminal-ink);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 15px;
+}
+
+:root[data-theme="dark"] .not-found-terminal {
+  --terminal-bg: #0b0d0f;
+  --terminal-ink: #edf0f2;
+  --terminal-bar: #181b1e;
+  --terminal-border: #353b40;
+  --terminal-muted: #929aa2;
+  --terminal-accent: #81b69b;
+}
+
+.not-found-terminal-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--terminal-border);
+  border-radius: 5px 5px 0 0;
+  background: var(--terminal-bar);
+}
+
+.not-found-terminal-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--terminal-muted);
+}
+
+.not-found-terminal-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.not-found-terminal-title svg {
+  flex-shrink: 0;
+}
+
+.not-found-terminal-prompt {
+  display: flex;
+  padding: 16px 20px 0;
+  line-height: 24px;
+}
+
+.not-found-terminal-prompt span:first-child {
+  color: var(--terminal-accent);
+}
+
+.not-found-terminal-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 38px;
+  padding: 0 20px;
+  border-top: 1px solid var(--terminal-border);
+  color: var(--terminal-muted);
+  font-size: 13px;
+}
+
+[data-404-status] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+[data-404-status]::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--terminal-muted);
+}
+
+[data-404-status][data-state="running"]::before {
+  background: var(--terminal-accent);
+}
+
+[data-404-status][data-state="aligned"]::before {
+  background: var(--link);
+}
+
+.not-found-scene {
+  position: relative;
+  width: 100%;
+  height: min(44svh, 440px);
+  min-height: 200px;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.not-found-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+}
+
+.not-found[data-ready="true"] .not-found-canvas {
+  opacity: 1;
+}
+
+.not-found[data-ready="true"] .not-found-fallback {
+  display: none;
+}
+
+.not-found-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--terminal-ink);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 18px;
+  line-height: 1.2;
+  white-space: pre;
+}
+
+.not-found-caption {
+  padding: 26px 24px 0;
+  text-align: center;
+}
+
+.not-found-caption h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.not-found-caption p {
+  margin: 10px 0 25px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.not-found-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  text-underline-offset: 4px;
+}
+
+.not-found-home:visited {
+  color: var(--link);
+}
+
+.not-found-home svg {
+  transition: transform 180ms ease;
+}
+
+.not-found-home:hover svg {
+  transform: translateX(-3px);
+}
+
+.not-found-footer {
+  min-height: 64px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.not-found-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.not-found [hidden] {
+  display: none !important;
+}
+
+.not-found-controls button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: var(--terminal-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.not-found-controls button:hover,
+.not-found-controls button[aria-pressed="true"] {
+  background: var(--control-hover-bg);
+  color: var(--terminal-ink);
+}
+
+.not-found :focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 5px;
+}
+
+.not-found-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: var(--bg);
+  background: var(--text);
+  border-radius: 3px;
+  visibility: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.not-found-controls button:hover .not-found-tooltip,
+.not-found-controls button:focus-visible .not-found-tooltip {
+  visibility: visible;
+}
+
+@media (max-width: 600px) {
+  .not-found-header,
+  .not-found-footer {
+    padding: 22px 20px;
+  }
+
+  .not-found-header {
+    padding-right: 56px;
+    gap: 12px;
+  }
+
+  .not-found-header .site-brand {
+    font-size: 15px;
+  }
+
+  .not-found-code {
+    font-size: 9px;
+  }
+
+  .not-found-scene {
+    height: min(36svh, 310px);
+    min-height: 180px;
+  }
+
+  .not-found-terminal {
+    width: calc(100% - 32px);
+    font-size: 14px;
+  }
+
+  .not-found-terminal-bar {
+    grid-template-columns: minmax(0, 1fr) 92px;
+  }
+
+  .not-found-terminal-prompt {
+    padding: 12px 16px 0;
+    font-size: 14px;
+  }
+
+  .not-found-terminal-status {
+    padding: 0 16px;
+  }
+
+  .not-found-caption {
+    padding-top: 22px;
+  }
+
+  .not-found-caption p {
+    margin: 8px 0 16px;
+  }
+
+  .not-found-footer {
+    min-height: 48px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .not-found-fallback {
+    font-size: 11px;
+  }
+
+  .not-found-caption h1 {
+    font-size: 20px;
+  }
+
+  .not-found-controls button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .not-found-fallback {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-home svg {
+    transition: none;
+  }
+}

@@ -43,6 +43,30 @@ function getPostMeta(post: (typeof posts)[number]) {
     },
   }}
 >
+  <div slot="sidebar-after" class="sidebar-home-tools">
+    <input class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" aria-label="搜索文章" data-post-search />
+    <nav class="tag-nav sidebar-tag-nav" aria-label="标签筛选">
+      <a href="/index.html" class:list={["tag", "top", { active: !activeTag }]} data-tag="" aria-current={!activeTag ? "page" : undefined}>全部</a>
+      <div class:list={["tags-list", { collapsed: !tagsExpanded }]} data-tag-list>
+        {tags.map(([tag, count], index) => (
+          <a
+            href={`/index.html?tag=${encodeURIComponent(tag)}`}
+            class:list={["tag", { visible: index < 5, active: tag === activeTag }]}
+            data-tag={tag}
+            aria-current={tag === activeTag ? "page" : undefined}
+          >
+            {tag} ({count})
+          </a>
+        ))}
+      </div>
+      {tags.length > 5 && (
+        <button class="tag-toggle" type="button" aria-expanded={String(tagsExpanded)} data-tag-toggle data-collapsed-label={`展开全部标签 (${tags.length})`}>
+          {tagsExpanded ? "收起标签" : `展开全部标签 (${tags.length})`}
+        </button>
+      )}
+    </nav>
+  </div>
+
   <aside class="directory latest-note-panel" id="latest-note-preview">
     <p class="latest-note-title">最近随想</p>
     <p class="latest-note-text" id="latest-note-text">
@@ -53,29 +77,6 @@ function getPostMeta(post: (typeof posts)[number]) {
 
   <aside class="directory" id="posts">
     <h2 class="dir-title">文章目录</h2>
-    <div class="dir-tools">
-      <input class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" aria-label="搜索文章" data-post-search />
-      <nav class="tag-nav in-directory" aria-label="标签筛选">
-        <a href="/index.html" class:list={["tag", "top", { active: !activeTag }]} data-tag="" aria-current={!activeTag ? "page" : undefined}>全部</a>
-        <div class:list={["tags-list", { collapsed: !tagsExpanded }]} data-tag-list>
-          {tags.map(([tag, count], index) => (
-            <a
-              href={`/index.html?tag=${encodeURIComponent(tag)}`}
-              class:list={["tag", { visible: index < 5, active: tag === activeTag }]}
-              data-tag={tag}
-              aria-current={tag === activeTag ? "page" : undefined}
-            >
-              {tag} ({count})
-            </a>
-          ))}
-        </div>
-        {tags.length > 5 && (
-          <button class="tag-toggle" type="button" aria-expanded={String(tagsExpanded)} data-tag-toggle data-collapsed-label={`展开全部标签 (${tags.length})`}>
-            {tagsExpanded ? "收起标签" : `展开全部标签 (${tags.length})`}
-          </button>
-        )}
-      </nav>
-    </div>
     <div class="dir-list" data-post-list data-views-api={statsApi}>
       {visiblePosts.map((post) => (
         <div class="dir-item">
