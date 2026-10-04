@@ -1,4 +1,5 @@
 ---
+import PncLogo from "../components/PncLogo.astro";
 import { ArrowLeft, Focus, Pause, Play, Terminal } from "@lucide/astro";
 import DocumentLayout from "../layouts/DocumentLayout.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
@@ -18,7 +19,10 @@ import "../styles/not-found.css";
   <ThemeToggle />
   <div class="not-found" data-impossible-404>
     <header class="not-found-header">
-      <a class="site-brand" href="/">{site.name}</a>
+      <div class="pnc-brand" transition:name="site-brand">
+        <PncLogo size={28} />
+        <a class="site-brand" href="/">{site.name}</a>
+      </div>
       <span class="not-found-code">404 / NOT FOUND</span>
     </header>
 

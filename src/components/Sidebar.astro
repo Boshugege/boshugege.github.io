@@ -1,4 +1,5 @@
 ---
+import PncLogo from "./PncLogo.astro";
 import { site } from "../lib/site";
 
 interface Props {
@@ -19,7 +20,10 @@ const contactLinks = [
 
 <aside class="sidebar">
   <header class="site-header">
-    <a class="site-title site-brand" href="/index.html" transition:name="site-brand">{site.name}</a>
+    <div class="pnc-brand" transition:name="site-brand">
+      <PncLogo size={32} />
+      <a class="site-title site-brand" href="/index.html">{site.name}</a>
+    </div>
     <p class="site-desc">{site.headerDescription}</p>
   </header>
 

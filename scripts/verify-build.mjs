@@ -182,3 +182,21 @@ await assertMissing("assets/img/cidai/index.png");
 await assertMissing("_astro/bmw_hq.DEJyjXyi.jpg");
 
 console.log(`Verified ${postSources.length} posts and core static outputs.`);
+
+// Identity assets and references must ship together on every branded route.
+const manifest = JSON.parse(await read("manifest.webmanifest"));
+for (const icon of manifest.icons) await assertFile(icon.src.replace(/^\//, ""));
+for (const file of ["favicon.svg", "apple-touch-icon.png", "assets/img/avatar.png"]) await assertFile(file);
+await assertMissing("assets/img/icon.jpg");
+for (const html of [indexHtml, aboutHtml, notesHtml, samplePost, notFoundHtml]) {
+  for (const face of ["frame", "top", "left", "right"]) {
+    if (!html.includes(`data-pnc-face="${face}"`)) throw new Error(`Missing PNC ${face} face`);
+  }
+  if (!html.includes('href="/favicon.svg"') || !html.includes('href="/apple-touch-icon.png"') || html.includes("/assets/img/icon.jpg")) {
+    throw new Error("Page has stale or missing identity icon references");
+  }
+  for (const match of html.matchAll(/(?:src|href)="(\/(?:assets\/img\/[^"?#]+|favicon\.svg|apple-touch-icon\.png))"/g)) {
+    await assertFile(match[1].slice(1));
+  }
+}
+console.log(`Verified PNC identity assets; index.html is ${indexSize} / 40,000 bytes.`);

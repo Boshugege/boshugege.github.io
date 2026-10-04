@@ -8,8 +8,8 @@ export const site = {
   url: "https://parityncsvt.top",
   foundedAt: "2022-05-10",
   timeZone: "Asia/Shanghai",
-  defaultCover: "/assets/img/icon.jpg",
-  defaultCoverAlt: "PNC's Blog icon",
+  defaultCover: "/assets/img/avatar.png",
+  defaultCoverAlt: "PNC 冰蓝几何头像",
   aboutTitle: "About Me",
   aboutLines: [
     "一个正在学习的小朋友。",

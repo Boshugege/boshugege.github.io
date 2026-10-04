@@ -1,4 +1,5 @@
 ---
+import PncLogo from "../components/PncLogo.astro";
 import { formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import Comments from "../components/Comments.astro";
@@ -69,7 +70,10 @@ const postSlug = Astro.url.pathname;
 >
   <article class:list={["post-content", contentClass]}>
     <header class="post-topbar">
-      <a class="site-title site-brand post-site-brand" href="/index.html" transition:name="site-brand">{site.name}</a>
+      <div class="pnc-brand" transition:name="site-brand">
+        <PncLogo size={22} />
+        <a class="site-title site-brand post-site-brand" href="/index.html">{site.name}</a>
+      </div>
       <nav class="post-topnav" aria-label="站点导航">
         <a href="/about.html">About</a>
         <a href="/notes.html">随想</a>
