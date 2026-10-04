@@ -9,7 +9,7 @@ export const site = {
   foundedAt: "2022-05-10",
   timeZone: "Asia/Shanghai",
   defaultCover: "/assets/img/avatar.png",
-  defaultCoverAlt: "PNC 冰蓝几何头像",
+  defaultCoverAlt: "PNC 冰蓝完整立方体头像",
   aboutTitle: "About Me",
   aboutLines: [
     "一个正在学习的小朋友。",

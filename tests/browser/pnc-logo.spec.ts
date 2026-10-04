@@ -4,7 +4,7 @@ test("PNC faces, hover displacement, parity, themes and route reinitialization",
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/index.html");
-  const logo = page.locator("[data-pnc-logo]");
+  const logo = page.locator("[data-pnc-logo]").first();
   await expect(logo.locator("[data-pnc-face]")).toHaveCount(4);
   await expect(logo).not.toHaveClass(/pnc-scanning/);
   await logo.hover({ position: { x: 27, y: 6 } });
@@ -48,7 +48,7 @@ test("mobile and reduced motion preserve navigation and disable transforms", asy
   await page.setViewportSize({ width: 375, height: 812 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/index.html");
-  const logo = page.locator("[data-pnc-logo]");
+  const logo = page.locator("[data-pnc-logo]").first();
   await logo.hover();
   await logo.click();
   await expect(logo).not.toHaveClass(/pnc-breaking|pnc-hover|pnc-scanning/);
@@ -64,7 +64,7 @@ test("mobile and reduced motion preserve navigation and disable transforms", asy
 
 test("shimmer repeats and live motion changes clear animation state", async ({ page }) => {
   await page.goto("/index.html");
-  const logo = page.locator("[data-pnc-logo]");
+  const logo = page.locator("[data-pnc-logo]").first();
   await expect(logo).toHaveClass(/pnc-scanning/);
   await expect(logo).not.toHaveClass(/pnc-scanning/);
   await expect(logo).toHaveClass(/pnc-scanning/, { timeout: 8500 });

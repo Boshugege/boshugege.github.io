@@ -1,0 +1,39 @@
+---
+import PncLogo from "./PncLogo.astro";
+---
+<header class="pnc-wordmark" data-pnc-wordmark>
+  <PncLogo size={96} interaction="proximity" />
+  <div class="pnc-wordmark-text">
+    <span class="pnc-wordmark-name">PNC</span>
+    <span class="pnc-wordmark-fullname">ParityNonconservation</span>
+  </div>
+</header>
+<style>
+  .pnc-wordmark {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0 22px;
+    margin-bottom: 22px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .pnc-wordmark-text { min-width: 0; }
+  .pnc-wordmark-name {
+    display: block;
+    font-size: clamp(32px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: .06em;
+    line-height: 1.1;
+  }
+  .pnc-wordmark-fullname {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: clamp(11px, 2.5vw, 15px);
+    letter-spacing: .015em;
+  }
+  @media (max-width: 420px) {
+    .pnc-wordmark { gap: 10px; padding-bottom: 16px; margin-bottom: 16px; }
+    .pnc-wordmark :global(.pnc-logo-wrap) { zoom: .75; }
+  }
+</style>

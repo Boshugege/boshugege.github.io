@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PncWordmark from "../components/PncWordmark.astro";
 import AboutStats from "../components/AboutStats.astro";
 import AboutProfile from "../components/about/AboutProfile.astro";
 import LinkList from "../components/about/LinkList.astro";
@@ -50,6 +51,7 @@ const mdxComponents = { LinkList, MetricStrip, ProjectList, ResumeSection, Skill
   }}
 >
   <aside class="directory about-page" id="about-main">
+    <PncWordmark />
     <h2 class="dir-title">{about.data.title}</h2>
     {updated && <p class="meta">更新：{updated}</p>}
     <AboutProfile

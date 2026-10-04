@@ -185,18 +185,25 @@ console.log(`Verified ${postSources.length} posts and core static outputs.`);
 
 // Identity assets and references must ship together on every branded route.
 const manifest = JSON.parse(await read("manifest.webmanifest"));
-for (const icon of manifest.icons) await assertFile(icon.src.replace(/^\//, ""));
+for (const icon of manifest.icons) await assertFile(icon.src.split("?")[0].replace(/^\//, ""));
 for (const file of ["favicon.svg", "apple-touch-icon.png", "assets/img/avatar.png"]) await assertFile(file);
 await assertMissing("assets/img/icon.jpg");
 for (const html of [indexHtml, aboutHtml, notesHtml, samplePost, notFoundHtml]) {
+  for (const backing of ["rear-x", "rear-y", "bottom"]) {
+    if (!html.includes(`data-pnc-backing="${backing}"`)) throw new Error(`Missing PNC ${backing} backing`);
+  }
   for (const face of ["frame", "top", "left", "right"]) {
     if (!html.includes(`data-pnc-face="${face}"`)) throw new Error(`Missing PNC ${face} face`);
   }
-  if (!html.includes('href="/favicon.svg"') || !html.includes('href="/apple-touch-icon.png"') || html.includes("/assets/img/icon.jpg")) {
+  if (!html.includes('href="/favicon.svg?v=cube"') || !html.includes('href="/apple-touch-icon.png?v=cube"') || html.includes("/assets/img/icon.jpg")) {
     throw new Error("Page has stale or missing identity icon references");
   }
-  for (const match of html.matchAll(/(?:src|href)="(\/(?:assets\/img\/[^"?#]+|favicon\.svg|apple-touch-icon\.png))"/g)) {
+  for (const match of html.matchAll(/(?:src|href)="(\/(?:assets\/img\/[^"?#]+|favicon\.svg|apple-touch-icon\.png))(?:\?[^"]*)?"/g)) {
     await assertFile(match[1].slice(1));
   }
 }
 console.log(`Verified PNC identity assets; index.html is ${indexSize} / 40,000 bytes.`);
+
+if (!aboutHtml.includes("data-pnc-wordmark") || !aboutHtml.includes("data-pnc-proximity") || aboutHtml.indexOf("data-pnc-wordmark") > aboutHtml.indexOf('class="resume-content"')) {
+  throw new Error("About page is missing its introductory PNC wordmark");
+}

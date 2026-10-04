@@ -1,10 +1,10 @@
 ---
 import "../styles/logo.css";
-interface Props { size?: number; class?: string; }
-const { size = 32, class: className } = Astro.props;
+interface Props { size?: number; class?: string; interaction?: "explode" | "proximity"; }
+const { size = 32, class: className, interaction = "explode" } = Astro.props;
 const id = `pnc-${crypto.randomUUID()}`;
 ---
-<button type="button" class:list={["pnc-logo-wrap", className]} data-pnc-logo
+<button type="button" class:list={["pnc-logo-wrap", className]} data-pnc-logo data-pnc-proximity={interaction === "proximity" || undefined}
   style={`--pnc-size: ${size}px; --pnc-unit: ${2.4 / size}px`} aria-label="PNC Logo：触发宇称镜像彩蛋" title="宇称破缺">
   <span class="pnc-logo-tilt">
     <svg class="pnc-logo-svg" viewBox="-1.2 -1.2 2.4 2.4" width={size} height={size} aria-hidden="true">
@@ -17,6 +17,10 @@ const id = `pnc-${crypto.randomUUID()}`;
         <clipPath id={`${id}-clip`}><use href={`#${id}-geometry`} /></clipPath>
       </defs>
       <g id={`${id}-geometry`}>
+        <path class="pnc-shell" data-pnc-solid d="M0.0000000,-1.0000000 L0.8660254,-0.5000000 L0.8660254,0.5000000 L0.0000000,1.0000000 L-0.8660254,0.5000000 L-0.8660254,-0.5000000 L0.0000000,-1.0000000 Z" />
+        <path class="pnc-backing pnc-rear-x" data-pnc-backing="rear-x" d="M0.0000000,0.0000000 L-0.8660254,0.5000000 L-0.8660254,-0.5000000 L0.0000000,-1.0000000 L0.0000000,0.0000000 Z" />
+        <path class="pnc-backing pnc-rear-y" data-pnc-backing="rear-y" d="M0.0000000,0.0000000 L0.8660254,0.5000000 L0.8660254,-0.5000000 L0.0000000,-1.0000000 L0.0000000,0.0000000 Z" />
+        <path class="pnc-backing pnc-bottom" data-pnc-backing="bottom" d="M0.0000000,0.0000000 L0.8660254,0.5000000 L0.0000000,1.0000000 L-0.8660254,0.5000000 L0.0000000,0.0000000 Z" />
       <path class="pnc-face pnc-frame" data-pnc-face="frame" d="M0.0000000,-1.0000000 L-0.8660254,-0.5000000 L-0.8660254,0.5000000 L-0.7036456,0.5937500 L-0.7036456,-0.0312500 L-0.1623798,0.9062500 L0.0000000,1.0000000 L0.7938566,0.5416667 L0.7938566,0.3541667 L0.1623798,0.7187500 L0.1623798,0.0937500 L0.8660254,-0.3125000 L0.8660254,-0.5000000 L0.0000000,-1.0000000 Z M-0.4239916,-0.5677083 L0.2796540,-0.1614583 L0.0000000,0.0000000 L-0.1623798,-0.0937500 L-0.1623798,0.5312500 L-0.7036456,-0.4062500 L-0.4239916,-0.5677083 Z M-0.2616118,-0.6614583 L0.0000000,-0.8125000 L0.5412659,-0.5000000 L0.2796540,-0.3489583 L-0.2616118,-0.6614583 Z" fill-rule="evenodd" />
       <path class="pnc-face pnc-top" data-pnc-face="top" d="M0.0000000,-0.9740000 L-0.8209921,-0.5000000 L-0.7036456,-0.4322500 L-0.4239916,-0.5937083 L0.2796540,-0.1874583 L0.8209921,-0.5000000 L0.0000000,-0.9740000 Z M0.5862992,-0.5000000 L0.2796540,-0.3229583 L-0.3066452,-0.6614583 L0.0000000,-0.8385000 L0.5862992,-0.5000000 Z" fill-rule="evenodd" />
       <path class="pnc-face pnc-left" data-pnc-face="left" d="M-0.8435087,-0.4610000 L-0.8435087,0.4870000 L-0.7261623,0.5547500 L-0.7261623,-0.1070196 L-0.1530531,0.8856348 L-0.0225167,0.9610000 L-0.0225167,0.0130000 L-0.1398631,-0.0547500 L-0.1398631,0.6070196 L-0.7129723,-0.3856348 L-0.8435087,-0.4610000 Z" fill-rule="evenodd" />
