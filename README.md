@@ -47,6 +47,14 @@ npm run build
 
 ## 写文章
 
+新建文章（生成草稿，`npm run dev` 可预览，构建时不发布）：
+
+```bash
+npm run new -- my-slug "文章标题"
+```
+
+写完后把 `draft: true` 改成 `false` 或删掉该行，再推送。
+
 文章源码放在 `src/content/posts/`：
 
 ```text
@@ -82,6 +90,7 @@ coverAlt: "封面图片说明"
 canonical: "https://example.com/original.html"
 draft: false
 toc: true
+centerImages: false
 ---
 ```
 
@@ -94,8 +103,9 @@ toc: true
 - `cover` 使用 Astro 的 `image()` schema 校验，推荐使用相对路径。
 - `coverAlt` 会写入 Open Graph / Twitter 图片说明。
 - `canonical` 可为转载或外部首发文章指定规范 URL。
-- `draft: true` 会让文章从构建输出中排除。
+- `draft: true` 会让文章从构建输出中排除，但 `npm run dev` 中仍可预览。
 - `toc: false` 可关闭文章自动目录；默认开启，且只有 H2–H4 标题达到 3 个时才显示。
+- `centerImages: true` 让正文图片居中显示。
 
 正文支持 Markdown、MDX、代码高亮、相对路径图片，以及 `$...$` / `$$...$$` 数学公式。
 
@@ -225,7 +235,8 @@ node scripts/verify-build.mjs
 验证脚本会检查：
 
 - 首页、About、Notes、RSS、sitemap、JSON 索引存在。
-- 每个 `src/content/posts/**/*.mdx` 都生成对应的 `posts/*.html`。
+- 每个非草稿的 `src/content/posts/**/*.mdx` 都生成对应的 `posts/*.html`。
+- 文章检查按内容特征（公式、图片、封面、目录）挑选文章，不依赖具体文章名；增删、改名文章不会让验证失败。
 - 数学文章加载本地 KaTeX CSS，非数学页面不加载 KaTeX。
 - 文章图片有懒加载、解码和尺寸属性。
 - 文章封面元数据使用 Astro 优化后的公开图片。

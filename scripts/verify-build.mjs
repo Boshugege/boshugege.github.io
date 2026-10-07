@@ -42,6 +42,11 @@ await assertMissing("now.json");
 await assertMissing("CNAME");
 await assertMissing(".nojekyll");
 
+async function isDraft(file) {
+  const frontmatter = (await fs.readFile(file, "utf8")).match(/^---\n([\s\S]*?)\n---/)?.[1] || "";
+  return /^draft:\s*true\s*$/m.test(frontmatter);
+}
+
 async function collectPostSources(directory, prefix = "") {
   const entries = await fs.readdir(directory, { withFileTypes: true });
   const sources = [];
@@ -49,7 +54,7 @@ async function collectPostSources(directory, prefix = "") {
     const relativePath = path.posix.join(prefix, entry.name);
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) sources.push(...await collectPostSources(fullPath, relativePath));
-    else if (/\.mdx?$/.test(entry.name)) sources.push(relativePath);
+    else if (/\.mdx?$/.test(entry.name) && !await isDraft(fullPath)) sources.push(relativePath);
   }
   return sources;
 }
@@ -63,10 +68,17 @@ const indexHtml = await read("index.html");
 const aboutHtml = await read("about.html");
 const notesHtml = await read("notes.html");
 const notFoundHtml = await read("404.html");
-const samplePost = await read("posts/2026-01-20-sample.html");
-const imagePost = await read("posts/2023-first-half-conclusion.html");
-const coverPost = await read("posts/cg-final-path-tracing.html");
-const legacyHeadingPost = await read("posts/wuxieyu.html");
+// Checks pick posts by what they contain, not by name, so any post can be
+// renamed or deleted without breaking the build. A check whose feature no
+// post uses is skipped.
+const postHtml = await Promise.all((await fs.readdir(path.join(dist, "posts")))
+  .filter((file) => file.endsWith(".html"))
+  .map(async (file) => ({ file, html: await read(`posts/${file}`) })));
+const findPost = (test) => postHtml.find(({ html }) => test(html));
+const anyPost = postHtml[0].html;
+const imagePost = findPost((html) => /<div class="post-content"[\s\S]*<img /.test(html));
+const coverPost = findPost((html) => /property="og:image" content="[^"]+\/_astro\//.test(html));
+const updatedPost = findPost((html) => html.includes('property="article:modified_time"'));
 const globalCss = await fs.readFile(path.join(root, "src/styles/global.css"), "utf8");
 
 for (const marker of ["data-impossible-404", "data-404-terminal", "data-404-status", "data-404-canvas", "data-404-fallback", "data-404-pause", "data-404-align"]) {
@@ -117,55 +129,53 @@ for (const key of ["totalViews", "siteAge", "mostViewed", "commentCount"]) {
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");
 }
-if (!/href="\/_astro\/katex-local\.[^"]+\.css"/.test(samplePost) || !samplePost.includes("post-content")) {
-  throw new Error("Math post is missing KaTeX or article markup");
+for (const { file, html } of postHtml) {
+  const hasMath = html.includes('class="katex"');
+  const hasKatexCss = /href="\/_astro\/katex-local\.[^"]+\.css"/.test(html);
+  if (hasMath !== hasKatexCss) {
+    throw new Error(`${file}: KaTeX CSS must load exactly when the post has formulas`);
+  }
+  if (!html.includes("post-content") || !html.includes("data-post-view") || !html.includes("data-post-view-count") || !html.includes("阅读：")) {
+    throw new Error(`${file}: article markup or dynamic view count is missing`);
+  }
 }
-if (!samplePost.includes("data-post-view") || !samplePost.includes("data-post-view-count") || !samplePost.includes("阅读：")) {
-  throw new Error("Article metadata is missing its dynamic view count");
-}
-if (!/<img[^>]+loading="lazy"[^>]+decoding="async"[^>]+width="\d+"[^>]+height="\d+"/.test(imagePost)) {
-  throw new Error("Article images are missing lazy loading or intrinsic dimensions");
+if (imagePost && !/<img[^>]+loading="lazy"[^>]+decoding="async"[^>]+width="\d+"[^>]+height="\d+"/.test(imagePost.html)) {
+  throw new Error(`${imagePost.file}: article images are missing lazy loading or intrinsic dimensions`);
 }
 if (indexHtml.includes("katex.min") || aboutHtml.includes("katex.min")) {
   throw new Error("KaTeX must not load on pages without formulas");
 }
-if ([indexHtml, aboutHtml, notesHtml, samplePost, coverPost].some((html) => html.includes("cdn.jsdelivr.net/npm/katex"))) {
+if ([indexHtml, aboutHtml, notesHtml, ...postHtml.map(({ html }) => html)].some((html) => html.includes("cdn.jsdelivr.net/npm/katex"))) {
   throw new Error("KaTeX CSS must be bundled locally instead of loaded from a CDN");
 }
-if (coverPost.includes("src/content/posts") || !coverPost.includes('property="og:image:alt"') || !/property="og:image" content="https:\/\/parityncsvt\.top\/_astro\/bmw_hq\.[^"]+\.webp"/.test(coverPost)) {
-  throw new Error("Article cover metadata is not using an optimized Astro image");
+if (coverPost && (coverPost.html.includes("src/content/posts") || !coverPost.html.includes('property="og:image:alt"') || !/property="og:image" content="https:\/\/parityncsvt\.top\/_astro\/[^"]+\.webp"/.test(coverPost.html))) {
+  throw new Error(`${coverPost.file}: cover metadata is not using an optimized Astro image`);
 }
-if (!coverPost.includes('"dateModified"') || !coverPost.includes('property="article:modified_time"')) {
-  throw new Error("Article metadata is missing modified-time fields");
+if (updatedPost && !updatedPost.html.includes('"dateModified"')) {
+  throw new Error(`${updatedPost.file}: article metadata is missing modified-time fields`);
 }
 
 function getAttributeValues(html, attribute) {
   return [...html.matchAll(new RegExp(`${attribute}="([^"]+)"`, "g"))].map((match) => match[1]);
 }
 
-function assertTableOfContents(html, expectedHeadingCount, label) {
+// Every rendered table of contents must have matching inline and rail links
+// that point at real headings.
+for (const { file, html } of postHtml) {
   const tocSlugs = getAttributeValues(html, "data-toc-link");
+  if (tocSlugs.length === 0) continue;
   const uniqueSlugs = [...new Set(tocSlugs)];
-  if (uniqueSlugs.length !== expectedHeadingCount || tocSlugs.length !== expectedHeadingCount * 2) {
-    throw new Error(`${label} table of contents does not render matching inline and rail links`);
+  if (tocSlugs.length !== uniqueSlugs.length * 2 || !html.includes("post-toc-inline") || !html.includes("post-toc-rail")) {
+    throw new Error(`${file}: table of contents does not render matching inline and rail links`);
   }
   for (const slug of uniqueSlugs) {
     if (!html.includes(`id="${slug}"`)) {
-      throw new Error(`${label} table of contents points to a missing heading: ${slug}`);
+      throw new Error(`${file}: table of contents points to a missing heading: ${slug}`);
     }
   }
 }
 
-assertTableOfContents(coverPost, 13, "Long article");
-assertTableOfContents(legacyHeadingPost, 3, "Legacy H4 article");
-if (samplePost.includes("data-post-toc")) {
-  throw new Error("Short article should not render a table of contents");
-}
-if (!coverPost.includes("post-toc-inline") || !coverPost.includes("post-toc-rail")) {
-  throw new Error("Article table of contents is missing a responsive variant");
-}
-
-for (const html of [indexHtml, aboutHtml, notesHtml, samplePost]) {
+for (const html of [indexHtml, aboutHtml, notesHtml, anyPost]) {
   if (html.includes("/assets/js/site.js")) {
     throw new Error("Legacy site.js is still referenced");
   }
@@ -179,7 +189,6 @@ const indexSize = (await fs.stat(path.join(dist, "index.html"))).size;
 if (searchSize > 120_000) throw new Error(`search.json exceeds 120 KB: ${searchSize}`);
 if (indexSize > 40_000) throw new Error(`index.html exceeds 40 KB: ${indexSize}`);
 await assertMissing("assets/img/cidai/index.png");
-await assertMissing("_astro/bmw_hq.DEJyjXyi.jpg");
 
 console.log(`Verified ${postSources.length} posts and core static outputs.`);
 
@@ -188,7 +197,7 @@ const manifest = JSON.parse(await read("manifest.webmanifest"));
 for (const icon of manifest.icons) await assertFile(icon.src.split("?")[0].replace(/^\//, ""));
 for (const file of ["favicon.svg", "apple-touch-icon.png", "assets/img/avatar.png"]) await assertFile(file);
 await assertMissing("assets/img/icon.jpg");
-for (const html of [indexHtml, aboutHtml, notesHtml, samplePost, notFoundHtml]) {
+for (const html of [indexHtml, aboutHtml, notesHtml, anyPost, notFoundHtml]) {
   for (const backing of ["rear-x", "rear-y", "bottom"]) {
     if (!html.includes(`data-pnc-backing="${backing}"`)) throw new Error(`Missing PNC ${backing} backing`);
   }

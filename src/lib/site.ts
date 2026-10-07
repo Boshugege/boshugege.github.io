@@ -11,6 +11,7 @@ export const site = {
   defaultCover: "/assets/img/avatar.png",
   defaultCoverAlt: "PNC 冰蓝完整立方体头像",
   aboutTitle: "About Me",
+  // First line is the intro; every following line shows under it in the sidebar.
   aboutLines: [
     "一个正在学习的小朋友。",
     "Tsinghua University",

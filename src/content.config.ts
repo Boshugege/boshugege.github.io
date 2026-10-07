@@ -22,6 +22,7 @@ const posts = defineCollection({
     canonical: z.string().url().optional(),
     draft: z.boolean().default(false),
     toc: z.boolean().default(true),
+    centerImages: z.boolean().default(false),
   }),
 });
 

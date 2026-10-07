@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { showAboutLink = true, extraLinks = [], includeRss = true } = Astro.props;
-const [intro, profile1, profile2, profile3] = site.aboutLines;
+const [intro, ...profileLines] = site.aboutLines;
 const contactLinks = [
   ...extraLinks,
   { href: `mailto:${site.email}`, label: "Email" },
@@ -33,9 +33,7 @@ const contactLinks = [
       {intro}
       {showAboutLink && <a class="about-more-link" href="/about.html">更多</a>}
     </p>
-    <p class="profile-info">{profile1}</p>
-    <p class="profile-info">{profile2}</p>
-    <p class="profile-info">{profile3}</p>
+    {profileLines.map((line) => <p class="profile-info">{line}</p>)}
     <p class="contact">
       {contactLinks.map((link, index) => (
         <>

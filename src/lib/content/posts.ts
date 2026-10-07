@@ -41,7 +41,8 @@ function inferSlug(entry: CollectionEntry<"posts">) {
 export async function getAllPosts() {
   const entries = await getCollection("posts");
   const posts = await Promise.all(entries
-    .filter((entry) => !entry.data.draft)
+    // Drafts show up in `npm run dev` for previewing but never in a build.
+    .filter((entry) => import.meta.env.DEV || !entry.data.draft)
     .map(async (entry): Promise<PostSummary> => {
       const date = formatDate(entry.data.date);
       const updated = entry.data.updated ? formatDate(entry.data.updated) : undefined;
