@@ -200,6 +200,6 @@ for (const html of [indexHtml, aboutHtml, notesHtml, anyPost, notFoundHtml]) {
 }
 console.log(`Verified PNC identity assets; index.html is ${indexSize} / 40,000 bytes.`);
 
-if (!aboutHtml.includes("data-pnc-wordmark") || !aboutHtml.includes("data-pnc-proximity") || aboutHtml.indexOf("data-pnc-wordmark") > aboutHtml.indexOf('class="resume-content"')) {
+if (!aboutHtml.includes("data-pnc-wordmark") || aboutHtml.indexOf("data-pnc-wordmark") > aboutHtml.indexOf('class="resume-content"')) {
   throw new Error("About page is missing its introductory PNC wordmark");
 }

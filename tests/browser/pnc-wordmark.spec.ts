@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("About has a closed cube lockup with independent SVG IDs and near-pointer motion", async ({ page }) => {
+test("About has a closed cube lockup with independent SVG IDs and hover pop-up", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 960 });
@@ -17,33 +17,31 @@ test("About has a closed cube lockup with independent SVG IDs and near-pointer m
     return new Set(ids).size === ids.length && refs.every((id) => document.getElementById(id));
   });
   expect(validIds).toBeTruthy();
-  const box = (await logo.boundingBox())!;
-  await page.mouse.move(box.x + box.width + 35, box.y + box.height / 2);
-  await expect.poll(() => logo.evaluate((el) => parseFloat((el as HTMLElement).style.getPropertyValue('--pnc-ry')))).toBeGreaterThan(0);
-  const rotation = await logo.evaluate((el) => parseFloat((el as HTMLElement).style.getPropertyValue('--pnc-ry')));
-  expect(rotation).toBeLessThanOrEqual(4);
+  // The logo never tilts; hovering it only pops the faces apart.
+  await page.mouse.move(10, 10);
   await expect(logo).not.toHaveClass(/pnc-hover/);
   expect(await logo.locator('[data-pnc-face="top"]').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+  await logo.hover();
+  await expect(logo).toHaveClass(/pnc-hover/);
+  await expect.poll(() => logo.locator('[data-pnc-face="top"]').evaluate((el) => getComputedStyle(el).transform)).not.toBe("none");
   await page.mouse.move(1300, 900);
-  await expect.poll(() => logo.evaluate((el) => parseFloat((el as HTMLElement).style.getPropertyValue('--pnc-ry')))).toBe(0);
+  await expect(logo).not.toHaveClass(/pnc-hover/);
   await page.screenshot({ path: "test-results/pnc-about-light.png" });
   await page.locator('[data-theme-toggle]').click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.waitForTimeout(300);
   await page.screenshot({ path: "test-results/pnc-about-dark.png" });
-  await page.mouse.move(box.x + box.width + 35, box.y + box.height / 2);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect.poll(() => logo.locator('.pnc-logo-tilt').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+  await logo.hover();
+  await expect(logo).not.toHaveClass(/pnc-hover/);
   await page.locator('.site-brand').click();
   await expect(page).toHaveURL(/index\.html/);
   await page.locator('a[href="/about.html"]').first().click();
   await expect(page).toHaveURL(/about\.html/);
   await page.waitForLoadState("networkidle");
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
-  const next = (await logo.boundingBox())!;
-  await page.mouse.move(next.x + next.width + 35, next.y + next.height/2);
-  await expect.poll(() => logo.evaluate((el) => parseFloat((el as HTMLElement).style.getPropertyValue('--pnc-ry')))).toBeGreaterThan(0);
+  await logo.hover();
+  await expect(logo).toHaveClass(/pnc-hover/);
   expect(errors).toEqual([]);
 });
 
@@ -58,7 +56,7 @@ for (const width of [320, 375]) {
     const logo = wordmark.locator('[data-pnc-logo]');
     await logo.hover();
     await expect(logo).not.toHaveClass(/pnc-hover|pnc-scanning/);
-    await expect.poll(() => logo.locator('.pnc-logo-tilt').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    await expect.poll(() => logo.locator('.pnc-logo-svg').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
     await page.mouse.move(width - 2, 895);
     await page.screenshot({ path: `test-results/pnc-about-mobile-${width}.png` });
   });

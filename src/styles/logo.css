@@ -34,15 +34,11 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  perspective: calc(var(--pnc-size) * 6);
   border-radius: 5px;
   -webkit-tap-highlight-color: transparent;
 }
 .pnc-logo-wrap:focus-visible { outline: 2px solid var(--pnc-right-fill); outline-offset: 4px; }
 .pnc-logo-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
-.pnc-logo-tilt { display: block; transform: translate(var(--pnc-px, 0px), var(--pnc-py, 0px)) rotateX(var(--pnc-rx, 0deg)) rotateY(var(--pnc-ry, 0deg)); transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); will-change: transform; }
-/* While the cursor is near, follow it closely instead of springing each move. */
-.pnc-near .pnc-logo-tilt { transition-duration: .12s; transition-timing-function: ease-out; }
 .pnc-logo-svg { display: block; overflow: visible; transform-origin: center; }
 .pnc-face { transition: transform .45s cubic-bezier(.34, 1.56, .64, 1), fill .2s; }
 .pnc-shell { fill: var(--pnc-rear-y-fill); }
@@ -67,7 +63,7 @@
 @keyframes pnc-halo { 0% { box-shadow: 0 0 0 0 var(--pnc-glow-color); opacity: 1; } 100% { box-shadow: 0 0 12px 12px var(--pnc-glow-color); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .pnc-logo-wrap *, .pnc-logo-wrap::after { animation: none !important; transform: none !important; will-change: auto; }
-  .pnc-logo-tilt, .pnc-logo-svg { transition: none !important; }
+  .pnc-logo-svg { transition: none !important; }
   .pnc-face { transition: fill .2s; }
   .pnc-logo-wrap:hover, .pnc-logo-wrap:focus-visible { background: var(--pnc-glow-color); }
 }

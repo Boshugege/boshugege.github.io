@@ -52,12 +52,12 @@ test("mobile and reduced motion preserve navigation and disable transforms", asy
   await logo.hover();
   await logo.click();
   await expect(logo).not.toHaveClass(/pnc-breaking|pnc-hover|pnc-scanning/);
-  expect(await logo.locator('.pnc-logo-tilt').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+  expect(await logo.locator('.pnc-logo-svg').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/pnc-home-mobile-light.png", fullPage: true });
   await page.goto("/posts/arch-linux.html");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: "test-results/pnc-post-mobile-light.png", fullPage: true });
+  await page.screenshot({ path: "test-results/pnc-post-mobile-light.png" });
   await page.locator('.site-brand').click();
   await expect(page).toHaveURL(/index\.html/);
 });
