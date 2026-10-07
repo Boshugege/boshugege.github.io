@@ -80,7 +80,7 @@ function getPostMeta(post: (typeof posts)[number]) {
           </a>
           <span class="meta dir-item-meta">
             {getPostMeta(post).join(" · ")}
-            {" · 阅读："}<span data-post-list-view data-post-slug={`/${post.url}`}>—</span>{" 次"}
+            <span class="view-count" hidden>{" · 阅读："}<span data-post-list-view data-post-slug={`/${post.url}`}>—</span>{" 次"}</span>
           </span>
         </div>
       ))}

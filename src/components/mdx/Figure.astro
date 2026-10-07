@@ -1,0 +1,15 @@
+---
+// <Figure caption="说明">![alt](./image.jpg)</Figure>
+interface Props { caption?: string; }
+const { caption } = Astro.props;
+---
+<figure class="mdx-figure">
+  <slot />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+<style>
+  .mdx-figure { margin: 20px 0; text-align: center; }
+  .mdx-figure :global(p) { margin: 0; }
+  .mdx-figure :global(img) { border-radius: var(--radius); }
+  figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; }
+</style>

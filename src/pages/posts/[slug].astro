@@ -1,5 +1,6 @@
 ---
 import PostLayout from "../../layouts/PostLayout.astro";
+import { mdxComponents } from "../../components/mdx";
 import { render } from "astro:content";
 import { getAllPosts, type PostSummary } from "../../lib/content/posts";
 import { absoluteUrl, site } from "../../lib/site";
@@ -70,5 +71,5 @@ const toc = buildTableOfContents(rendered.headings, post.entry.data.toc);
     image: post.cover.startsWith("http") ? post.cover : absoluteUrl(post.cover),
   }}
 >
-  <Content />
+  <Content components={mdxComponents} />
 </PostLayout>

@@ -6,13 +6,19 @@
   --pnc-top-fill: #dce9f3;
   --pnc-left-fill: #c1d9e6;
   --pnc-right-fill: #93b9d0;
-  --pnc-glow-color: rgba(147, 185, 208, .45);
+  /* Light faces on a light page: the shine is a saturated ice-blue glint
+     and the click halo uses the deep frame blue so both stay visible. */
+  --pnc-shine-color: #3f86c0;
+  --pnc-shine-opacity: .65;
+  --pnc-glow-color: rgba(45, 82, 110, .32);
 }
 :root[data-theme="dark"] {
   --pnc-frame-fill: #335977;
   --pnc-top-fill: #edf5fa;
   --pnc-left-fill: #bdd8e7;
   --pnc-right-fill: #8eafc5;
+  --pnc-shine-color: #ffffff;
+  --pnc-shine-opacity: .7;
   --pnc-glow-color: rgba(220, 233, 243, .35);
 }
 .pnc-brand { display: inline-flex; align-items: center; gap: 9px; min-width: 0; }
@@ -28,13 +34,15 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  perspective: 240px;
+  perspective: calc(var(--pnc-size) * 6);
   border-radius: 5px;
   -webkit-tap-highlight-color: transparent;
 }
 .pnc-logo-wrap:focus-visible { outline: 2px solid var(--pnc-right-fill); outline-offset: 4px; }
 .pnc-logo-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
 .pnc-logo-tilt { display: block; transform: translate(var(--pnc-px, 0px), var(--pnc-py, 0px)) rotateX(var(--pnc-rx, 0deg)) rotateY(var(--pnc-ry, 0deg)); transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); will-change: transform; }
+/* While the cursor is near, follow it closely instead of springing each move. */
+.pnc-near .pnc-logo-tilt { transition-duration: .12s; transition-timing-function: ease-out; }
 .pnc-logo-svg { display: block; overflow: visible; transform-origin: center; }
 .pnc-face { transition: transform .45s cubic-bezier(.34, 1.56, .64, 1), fill .2s; }
 .pnc-shell { fill: var(--pnc-rear-y-fill); }

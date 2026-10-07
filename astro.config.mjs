@@ -17,7 +17,10 @@ export default defineConfig({
     }),
     syntaxHighlight: "shiki",
     shikiConfig: {
-      theme: "github-light",
+      // Colors are emitted as --shiki-light / --shiki-dark and picked by
+      // the site theme in content.css.
+      themes: { light: "github-light", dark: "github-dark" },
+      defaultColor: false,
     },
   },
   build: {

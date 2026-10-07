@@ -3,7 +3,7 @@ let controller: AbortController;
 let logos: HTMLElement[] = [];
 let frame = 0;
 function reset(logo: HTMLElement) {
-  logo.classList.remove("pnc-hover", "pnc-breaking", "pnc-scanning");
+  logo.classList.remove("pnc-hover", "pnc-near", "pnc-breaking", "pnc-scanning");
   for (const key of ["rx", "ry", "px", "py"]) logo.style.removeProperty(`--pnc-${key}`);
 }
 function scan(logo: HTMLElement) {
@@ -46,6 +46,9 @@ function setup() {
     }, options);
   }
   if (near.length) {
+    // Proximity logos turn toward a nearby cursor: full strength within one
+    // logo width, fading out by REACH logo widths.
+    const REACH = 3, ANGLE = 28;
     document.addEventListener("pointermove", (event) => {
       if (motion.matches || event.pointerType === "touch") return;
       cancelAnimationFrame(frame);
@@ -54,11 +57,14 @@ function setup() {
           const box = logo.getBoundingClientRect();
           const x = event.clientX - box.left - box.width / 2;
           const y = event.clientY - box.top - box.height / 2;
-          const weight = Math.max(0, 1 - Math.hypot(x, y) / 220);
-          const dx = x / 110 * weight, dy = y / 110 * weight;
-          tilt(logo, dx, dy, 4);
-          logo.style.setProperty("--pnc-px", `${dx * 2}px`);
-          logo.style.setProperty("--pnc-py", `${dy * 2}px`);
+          const distance = Math.hypot(x, y) / box.width;
+          const weight = Math.max(0, Math.min(1, (REACH - distance) / (REACH - 1)));
+          const dx = clamp(x / box.width) * weight, dy = clamp(y / box.height) * weight;
+          logo.classList.toggle("pnc-near", weight > 0);
+          logo.classList.toggle("pnc-hover", distance < 0.6);
+          tilt(logo, dx, dy, ANGLE);
+          logo.style.setProperty("--pnc-px", `${dx * 4}px`);
+          logo.style.setProperty("--pnc-py", `${dy * 4}px`);
         }
       });
     }, options);

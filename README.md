@@ -107,7 +107,15 @@ centerImages: false
 - `toc: false` 可关闭文章自动目录；默认开启，且只有 H2–H4 标题达到 3 个时才显示。
 - `centerImages: true` 让正文图片居中显示。
 
-正文支持 Markdown、MDX、代码高亮、相对路径图片，以及 `$...$` / `$$...$$` 数学公式。
+正文支持 Markdown（含表格、删除线）、代码高亮（随明暗主题切换）、相对路径图片、`$...$` / `$$...$$` 数学公式，以及直接写 HTML（如 `<details>`、`<kbd>`、`<video>`）。
+
+文章里无需 import 即可使用这些组件（定义在 `src/components/mdx/`，新增组件在其 `index.ts` 中注册）：
+
+- `<Figure caption="说明">![alt](./a.jpg)</Figure>`：带说明文字的图片。
+- `<Compare labels={["之前", "之后"]}>` + 相邻两行图片：左右对比图，手机上自动上下排列。
+- `<Note>` / `<Note type="tip">` / `<Note type="warn" title="标题">`：提示框。
+
+完整示例见草稿 `src/content/posts/2026-01-20-sample/index.mdx`，运行 `npm run dev` 后访问 `/posts/2026-01-20-sample.html`。
 
 ## 图片规则
 

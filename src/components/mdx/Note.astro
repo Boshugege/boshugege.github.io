@@ -1,0 +1,25 @@
+---
+// <Note>普通提示</Note>  <Note type="tip" title="小技巧">…</Note>  <Note type="warn">…</Note>
+interface Props { type?: "info" | "tip" | "warn"; title?: string; }
+const { type = "info", title } = Astro.props;
+const defaultTitle = { info: "注意", tip: "提示", warn: "警告" }[type];
+---
+<aside class:list={["mdx-note", `mdx-note-${type}`]}>
+  <p class="mdx-note-title">{title ?? defaultTitle}</p>
+  <slot />
+</aside>
+<style>
+  .mdx-note {
+    --note-color: var(--muted);
+    margin: 18px 0;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--note-color);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+  .mdx-note-tip { --note-color: #5a8a5e; }
+  .mdx-note-warn { --note-color: var(--link); }
+  .mdx-note-title { margin: 0 0 4px; color: var(--note-color); font-weight: 600; font-size: 14px; }
+  .mdx-note :global(p:last-child) { margin-bottom: 0; }
+</style>

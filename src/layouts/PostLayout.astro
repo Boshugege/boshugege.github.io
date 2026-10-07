@@ -96,7 +96,7 @@ const postSlug = Astro.url.pathname;
           <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
         </>
       ))}
-      {" · 阅读："}<span data-post-view-count>—</span>{" 次"}
+      <span class="view-count" hidden>{" · 阅读："}<span data-post-view-count>—</span>{" 次"}</span>
     </p>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">

@@ -1,14 +1,28 @@
 ---
-title: "示例：代码与公式"
+title: "写作示例：文章里能用什么"
 date: "2026-01-20"
-tags: ["数学","代码"]
-excerpt: "示例文章，包含行内代码、代码块、行内数学与独立数学公式。"
+tags: ["示例"]
+excerpt: "所有可用写法的速查页。草稿，只在 npm run dev 中可见。"
+draft: true
 ---
-这是一个示例段落，包含行内代码 `x = 42`，以及行内数学
-$e^{i\theta}=\cos\theta +
-i\sin\theta$。
 
-下面是一个 Python 代码块：
+这篇是写作速查页，设为草稿，只在 `npm run dev` 里能看到。复制需要的片段到新文章即可。
+
+## 基本 Markdown
+
+**粗体**、*斜体*、~~删除线~~、`行内代码`、[链接](https://parityncsvt.top)。
+
+- 列表项
+- 另一项
+  1. 有序子项
+
+> 引用块。
+
+| 表格 | 也可以 |
+| --- | --- |
+| a | b |
+
+## 代码
 
 ```python
 def fib(n):
@@ -18,8 +32,52 @@ def fib(n):
     return a
 ```
 
-下面展示一个独立数学公式：
+## 数学公式
+
+行内 $e^{i\theta}=\cos\theta+i\sin\theta$，独立公式：
 
 $$
 \int_0^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
 $$
+
+## 图片
+
+普通图片放在文章目录里，用相对路径：`![说明](./image.jpg)`。
+
+带说明文字的图片：
+
+```mdx
+<Figure caption="图片下方的说明">
+![替代文字](./image.jpg)
+</Figure>
+```
+
+左右对比（手机上自动上下排列），两张图写在相邻两行：
+
+```mdx
+<Compare labels={["之前", "之后"]} caption="可选的总说明">
+![之前](./before.jpg)
+![之后](./after.jpg)
+</Compare>
+```
+
+## 提示框
+
+<Note>默认样式，用来补充说明。</Note>
+
+<Note type="tip" title="小技巧">绿色提示，可以自定义标题。</Note>
+
+<Note type="warn">警告样式，用站点强调色。</Note>
+
+## HTML
+
+MDX 里可以直接写 HTML：
+
+<details>
+<summary>点击展开</summary>
+
+折叠内容，里面也能写 **Markdown**。
+
+</details>
+
+按 <kbd>Ctrl</kbd> + <kbd>C</kbd> 复制。

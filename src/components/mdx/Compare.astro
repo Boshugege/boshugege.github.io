@@ -1,0 +1,45 @@
+---
+// Side-by-side images (stacked on phones). Put one Markdown image per line:
+// <Compare labels={["之前", "之后"]} caption="说明">
+// ![a](./a.jpg)
+// ![b](./b.jpg)
+// </Compare>
+interface Props { labels?: string[]; caption?: string; }
+const { labels = [], caption } = Astro.props;
+---
+<figure class="mdx-compare">
+  <div class="mdx-compare-grid">
+    <slot />
+  </div>
+  {labels.length > 0 && (
+    <div class="mdx-compare-labels">{labels.map((label) => <span>{label}</span>)}</div>
+  )}
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+<style>
+  .mdx-compare { margin: 20px 0; }
+  /* Markdown wraps the images in one <p>; lay its children out as columns. */
+  .mdx-compare-grid :global(p) {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    margin: 0;
+  }
+  .mdx-compare-grid :global(img) { width: 100%; height: auto; border-radius: var(--radius); }
+  .mdx-compare-labels {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+  figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; text-align: center; }
+  @media (max-width: 600px) {
+    .mdx-compare-grid :global(p), .mdx-compare-labels { grid-auto-flow: row; }
+    .mdx-compare-labels { display: none; }
+  }
+</style>

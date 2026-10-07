@@ -33,7 +33,7 @@ test("PNC faces, hover displacement, parity, themes and route reinitialization",
   await expect(logo).toHaveClass(/pnc-breaking/);
   await page.locator('.site-brand').click();
   await expect(page).toHaveURL(/index\.html/);
-  await page.goto("/posts/2026-01-20-sample.html");
+  await page.goto("/posts/arch-linux.html");
   await expect(logo.locator("svg")).toHaveAttribute("width", "22");
   await logo.click();
   await expect(logo).toHaveClass(/pnc-breaking/);
@@ -55,7 +55,7 @@ test("mobile and reduced motion preserve navigation and disable transforms", asy
   expect(await logo.locator('.pnc-logo-tilt').evaluate((el) => getComputedStyle(el).transform)).toBe("none");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/pnc-home-mobile-light.png", fullPage: true });
-  await page.goto("/posts/2026-01-20-sample.html");
+  await page.goto("/posts/arch-linux.html");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/pnc-post-mobile-light.png", fullPage: true });
   await page.locator('.site-brand').click();

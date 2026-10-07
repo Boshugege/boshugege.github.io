@@ -237,9 +237,10 @@ return directLight + indirect contribution
 
 下面两张图都使用 128 spp。第一张是不带 NEE 的路径追踪，第二张是带 NEE 的路径追踪。
 
+<Compare labels={["非 NEE 路径追踪", "NEE 路径追踪"]}>
 ![非 NEE 路径追踪](./path_no_nee.jpg)
-
 ![NEE 路径追踪](./path_nee.jpg)
+</Compare>
 
 **对比：**
 
@@ -251,9 +252,10 @@ return directLight + indirect contribution
 
 这里再比较 Whitted-Style 光线追踪和路径追踪。两张图使用同一个场景，物体、相机和盒子构图保持一致；场景中同时提供了给 Whitted 使用的点光源，以及给路径追踪采样的 emissive triangle 面光源。
 
+<Compare labels={["Whitted", "Path Tracing"]}>
 ![Whitted](./whitted_vs_path_whitted.jpg)
-
 ![Path Tracing](./whitted_vs_path_path.jpg)
+</Compare>
 
 第一个不同是噪声。Whitted-Style 是确定性的递归光追，每个像素只追踪主光线、反射光线、折射光线和到点光源的 shadow ray，所以有锐利阴影。路径追踪是随机采样渲染方程，有限 spp 下会有 Monte Carlo 噪声，尤其是发光面附近、glossy 球和间接照明较强的区域。
 
@@ -326,15 +328,17 @@ else:
 
 第一组图是同一场景下关闭和开启 Fresnel 的对比，注意到黄球在玻璃附近的效果有明显的区别。
 
+<Compare labels={["未使用菲涅尔系数", "使用菲涅尔系数"]}>
 ![未使用菲涅尔系数](./fresnel_without.jpg)
-
 ![使用菲涅尔系数](./fresnel_with.jpg)
+</Compare>
 
 路径追踪版本：
 
+<Compare labels={["未使用菲涅尔系数 - 路径追踪", "使用菲涅尔系数 - 路径追踪"]}>
 ![未使用菲涅尔系数 - 路径追踪](./fresnel_without_pt.jpg)
-
 ![使用菲涅尔系数 - 路径追踪](./fresnel_with_pt.jpg)
+</Compare>
 
 第二组图是水和玻璃的对比。左侧水楔形体折射率为 1.33，右侧玻璃楔形体折射率为 1.80。因为出射角约为 42 度，水中光线可以折射出去，而玻璃内部会发生全反射。
 

@@ -76,8 +76,9 @@ async function setupPostView(root: HTMLElement) {
       body: JSON.stringify({ slug }),
     });
     countNode.textContent = formatCount(data.views);
+    countNode.closest<HTMLElement>(".view-count")?.removeAttribute("hidden");
   } catch {
-    // Keep the static fallback without changing the article metadata layout.
+    // The count stays hidden when the API is unavailable.
   }
 }
 

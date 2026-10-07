@@ -57,6 +57,7 @@ function formatViewCount(slug: string) {
 function updateViewCountNodes() {
   document.querySelectorAll<HTMLElement>("[data-post-list-view]").forEach((node) => {
     node.textContent = formatViewCount(node.dataset.postSlug || "");
+    if (node.parentElement) node.parentElement.hidden = !viewCountsLoaded;
   });
 }
 
@@ -105,7 +106,11 @@ function renderPosts(posts: PostIndexDocument[]) {
     viewCount.dataset.postListView = "";
     viewCount.dataset.postSlug = slug;
     viewCount.textContent = formatViewCount(slug);
-    meta.append(document.createTextNode(`${metaText} · 阅读：`), viewCount, document.createTextNode(" 次"));
+    const viewWrap = document.createElement("span");
+    viewWrap.className = "view-count";
+    viewWrap.hidden = !viewCountsLoaded;
+    viewWrap.append(" · 阅读：", viewCount, " 次");
+    meta.append(metaText, viewWrap);
     item.append(title, meta);
     fragment.append(item);
   }
