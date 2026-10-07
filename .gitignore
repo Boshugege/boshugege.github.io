@@ -5,20 +5,4 @@ test-results/
 playwright-report/
 .DS_Store
 
-# Legacy repository-root build output. Production deploys dist/ from a
-# verified commit instead of committing generated files.
-/_astro/
-/assets/
-/posts/
-/about.html
-/index.html
-/index.json
-/manifest.webmanifest
-/notes.html
-/notes.json
-/robots.txt
-/rss.xml
-/search.json
-/sitemap.xml
-/.nojekyll
-/CNAME
+.claude/

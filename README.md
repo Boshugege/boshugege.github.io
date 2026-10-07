@@ -151,14 +151,7 @@ About 页面正文来自：
 src/content/about/resume.mdx
 ```
 
-该页面已预注册这些 MDX 组件：
-
-- `ResumeSection`
-- `Timeline`
-- `ProjectList`
-- `SkillList`
-- `LinkList`
-- `MetricStrip`
+正文就是普通 Markdown，直接按标题分段写即可。
 
 每天随想写在：
 
@@ -200,7 +193,7 @@ scripts/
 
 - `src/` 是唯一前端源码树。
 - `dist/` 是 Astro 构建输出。
-- `dist/`、`.astro/`、`node_modules/` 和仓库根目录的旧静态产物均由 Git 忽略。
+- `dist/`、`.astro/`、`node_modules/` 由 Git 忽略。
 - 生产部署从指定 Git commit 重新构建 `dist/`，不读取仓库中的预生成 HTML。
 
 ## 生产服务
@@ -240,10 +233,8 @@ node scripts/verify-build.mjs
 - 数学文章加载本地 KaTeX CSS，非数学页面不加载 KaTeX。
 - 文章图片有懒加载、解码和尺寸属性。
 - 文章封面元数据使用 Astro 优化后的公开图片。
-- 旧的 now-status / calendar 输出没有复活。
 - 首页与文章页保留阅读次数挂载点，About 保留四项动态统计挂载点。
 - 搜索索引和首页 HTML 没有超过体积预算。
-- 已移除的旧静态垃圾不会重新出现在构建输出里。
 
 ## 发布流程
 

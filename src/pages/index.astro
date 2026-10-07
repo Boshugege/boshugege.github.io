@@ -12,10 +12,6 @@ for (const post of posts) {
   for (const tag of post.tags) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
 }
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-const activeTag = Astro.url.searchParams.get("tag") || "";
-const activeTagIndex = tags.findIndex(([tag]) => tag === activeTag);
-const tagsExpanded = activeTagIndex >= 5;
-const visiblePosts = activeTag ? posts.filter((post) => post.tags.includes(activeTag)) : posts;
 const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
 
 function getPostMeta(post: (typeof posts)[number]) {
@@ -46,22 +42,21 @@ function getPostMeta(post: (typeof posts)[number]) {
   <div slot="sidebar-after" class="sidebar-home-tools">
     <input class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" aria-label="搜索文章" data-post-search />
     <nav class="tag-nav sidebar-tag-nav" aria-label="标签筛选">
-      <a href="/index.html" class:list={["tag", "top", { active: !activeTag }]} data-tag="" aria-current={!activeTag ? "page" : undefined}>全部</a>
-      <div class:list={["tags-list", { collapsed: !tagsExpanded }]} data-tag-list>
+      <a href="/index.html" class="tag top active" data-tag="" aria-current="page">全部</a>
+      <div class="tags-list collapsed" data-tag-list>
         {tags.map(([tag, count], index) => (
           <a
             href={`/index.html?tag=${encodeURIComponent(tag)}`}
-            class:list={["tag", { visible: index < 5, active: tag === activeTag }]}
+            class:list={["tag", { visible: index < 5 }]}
             data-tag={tag}
-            aria-current={tag === activeTag ? "page" : undefined}
           >
             {tag} ({count})
           </a>
         ))}
       </div>
       {tags.length > 5 && (
-        <button class="tag-toggle" type="button" aria-expanded={String(tagsExpanded)} data-tag-toggle data-collapsed-label={`展开全部标签 (${tags.length})`}>
-          {tagsExpanded ? "收起标签" : `展开全部标签 (${tags.length})`}
+        <button class="tag-toggle" type="button" aria-expanded="false" data-tag-toggle data-collapsed-label={`展开全部标签 (${tags.length})`}>
+          {`展开全部标签 (${tags.length})`}
         </button>
       )}
     </nav>
@@ -78,7 +73,7 @@ function getPostMeta(post: (typeof posts)[number]) {
   <aside class="directory" id="posts">
     <h2 class="dir-title">文章目录</h2>
     <div class="dir-list" data-post-list data-views-api={statsApi}>
-      {visiblePosts.map((post) => (
+      {posts.map((post) => (
         <div class="dir-item">
           <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch>
             {post.title}

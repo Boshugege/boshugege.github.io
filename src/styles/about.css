@@ -28,15 +28,7 @@
 .resume-content p { margin: 0 0 8px; }
 .resume-content ul { margin: 0 0 10px 20px; padding: 0; }
 .resume-content li { margin: 3px 0; }
-.resume-content .meta,
-.about-fact { color: var(--muted); }
-.about-lead { margin: 0 0 14px; }
-.about-block { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px; }
-.about-block:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
-.about-block h3 { margin: 0 0 8px; font-size: 16px; }
-.about-block p { margin: 0 0 8px; }
-.about-block p:last-child { margin-bottom: 0; }
-.about-inline-links { line-height: 1.8; }
+.resume-content .meta { color: var(--muted); }
 @media (max-width: 800px) {
   .about-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .about-highlight-grid { grid-template-columns: 1fr; }

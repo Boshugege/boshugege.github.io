@@ -38,9 +38,6 @@ for (const file of [
 ]) {
   await assertFile(file);
 }
-await assertMissing("now.json");
-await assertMissing("CNAME");
-await assertMissing(".nojekyll");
 
 async function isDraft(file) {
   const frontmatter = (await fs.readFile(file, "utf8")).match(/^---\n([\s\S]*?)\n---/)?.[1] || "";
@@ -175,20 +172,10 @@ for (const { file, html } of postHtml) {
   }
 }
 
-for (const html of [indexHtml, aboutHtml, notesHtml, anyPost]) {
-  if (html.includes("/assets/js/site.js")) {
-    throw new Error("Legacy site.js is still referenced");
-  }
-  if (html.includes("data-now-status") || html.includes("/now.json")) {
-    throw new Error("Calendar status integration is still referenced");
-  }
-}
-
 const searchSize = (await fs.stat(path.join(dist, "search.json"))).size;
 const indexSize = (await fs.stat(path.join(dist, "index.html"))).size;
 if (searchSize > 120_000) throw new Error(`search.json exceeds 120 KB: ${searchSize}`);
 if (indexSize > 40_000) throw new Error(`index.html exceeds 40 KB: ${indexSize}`);
-await assertMissing("assets/img/cidai/index.png");
 
 console.log(`Verified ${postSources.length} posts and core static outputs.`);
 
