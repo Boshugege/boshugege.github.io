@@ -171,6 +171,17 @@ src/content/notes.md
 - `notes.html`：随想时间线页面。
 - `notes.json`：首页最近随想预览数据。
 
+## 修改外观
+
+整站外观集中在 `src/styles/global.css` 顶部的设计变量里：
+
+- `--bg` / `--panel` / `--text` / `--muted` / `--border` / `--link`：颜色（下方 `[data-theme="dark"]` 是深色版本）。
+- `--font-sans` / `--font-serif` / `--font-mono`：正文、标题、代码字体。标题英文用自托管的 Source Serif 4（`@fontsource-variable/source-serif-4`），中文回退到系统宋体；不依赖 Google Fonts。
+- `--radius`：卡片、按钮圆角。
+- `--divider`：列表与段落间的分隔线样式。
+
+站点名称、简介、侧栏文字、邮箱等写在 `src/lib/site.ts`。
+
 ## 工程结构
 
 ```text

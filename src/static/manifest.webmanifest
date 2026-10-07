@@ -3,8 +3,8 @@
   "short_name": "PNC Blog",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#f2efe7",
-  "theme_color": "#f2efe7",
+  "background_color": "#f5f4ed",
+  "theme_color": "#f5f4ed",
   "lang": "zh-CN",
   "icons": [
     {

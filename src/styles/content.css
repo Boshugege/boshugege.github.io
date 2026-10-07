@@ -14,7 +14,7 @@
   gap: 14px;
   margin-bottom: 22px;
   padding: 8px 0 14px;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: var(--divider);
 }
 .post-site-brand {
   min-width: 0;
@@ -68,8 +68,8 @@
 .post-toc-inline {
   margin: 18px 0 20px;
   padding: 9px 0;
-  border-top: 1px dashed var(--border);
-  border-bottom: 1px dashed var(--border);
+  border-top: var(--divider);
+  border-bottom: var(--divider);
 }
 .post-toc-inline summary {
   width: fit-content;
@@ -161,7 +161,7 @@
 .comments {
   margin-top: 36px;
   padding-top: 18px;
-  border-top: 1px dashed var(--border);
+  border-top: var(--divider);
 }
 .comments h2 {
   margin-top: 0;
@@ -181,7 +181,7 @@
 }
 .comment-item {
   padding: 12px 0;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: var(--divider);
 }
 .comment-meta {
   margin-bottom: 6px;
@@ -311,7 +311,7 @@
 .post-content blockquote p:last-child { margin-bottom: 0; }
 .post-content pre,
 .post-content code {
-  font-family: "Cascadia Code", "Cascadia Mono", "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Monaco, "DejaVu Sans Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.95em;
 }
 .post-content pre {
@@ -390,7 +390,7 @@
   gap: 12px;
   margin-top: 36px;
   padding-top: 16px;
-  border-top: 1px dashed var(--border);
+  border-top: var(--divider);
   font-size: 14px;
 }
 .post-nav-item { min-width: 0; }

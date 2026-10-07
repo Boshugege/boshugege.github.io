@@ -1,45 +1,56 @@
 /* Global tokens, document defaults and shared site chrome. */
+/*
+ * Design tokens — edit here to restyle the whole site.
+ * Colors follow a warm "ivory + ink + clay" palette; fonts are system stacks
+ * plus a self-hosted serif (Source Serif 4) for headings.
+ */
 :root {
-  --bg: #ffffff;
-  --text: #000000;
-  --link: #0000ee; /* 经典蓝 */
-  --visited: #551a8b;
-  --muted: #666666;
-  --border: #cccccc;
-  --panel: #fff;
-  --control-bg: #ffffff;
-  --control-hover-bg: #f4f4f4;
-  --active-bg: #111111;
-  --active-text: #ffffff;
-  --code-bg: #f6f6f6;
-  --code-label-bg: rgba(255, 255, 255, 0.95);
-  --inline-code-bg: #f0f0f0;
-  --quote-bg: #f7f7f7;
-  --quote-border: #999999;
-  --button-bg: #ffffff;
-  --button-text: #000000;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Songti SC", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Microsoft YaHei", serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, Menlo, "Liberation Mono", monospace;
+  --radius: 8px;
+  --divider: 1px solid var(--border);
+
+  --bg: #f5f4ed;
+  --text: #141413;
+  --link: #b4532a;
+  --visited: var(--link);
+  --muted: #6b6a64;
+  --border: #e0ddd2;
+  --panel: #faf9f5;
+  --control-bg: #faf9f5;
+  --control-hover-bg: #efede4;
+  --active-bg: #141413;
+  --active-text: #faf9f5;
+  --code-bg: #f0eee6;
+  --code-label-bg: rgba(250, 249, 245, 0.95);
+  --inline-code-bg: #ebe8de;
+  --quote-bg: #f0eee6;
+  --quote-border: #c9c5b8;
+  --button-bg: #faf9f5;
+  --button-text: #141413;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #111111;
-  --text: #eeeeee;
-  --link: #8ab4ff;
-  --visited: #c58cff;
-  --muted: #aaaaaa;
-  --border: #555555;
-  --panel: #171717;
-  --control-bg: #1d1d1d;
-  --control-hover-bg: #262626;
-  --active-bg: #eeeeee;
-  --active-text: #111111;
-  --code-bg: #1f1f1f;
-  --code-label-bg: rgba(17, 17, 17, 0.95);
-  --inline-code-bg: #262626;
-  --quote-bg: #1d1d1d;
-  --quote-border: #777777;
-  --button-bg: #171717;
-  --button-text: #eeeeee;
+  --bg: #1f1e1d;
+  --text: #f0eee6;
+  --link: #e3906b;
+  --visited: var(--link);
+  --muted: #a6a39a;
+  --border: #3e3c38;
+  --panel: #262624;
+  --control-bg: #2b2a27;
+  --control-hover-bg: #34322e;
+  --active-bg: #f0eee6;
+  --active-text: #1f1e1d;
+  --code-bg: #2b2a27;
+  --code-label-bg: rgba(38, 38, 36, 0.95);
+  --inline-code-bg: #34322e;
+  --quote-bg: #2b2a27;
+  --quote-border: #5a5750;
+  --button-bg: #262624;
+  --button-text: #f0eee6;
   color-scheme: dark;
 }
 
@@ -115,19 +126,24 @@ body {
   min-width: 0;
   background: var(--bg);
   color: var(--text);
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
   transition:
     background-color 140ms ease,
     color 140ms ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+.site-title,
+.latest-note-title,
+.dir-item-title {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
 
 .skip-link {
@@ -166,6 +182,7 @@ body {
   width: 32px;
   height: 32px;
   padding: 6px;
+  border-radius: var(--radius);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -219,10 +236,11 @@ body {
   display: block;
 }
 
-/* 链接为经典蓝，带下划线 */
 a {
   color: var(--link);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
   transition: color 140ms ease;
 }
 a:visited {
@@ -234,7 +252,7 @@ a:focus {
 }
 
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--link);
   outline-offset: 2px;
 }
 
@@ -296,13 +314,24 @@ a:focus {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--border);
-  padding: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
   background: var(--panel);
 }
 .about h2,
 .about h3 {
   margin: 0 0 8px;
   font-size: 18px;
+}
+.about p {
+  margin: 0 0 6px;
+}
+.about .profile-info {
+  margin: 0;
+  color: var(--muted);
+}
+.about .contact {
+  margin: 10px 0 0;
 }
 .about-more-link {
   margin-left: 6px;
@@ -311,7 +340,7 @@ a:focus {
 .latest-note-preview {
   margin-top: 0;
   margin-bottom: 10px;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: var(--divider);
   padding-bottom: 8px;
 }
 .latest-note-panel {
@@ -347,7 +376,7 @@ a:focus {
   margin: 0;
   padding: 4px 10px;
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--control-bg);
   color: var(--text);
   line-height: 1.4;
@@ -395,7 +424,7 @@ a:focus {
   margin: 0;
   padding: 4px 10px;
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: 999px;
   background: var(--control-bg);
   color: var(--text);
   line-height: 1.4;
@@ -409,8 +438,8 @@ a:focus {
 .tag-toggle {
   margin-left: 0;
   background: transparent;
-  border: 1px dashed var(--border);
-  border-radius: 2px;
+  border: var(--divider);
+  border-radius: 999px;
   padding: 4px 10px;
   cursor: pointer;
   color: var(--muted);
@@ -441,7 +470,8 @@ a:focus {
   min-width: 0;
   max-width: 100%;
   border: 1px solid var(--border);
-  padding: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
   background: var(--panel);
   transition:
     background-color 140ms ease,
@@ -455,7 +485,7 @@ a:focus {
   width: min(300px, 100%);
   flex: 0 1 300px;
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: var(--radius);
   background: var(--control-bg);
   color: var(--text);
   caret-color: var(--text);
@@ -490,7 +520,7 @@ a:focus {
   background: var(--control-hover-bg);
 }
 .search-input:focus {
-  border-color: var(--text);
+  border-color: var(--link);
   box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--border);
 }
 .dir-list {
@@ -499,15 +529,15 @@ a:focus {
   padding: 0;
 }
 .dir-item {
-  padding: 8px 0;
-  border-top: 1px dashed var(--border);
+  padding: 10px 0;
+  border-top: var(--divider);
 }
 .dir-item:first-child {
   border-top: 0;
 }
 .dir-item-title {
   color: var(--text);
-  font-weight: 700;
+  font-size: 17px;
   text-decoration: none;
   overflow-wrap: anywhere;
 }

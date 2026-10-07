@@ -2,7 +2,7 @@ export const site = {
   name: "PNC's Blog",
   homeDescription: "一个随意写写的简单博客",
   headerDescription: "ParityNonconservation's personal blog, a simple static site.",
-  themeColor: "#f2efe7",
+  themeColor: "#f5f4ed",
   language: "zh-CN",
   footerOwner: "ParityNonconservation",
   url: "https://parityncsvt.top",
