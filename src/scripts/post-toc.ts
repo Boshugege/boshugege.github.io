@@ -1,23 +1,6 @@
-export {};
+import { copyText } from "./clipboard";
 
 let cleanupToc: (() => void) | undefined;
-
-async function copyText(value: string) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.readOnly = true;
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  document.body.append(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
-}
 
 function initializePostToc() {
   cleanupToc?.();
@@ -74,7 +57,7 @@ function initializePostToc() {
       history.replaceState(null, "", anchor.hash);
       setActive(heading.id);
       try {
-        await copyText(window.location.href);
+        if (!await copyText(window.location.href)) throw new Error("copy failed");
         anchor.classList.add("copied");
         anchor.title = "已复制";
         window.clearTimeout(copiedTimer);

@@ -488,3 +488,32 @@
   .code-copy-button,
   .heading-anchor { transition: none; }
 }
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 1px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--control-bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9em;
+  vertical-align: 1px;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.share-button:hover,
+.share-button:focus-visible {
+  background: var(--control-hover-bg);
+  color: var(--text);
+}
+.share-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

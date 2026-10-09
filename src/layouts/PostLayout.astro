@@ -1,6 +1,6 @@
 ---
 import PncLogo from "../components/PncLogo.astro";
-import { formatDate, normalizeTags, site } from "../lib/site";
+import { absoluteUrl, formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import Comments from "../components/Comments.astro";
 import PostToc from "../components/PostToc.astro";
@@ -16,6 +16,8 @@ interface Props {
   canonicalPath: string;
   image?: string;
   imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   updated?: Date | string;
   contentClass?: string;
   wordCount?: number;
@@ -35,6 +37,8 @@ const {
   canonicalPath,
   image = site.defaultCover,
   imageAlt = site.defaultCoverAlt,
+  imageWidth,
+  imageHeight,
   updated,
   contentClass = "",
   wordCount,
@@ -62,6 +66,8 @@ const postSlug = Astro.url.pathname;
   ogType="article"
   image={image}
   imageAlt={imageAlt}
+  imageWidth={imageWidth}
+  imageHeight={imageHeight}
   includeKatex={hasMath}
   articlePublishedTime={dateText}
   articleModifiedTime={updatedText || dateText}
@@ -97,6 +103,17 @@ const postSlug = Astro.url.pathname;
         </>
       ))}
       <span class="view-count" hidden>{" · 阅读："}<span data-post-view-count>—</span>{" 次"}</span>
+      <button
+        type="button"
+        class="share-button"
+        data-share
+        data-share-title={title}
+        data-share-text={excerpt}
+        data-share-url={absoluteUrl(canonicalPath)}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" /></svg>
+        <span data-share-label aria-live="polite">分享</span>
+      </button>
     </p>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">
@@ -122,5 +139,6 @@ const postSlug = Astro.url.pathname;
     import "../scripts/code-copy";
     import "../scripts/post-toc";
     import "../scripts/site-stats";
+    import "../scripts/share";
   </script>
 </DocumentLayout>

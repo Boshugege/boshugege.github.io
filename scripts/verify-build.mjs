@@ -145,7 +145,7 @@ if (indexHtml.includes("katex.min") || aboutHtml.includes("katex.min")) {
 if ([indexHtml, aboutHtml, notesHtml, ...postHtml.map(({ html }) => html)].some((html) => html.includes("cdn.jsdelivr.net/npm/katex"))) {
   throw new Error("KaTeX CSS must be bundled locally instead of loaded from a CDN");
 }
-if (coverPost && (coverPost.html.includes("src/content/posts") || !coverPost.html.includes('property="og:image:alt"') || !/property="og:image" content="https:\/\/parityncsvt\.top\/_astro\/[^"]+\.webp"/.test(coverPost.html))) {
+if (coverPost && (coverPost.html.includes("src/content/posts") || !coverPost.html.includes('property="og:image:alt"') || !/property="og:image" content="https:\/\/parityncsvt\.top\/_astro\/[^"]+\.jpg"/.test(coverPost.html) || !coverPost.html.includes('property="og:image:width"'))) {
   throw new Error(`${coverPost.file}: cover metadata is not using an optimized Astro image`);
 }
 if (updatedPost && !updatedPost.html.includes('"dateModified"')) {

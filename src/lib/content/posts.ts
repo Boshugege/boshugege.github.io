@@ -14,6 +14,8 @@ export interface PostSummary {
   tags: string[];
   excerpt: string;
   cover: string;
+  coverWidth: number;
+  coverHeight: number;
   coverAlt: string;
   canonical?: string;
   url: string;
@@ -28,10 +30,30 @@ function stableId(value: string) {
   return crypto.createHash("sha256").update(value.toLowerCase()).digest("hex").slice(0, 32);
 }
 
+// Share previews: JPEG is the format every link-preview crawler accepts.
 async function normalizeCover(cover?: CollectionEntry<"posts">["data"]["cover"]) {
-  if (!cover) return site.defaultCover;
-  const image = await getImage({ src: cover, format: "webp" });
-  return image.src;
+  if (!cover) return { src: site.defaultCover, width: site.defaultCoverSize, height: site.defaultCoverSize };
+  const width = Math.min(cover.width, 1200);
+  const image = await getImage({ src: cover, format: "jpg", width, quality: 82 });
+  return { src: image.src, width, height: Math.round(cover.height * width / cover.width) };
+}
+
+// Plain-text summary for meta descriptions, RSS and search: drops Markdown
+// and MDX syntax so previews never show backticks, links or tags.
+export function toPlainText(markdown: string, maxLength = 160) {
+  const text = markdown
+    .replace(/^(import|export) .*$/gm, "")
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    .replace(/^```[\s\S]*?^```/gm, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^>\s?/gm, "")
+    .replace(/`|\*\*|~~|\$+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength).trimEnd()}…` : text;
 }
 
 function inferSlug(entry: CollectionEntry<"posts">) {
@@ -49,14 +71,17 @@ export async function getAllPosts() {
       const slug = inferSlug(entry);
       const url = `posts/${slug}.html`;
       const tags = normalizeTags(entry.data.tags);
+      const cover = await normalizeCover(entry.data.cover);
       return {
         id: stableId(url),
         title: entry.data.title,
         date,
         updated,
         tags,
-        excerpt: entry.data.excerpt || entry.body.slice(0, 180).replace(/\s+/g, " "),
-        cover: await normalizeCover(entry.data.cover),
+        excerpt: toPlainText(entry.data.excerpt || entry.body),
+        cover: cover.src,
+        coverWidth: cover.width,
+        coverHeight: cover.height,
         coverAlt: entry.data.coverAlt || site.defaultCoverAlt,
         canonical: entry.data.canonical,
         url,

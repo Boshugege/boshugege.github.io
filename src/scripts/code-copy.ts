@@ -1,23 +1,9 @@
+import { copyText } from "./clipboard";
+
 const COPY_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path></svg>';
 const CHECK_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg>';
-
-async function copyText(value: string) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.readOnly = true;
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  document.body.append(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
-}
 
 function initializeCopyButtons() {
   document.querySelectorAll<HTMLElement>(".post-content pre").forEach((pre) => {

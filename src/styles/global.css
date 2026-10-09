@@ -1,7 +1,7 @@
 /* Global tokens, document defaults and shared site chrome. */
 /*
  * Design tokens — edit here to restyle the whole site.
- * Colors follow a warm "ivory + ink + clay" palette; fonts are system stacks
+ * Colors follow the glacier-blue PNC logo; fonts are system stacks
  * plus a self-hosted serif (Source Serif 4) for headings.
  */
 :root {
@@ -11,46 +11,46 @@
   --radius: 8px;
   --divider: 1px solid var(--border);
 
-  --bg: #f5f4ed;
-  --text: #141413;
-  --link: #b4532a;
+  --bg: #f3f6f8;
+  --text: #142130;
+  --link: #2a5f86;
   --visited: var(--link);
-  --muted: #6b6a64;
-  --border: #e0ddd2;
-  --panel: #faf9f5;
-  --control-bg: #faf9f5;
-  --control-hover-bg: #efede4;
-  --active-bg: #141413;
-  --active-text: #faf9f5;
-  --code-bg: #f0eee6;
-  --code-label-bg: rgba(250, 249, 245, 0.95);
-  --inline-code-bg: #ebe8de;
-  --quote-bg: #f0eee6;
-  --quote-border: #c9c5b8;
-  --button-bg: #faf9f5;
-  --button-text: #141413;
+  --muted: #586776;
+  --border: #dbe3ea;
+  --panel: #fafcfd;
+  --control-bg: #fafcfd;
+  --control-hover-bg: #e9eff4;
+  --active-bg: #214864;
+  --active-text: #fafcfd;
+  --code-bg: #edf2f6;
+  --code-label-bg: rgba(250, 252, 253, 0.95);
+  --inline-code-bg: #e4ebf1;
+  --quote-bg: #edf2f6;
+  --quote-border: #a9c1d3;
+  --button-bg: #fafcfd;
+  --button-text: #142130;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #1f1e1d;
-  --text: #f0eee6;
-  --link: #e3906b;
+  --bg: #10161c;
+  --text: #e3ebf2;
+  --link: #93c3e3;
   --visited: var(--link);
-  --muted: #a6a39a;
-  --border: #3e3c38;
-  --panel: #262624;
-  --control-bg: #2b2a27;
-  --control-hover-bg: #34322e;
-  --active-bg: #f0eee6;
-  --active-text: #1f1e1d;
-  --code-bg: #2b2a27;
-  --code-label-bg: rgba(38, 38, 36, 0.95);
-  --inline-code-bg: #34322e;
-  --quote-bg: #2b2a27;
-  --quote-border: #5a5750;
-  --button-bg: #262624;
-  --button-text: #f0eee6;
+  --muted: #93a3b2;
+  --border: #273441;
+  --panel: #161e26;
+  --control-bg: #1b242e;
+  --control-hover-bg: #222d38;
+  --active-bg: #dce9f3;
+  --active-text: #10161c;
+  --code-bg: #1b242e;
+  --code-label-bg: rgba(22, 30, 38, 0.95);
+  --inline-code-bg: #222d38;
+  --quote-bg: #1b242e;
+  --quote-border: #3d5468;
+  --button-bg: #161e26;
+  --button-text: #e3ebf2;
   color-scheme: dark;
 }
 

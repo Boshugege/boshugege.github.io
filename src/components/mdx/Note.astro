@@ -18,8 +18,10 @@ const defaultTitle = { info: "注意", tip: "提示", warn: "警告" }[type];
     border-radius: var(--radius);
     background: var(--panel);
   }
-  .mdx-note-tip { --note-color: #5a8a5e; }
-  .mdx-note-warn { --note-color: var(--link); }
+  .mdx-note-tip { --note-color: #4a7a4e; }
+  .mdx-note-warn { --note-color: #9a5b14; }
+  :global(:root[data-theme="dark"]) .mdx-note-tip { --note-color: #7fb685; }
+  :global(:root[data-theme="dark"]) .mdx-note-warn { --note-color: #d9a35b; }
   .mdx-note-title { margin: 0 0 4px; color: var(--note-color); font-weight: 600; font-size: 14px; }
   .mdx-note :global(p:last-child) { margin-bottom: 0; }
 </style>
