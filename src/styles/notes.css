@@ -44,10 +44,17 @@
 .note-body > :first-child { margin-top: 0; }
 .note-body > :last-child { margin-bottom: 0; }
 .note-body p { margin: 0 0 10px; }
-.note-nav.post-content {
-  max-width: none;
-  padding: 0;
+/* A note opened from a #link gets a brief highlight (class set by notes.astro). */
+.note-item {
+  scroll-margin-top: 16px;
 }
-.note-nav .post-nav {
-  margin-top: 8px;
+.note-item.is-target {
+  animation: note-target 2.4s ease-out;
+}
+@keyframes note-target {
+  from { background: var(--control-hover-bg); box-shadow: -16px 0 0 var(--control-hover-bg), 16px 0 0 var(--control-hover-bg); }
+  to { background: transparent; box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .note-item.is-target { animation: none; }
 }

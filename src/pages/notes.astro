@@ -27,4 +27,18 @@ const notes = await getNotes();
       {notes.map((note) => <NoteItem note={note} />)}
     </div>
   </aside>
+  <script>
+    // Highlight the note a #link points at. A class instead of :target,
+    // because client-side page navigation does not update :target.
+    function highlightNote() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const note = id ? document.getElementById(id) : null;
+      if (!note?.classList.contains("note-item")) return;
+      note.classList.remove("is-target");
+      void note.offsetWidth;
+      note.classList.add("is-target");
+    }
+    document.addEventListener("astro:page-load", highlightNote);
+    window.addEventListener("hashchange", highlightNote);
+  </script>
 </BaseLayout>

@@ -9,7 +9,7 @@ const notesPath = path.join(process.cwd(), "src/content/notes.md");
 const HEADING = /^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm;
 
 export interface NoteEntry {
-  /** URL id: the date, plus -2, -3… for later notes on the same day. */
+  /** Anchor id: the date, plus -2, -3… for later notes on the same day. */
   id: string;
   url: string;
   date: string;
@@ -54,7 +54,7 @@ async function loadNotes() {
     const { code } = await markdown.render(body);
     return {
       id,
-      url: `/notes/${id}.html`,
+      url: `/notes.html#${id}`,
       date,
       title: (match[2] || "").trim(),
       body,

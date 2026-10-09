@@ -124,7 +124,7 @@ for (const key of ["totalViews", "siteAge", "mostViewed", "commentCount"]) {
   }
 }
 for (const entry of JSON.parse(await read("notes.json")).entries) {
-  await assertFile(entry.url.replace(/^\//, ""));
+  if (!notesHtml.includes(`id="${entry.url.split("#")[1]}"`)) throw new Error(`Notes page is missing anchor for ${entry.url}`);
 }
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");

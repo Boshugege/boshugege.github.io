@@ -1,10 +1,8 @@
 import { getAllPosts } from "../lib/content/posts";
-import { getNotes } from "../lib/notes";
 import { site } from "../lib/site";
 
 export async function GET() {
   const posts = await getAllPosts();
-  const notes = await getNotes();
   const staticPaths = ["/index.html", "/about.html", "/notes.html", "/rss.xml"];
   const urls = [
     ...staticPaths.map((pathname) => ({ pathname })),
@@ -12,7 +10,6 @@ export async function GET() {
       pathname: `/${post.url}`,
       lastmod: post.updated || post.date,
     })),
-    ...notes.map((note) => ({ pathname: note.url, lastmod: note.date })),
   ];
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
