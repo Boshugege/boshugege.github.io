@@ -90,19 +90,14 @@ const postSlug = Astro.url.pathname;
       <ThemeToggle />
     </header>
     <h1>{title}</h1>
-    <p class="meta" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
-      {dateText}
-      {updatedText && updatedText !== dateText && ` · 更新：${updatedText}`}
-      {typeof wordCount === "number" && ` · 约 ${wordCount.toLocaleString("zh-CN")} 字`}
-      {typeof readingMinutes === "number" && ` · 约 ${readingMinutes} 分钟读完`}
-      {tagList.length > 0 && " · 标签："}
-      {tagList.map((tag, index) => (
-        <>
-          {index > 0 && ", "}
-          <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>{tag}</a>
-        </>
-      ))}
-      <span class="view-count" hidden>{" · 阅读："}<span data-post-view-count>—</span>{" 次"}</span>
+    <div class="post-meta">
+      <p class="post-meta-facts" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
+        <time datetime={dateText}>{dateText}</time>
+        {updatedText && updatedText !== dateText && <span>更新于 {updatedText}</span>}
+        {typeof wordCount === "number" && <span>{wordCount.toLocaleString("zh-CN")} 字</span>}
+        {typeof readingMinutes === "number" && <span>{readingMinutes} 分钟</span>}
+        <span class="view-count" hidden><span data-post-view-count>—</span> 次阅读</span>
+      </p>
       <button
         type="button"
         class="share-button"
@@ -114,11 +109,16 @@ const postSlug = Astro.url.pathname;
         <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" /></svg>
         <span data-share-label aria-live="polite">分享</span>
       </button>
-    </p>
+    </div>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">
       <div class="post-body" data-post-body>
         <slot />
+        {tagList.length > 0 && (
+          <nav class="post-tags" aria-label="标签">
+            {tagList.map((tag) => <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}
+          </nav>
+        )}
         <Comments postSlug={canonicalPath} />
         <nav class="post-nav" aria-label="文章导航">
           <div class="post-nav-item post-nav-prev">

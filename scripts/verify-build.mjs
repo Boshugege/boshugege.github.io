@@ -132,7 +132,7 @@ for (const { file, html } of postHtml) {
   if (hasMath !== hasKatexCss) {
     throw new Error(`${file}: KaTeX CSS must load exactly when the post has formulas`);
   }
-  if (!html.includes("post-content") || !html.includes("data-post-view") || !html.includes("data-post-view-count") || !html.includes("阅读：")) {
+  if (!html.includes("post-content") || !html.includes("data-post-view") || !html.includes("data-post-view-count") || !html.includes("次阅读")) {
     throw new Error(`${file}: article markup or dynamic view count is missing`);
   }
 }
