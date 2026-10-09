@@ -11,7 +11,10 @@ const HEADING = /^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm;
 export interface NoteEntry {
   /** Anchor id: the date, plus -2, -3… for later notes on the same day. */
   id: string;
+  /** Where the note lives on the site: /notes.html#<id>. */
   url: string;
+  /** Share-only page with this note's preview; redirects to `url`. */
+  shareUrl: string;
   date: string;
   title: string;
   body: string;
@@ -55,6 +58,7 @@ async function loadNotes() {
     return {
       id,
       url: `/notes.html#${id}`,
+      shareUrl: `/notes/${id}.html`,
       date,
       title: (match[2] || "").trim(),
       body,

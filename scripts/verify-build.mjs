@@ -125,6 +125,10 @@ for (const key of ["totalViews", "siteAge", "mostViewed", "commentCount"]) {
 }
 for (const entry of JSON.parse(await read("notes.json")).entries) {
   if (!notesHtml.includes(`id="${entry.url.split("#")[1]}"`)) throw new Error(`Notes page is missing anchor for ${entry.url}`);
+  const shareHtml = await read(`notes/${entry.url.split("#")[1]}.html`);
+  if (!shareHtml.includes(`http-equiv="refresh"`) || !shareHtml.includes('property="og:description"')) {
+    throw new Error(`Share page for ${entry.url} is missing its redirect or preview tags`);
+  }
 }
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");

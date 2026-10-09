@@ -1,0 +1,47 @@
+---
+// Share-only page for one note. Link-preview crawlers read the meta tags
+// below; people are sent straight on to the note on /notes.html. Nothing on
+// the site links here except the note's share button.
+import { getNotes, type NoteEntry } from "../../lib/notes";
+import { absoluteUrl, site } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note) => ({ params: { id: note.id }, props: { note } }));
+}
+
+const { note } = Astro.props as { note: NoteEntry };
+const title = note.title ? `${note.title} · 随想` : `随想 · ${note.date}`;
+const target = absoluteUrl(note.url);
+const image = absoluteUrl(site.defaultCover);
+---
+
+<!doctype html>
+<html lang={site.language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title} - {site.name}</title>
+    <meta name="description" content={note.summary} />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={absoluteUrl("/notes.html")} />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={note.summary} />
+    <meta property="og:url" content={absoluteUrl(note.shareUrl)} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content={String(site.defaultCoverSize)} />
+    <meta property="og:image:height" content={String(site.defaultCoverSize)} />
+    <meta property="article:published_time" content={note.date} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={note.summary} />
+    <meta name="twitter:image" content={image} />
+    <meta http-equiv="refresh" content={`0; url=${note.url}`} />
+    <script is:inline define:vars={{ target: note.url }}>location.replace(target);</script>
+  </head>
+  <body>
+    <p><a href={note.url}>{title}</a></p>
+  </body>
+</html>
