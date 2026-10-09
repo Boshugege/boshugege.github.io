@@ -123,6 +123,9 @@ for (const key of ["totalViews", "siteAge", "mostViewed", "commentCount"]) {
     throw new Error(`About page is missing dynamic statistic: ${key}`);
   }
 }
+for (const entry of JSON.parse(await read("notes.json")).entries) {
+  await assertFile(entry.url.replace(/^\//, ""));
+}
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");
 }

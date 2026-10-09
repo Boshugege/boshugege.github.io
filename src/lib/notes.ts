@@ -1,90 +1,66 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { toPlainText } from "./text";
 
-const rootDir = process.cwd();
-const notesPath = path.join(rootDir, "src/content/notes.md");
+const notesPath = path.join(process.cwd(), "src/content/notes.md");
+
+// Each note in notes.md starts with "## YYYY-MM-DD" or "## YYYY-MM-DD | 标题".
+const HEADING = /^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm;
 
 export interface NoteEntry {
+  /** URL id: the date, plus -2, -3… for later notes on the same day. */
+  id: string;
+  url: string;
   date: string;
   title: string;
   body: string;
+  summary: string;
   html: string;
 }
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (char) => {
-    return {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    }[char] as string;
+let processor: ReturnType<typeof createMarkdownProcessor> | undefined;
+function getProcessor() {
+  return processor ||= createMarkdownProcessor({
+    syntaxHighlight: "shiki",
+    shikiConfig: { themes: { light: "github-light", dark: "github-dark" }, defaultColor: false },
   });
 }
 
-function inlineMarkdown(value: string) {
-  return escapeHtml(value)
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+let cache: Promise<NoteEntry[]> | undefined;
+export function getNotes() {
+  return cache ||= loadNotes();
 }
 
-function markdownToHtml(markdown: string) {
-  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-  const out: string[] = [];
-  let paragraph: string[] = [];
-  let code: string[] | null = null;
-
-  function flushParagraph() {
-    if (!paragraph.length) return;
-    out.push(`<p>${inlineMarkdown(paragraph.join("\n")).replace(/\n/g, "<br/>")}</p>`);
-    paragraph = [];
+async function loadNotes() {
+  const raw = (await fs.readFile(notesPath, "utf8")).replace(/\r\n/g, "\n");
+  const matches = [...raw.matchAll(HEADING)];
+  const markdown = await getProcessor();
+  // New notes go on top, so number same-day notes from the bottom (oldest
+  // first): adding a note never changes the URL of one already shared.
+  const ids = new Map<RegExpMatchArray, string>();
+  const seen = new Map<string, number>();
+  for (const match of [...matches].reverse()) {
+    const count = (seen.get(match[1]) || 0) + 1;
+    seen.set(match[1], count);
+    ids.set(match, count === 1 ? match[1] : `${match[1]}-${count}`);
   }
-
-  for (const line of lines) {
-    if (line.startsWith("```")) {
-      if (code) {
-        out.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-        code = null;
-      } else {
-        flushParagraph();
-        code = [];
-      }
-      continue;
-    }
-    if (code) {
-      code.push(line);
-      continue;
-    }
-    if (!line.trim()) {
-      flushParagraph();
-      continue;
-    }
-    if (line.startsWith("### ")) {
-      flushParagraph();
-      out.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`);
-      continue;
-    }
-    paragraph.push(line);
-  }
-
-  flushParagraph();
-  return out.join("\n");
-}
-
-export async function getNotes() {
-  const raw = await fs.readFile(notesPath, "utf8");
-  const matches = [...raw.matchAll(/^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm)];
-  return matches.map((match, index): NoteEntry => {
+  const notes = await Promise.all(matches.map(async (match, index): Promise<NoteEntry> => {
+    const date = match[1];
+    const id = ids.get(match)!;
     const start = (match.index || 0) + match[0].length;
     const end = matches[index + 1]?.index ?? raw.length;
     const body = raw.slice(start, end).trim();
+    const { code } = await markdown.render(body);
     return {
-      date: match[1],
+      id,
+      url: `/notes/${id}.html`,
+      date,
       title: (match[2] || "").trim(),
       body,
-      html: markdownToHtml(body),
+      summary: toPlainText(body, 120),
+      html: code,
     };
-  }).sort((a, b) => b.date.localeCompare(a.date));
+  }));
+  return notes.sort((a, b) => b.date.localeCompare(a.date));
 }

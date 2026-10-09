@@ -5,10 +5,11 @@ export async function GET() {
   return Response.json({
     version: 1,
     updatedAt: notes[0] ? `${notes[0].date}T00:00:00.000Z` : null,
-    entries: notes.map(({ date, title, body, html }) => ({
+    entries: notes.map(({ date, title, url, summary, html }) => ({
       date,
       title,
-      summary: body.replace(/[`*_#>]/g, "").replace(/\s+/g, " ").slice(0, 220),
+      url,
+      summary,
       contentHtml: html,
     })),
   });

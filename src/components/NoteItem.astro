@@ -1,0 +1,19 @@
+---
+import ShareButton from "./ShareButton.astro";
+import type { NoteEntry } from "../lib/notes";
+
+interface Props {
+  note: NoteEntry;
+}
+
+const { note } = Astro.props;
+---
+
+<article class="note-item" id={note.id}>
+  <header class="note-head">
+    <a class="note-date" href={note.url} title="这条随想的链接"><time datetime={note.date}>{note.date}</time></a>
+    <ShareButton title={note.title || `随想 · ${note.date}`} text={note.summary} url={note.url} />
+  </header>
+  {note.title && <h3 class="note-title">{note.title}</h3>}
+  <div class="note-body post-content" set:html={note.html} />
+</article>

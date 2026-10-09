@@ -1,9 +1,10 @@
 ---
 import PncLogo from "../components/PncLogo.astro";
-import { absoluteUrl, formatDate, normalizeTags, site } from "../lib/site";
+import { formatDate, normalizeTags, site } from "../lib/site";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import Comments from "../components/Comments.astro";
 import PostToc from "../components/PostToc.astro";
+import ShareButton from "../components/ShareButton.astro";
 import DocumentLayout from "./DocumentLayout.astro";
 import type { TableOfContents } from "../lib/toc";
 import "../styles/content.css";
@@ -98,17 +99,7 @@ const postSlug = Astro.url.pathname;
         {typeof readingMinutes === "number" && <span>{readingMinutes} 分钟</span>}
         <span class="view-count" hidden><span data-post-view-count>—</span> 次阅读</span>
       </p>
-      <button
-        type="button"
-        class="share-button"
-        data-share
-        data-share-title={title}
-        data-share-text={excerpt}
-        data-share-url={absoluteUrl(canonicalPath)}
-      >
-        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" /></svg>
-        <span data-share-label aria-live="polite">分享</span>
-      </button>
+      <ShareButton title={title} text={excerpt} url={canonicalPath} />
     </div>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">
@@ -142,6 +133,5 @@ const postSlug = Astro.url.pathname;
     import "../scripts/code-copy";
     import "../scripts/post-toc";
     import "../scripts/site-stats";
-    import "../scripts/share";
   </script>
 </DocumentLayout>

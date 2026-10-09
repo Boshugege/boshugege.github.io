@@ -365,6 +365,9 @@
   text-transform: capitalize;
 }
 .post-content pre[data-language]::before { content: attr(data-language); }
+/* Unlabeled code blocks get no language tag. */
+.post-content pre[data-language="plaintext"] { padding-top: 12px; }
+.post-content pre[data-language="plaintext"]::before { display: none; }
 .code-copy-button {
   position: absolute;
   top: 7px;

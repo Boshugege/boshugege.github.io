@@ -1,0 +1,20 @@
+---
+import { absoluteUrl } from "../lib/site";
+
+interface Props {
+  title: string;
+  text?: string;
+  /** Site path or absolute URL of the page to share. */
+  url: string;
+}
+
+const { title, text = "", url } = Astro.props;
+---
+
+<button type="button" class="share-button" data-share data-share-title={title} data-share-text={text} data-share-url={absoluteUrl(url)}>
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13" /></svg>
+  <span data-share-label aria-live="polite">分享</span>
+</button>
+<script>
+  import "../scripts/share";
+</script>

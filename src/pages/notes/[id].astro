@@ -1,0 +1,57 @@
+---
+// One page per note, so a single note can be shared with its own preview.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NoteItem from "../../components/NoteItem.astro";
+import { getNotes, type NoteEntry } from "../../lib/notes";
+import "../../styles/content.css";
+import "../../styles/notes.css";
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note, index) => ({
+    params: { id: note.id },
+    props: { note, newer: notes[index - 1], older: notes[index + 1] },
+  }));
+}
+
+const { note, newer, older } = Astro.props as { note: NoteEntry; newer?: NoteEntry; older?: NoteEntry };
+const label = (entry: NoteEntry) => entry.title || entry.summary.slice(0, 24);
+---
+
+<BaseLayout
+  title={note.title ? `${note.title} · 随想` : `随想 · ${note.date}`}
+  description={note.summary}
+  canonicalPath={note.url}
+  ogType="article"
+  skipHref="#notes-main"
+  skipText="跳转到随想"
+  sidebarProps={{
+    extraLinks: [{ href: "/index.html", label: "首页" }],
+  }}
+>
+  <aside class="directory" id="notes-main">
+    <div class="panel-head">
+      <h2 class="dir-title">随想</h2>
+      <a class="panel-more" href="/notes.html">全部随想 →</a>
+    </div>
+    <div class="notes-timeline">
+      <NoteItem note={note} />
+    </div>
+    <nav class="post-content note-nav" aria-label="随想导航">
+      <div class="post-nav">
+        {newer ? (
+          <a class="post-nav-prev" href={newer.url}>
+            <span class="post-nav-label">← 较新</span>
+            <span class="post-nav-title">{label(newer)}</span>
+          </a>
+        ) : <span />}
+        {older && (
+          <a class="post-nav-next" href={older.url}>
+            <span class="post-nav-label">较早 →</span>
+            <span class="post-nav-title">{label(older)}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  </aside>
+</BaseLayout>

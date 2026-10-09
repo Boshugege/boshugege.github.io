@@ -5,6 +5,9 @@ import { getReadingStats, type ReadingStats } from "../reading";
 import { formatDate, normalizeTags, site } from "../site";
 import type { PostIndexDocument, PostSearchDocument } from "../search";
 import { getPostFeatures, type PostFeatures } from "./features";
+import { toPlainText } from "../text";
+
+export { toPlainText };
 
 export interface PostSummary {
   id: string;
@@ -36,24 +39,6 @@ async function normalizeCover(cover?: CollectionEntry<"posts">["data"]["cover"])
   const width = Math.min(cover.width, 1200);
   const image = await getImage({ src: cover, format: "jpg", width, quality: 82 });
   return { src: image.src, width, height: Math.round(cover.height * width / cover.width) };
-}
-
-// Plain-text summary for meta descriptions, RSS and search: drops Markdown
-// and MDX syntax so previews never show backticks, links or tags.
-export function toPlainText(markdown: string, maxLength = 160) {
-  const text = markdown
-    .replace(/^(import|export) .*$/gm, "")
-    .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
-    .replace(/^```[\s\S]*?^```/gm, "")
-    .replace(/<[^>]+>/g, "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^>\s?/gm, "")
-    .replace(/`|\*\*|~~|\$+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  return text.length > maxLength ? `${text.slice(0, maxLength).trimEnd()}…` : text;
 }
 
 function inferSlug(entry: CollectionEntry<"posts">) {

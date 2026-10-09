@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getNotes } from "../lib/notes";
-import { getAllPosts, toPlainText } from "../lib/content/posts";
+import { getAllPosts } from "../lib/content/posts";
 import { absoluteUrl, site } from "../lib/site";
 
 const posts = await getAllPosts();
@@ -59,10 +59,10 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
       <a class="panel-more" href="/notes.html">全部随想 →</a>
     </div>
     {latestNote ? (
-      <p class="latest-note-text">
+      <a class="latest-note-text" href={latestNote.url}>
         <time datetime={latestNote.date}>{latestNote.date}</time>
-        {toPlainText(latestNote.body, 120)}
-      </p>
+        {latestNote.summary}
+      </a>
     ) : <p class="latest-note-text">暂无随想</p>}
   </aside>
 

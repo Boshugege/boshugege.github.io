@@ -358,6 +358,15 @@ a:focus {
 .panel-more:focus-visible {
   color: var(--link);
 }
+.latest-note-text,
+.latest-note-text:visited {
+  color: var(--text);
+  text-decoration: none;
+}
+.latest-note-text:hover,
+.latest-note-text:focus-visible {
+  color: var(--link);
+}
 .latest-note-text {
   margin: 0;
   display: -webkit-box;

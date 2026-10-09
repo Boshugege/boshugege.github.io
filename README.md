@@ -161,22 +161,23 @@ src/content/about/resume.mdx
 
 正文就是普通 Markdown，直接按标题分段写即可。
 
-每天随想写在：
+每天随想写在 `src/content/notes.md`。最快的发法：
 
-```text
-src/content/notes.md
+```bash
+npm run note -- "今天的想法，支持 **Markdown**" "可选标题"
 ```
 
-推荐格式：
+它会在文件最上方加一段今天日期的随想；提交并推送即发布。也可以直接手写（手机上用 GitHub App 编辑这个文件也行）：
 
 ```md
 ## 2026-04-07 | 可选标题
-这里写正文，可以多段。
+这里写正文，支持完整 Markdown（列表、引用、代码、链接）。
 ```
 
 构建会生成：
 
-- `notes.html`：随想时间线页面。
+- `notes.html`：随想时间线，每条带「分享」按钮。
+- `notes/YYYY-MM-DD.html`：每条随想单独的页面，分享时有自己的标题和摘要预览。同一天多条依次为 `-2`、`-3`，新加的随想不会改变已分享的链接。
 - `notes.json`：首页最近随想预览数据。
 
 ## 修改外观

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import NoteItem from "../components/NoteItem.astro";
 import { getNotes } from "../lib/notes";
 import "../styles/content.css";
 import "../styles/notes.css";
@@ -9,6 +10,7 @@ const notes = await getNotes();
 
 <BaseLayout
   title="每天随想"
+  description="一些零散的想法，随手记下。"
   canonicalPath="/notes.html"
   skipHref="#notes-main"
   skipText="跳转到随想"
@@ -17,17 +19,12 @@ const notes = await getNotes();
   }}
 >
   <aside class="directory" id="notes-main">
-    <h2 class="dir-title">每天随想</h2>
+    <div class="panel-head">
+      <h2 class="dir-title">每天随想</h2>
+      <span class="panel-more">{notes.length} 条</span>
+    </div>
     <div class="notes-timeline">
-      {notes.map((note) => (
-        <section class="note-item">
-          <div class="note-date">{note.date}</div>
-          <div class="note-body post-content">
-            {note.title && <h3 class="note-title">{note.title}</h3>}
-            <Fragment set:html={note.html} />
-          </div>
-        </section>
-      ))}
+      {notes.map((note) => <NoteItem note={note} />)}
     </div>
   </aside>
 </BaseLayout>
