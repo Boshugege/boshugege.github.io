@@ -1,7 +1,6 @@
 export const site = {
   name: "PNC's Blog",
   homeDescription: "一个随意写写的简单博客",
-  headerDescription: "ParityNonconservation's personal blog, a simple static site.",
   themeColor: "#f3f6f8",
   language: "zh-CN",
   footerOwner: "ParityNonconservation",

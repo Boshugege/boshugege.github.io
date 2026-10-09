@@ -139,7 +139,6 @@ h2,
 h3,
 h4,
 .site-title,
-.latest-note-title,
 .dir-item-title {
   font-family: var(--font-serif);
   font-weight: 600;
@@ -268,6 +267,9 @@ a:focus {
   text-decoration: underline;
 }
 
+.site-header .pnc-brand {
+  gap: 14px;
+}
 .site-header {
   margin: 0 0 16px 0;
   padding: 0;
@@ -279,11 +281,6 @@ a:focus {
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
-}
-.site-desc {
-  margin: 6px 0 12px;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 /* 布局：左右两栏（桌面） */
@@ -337,30 +334,43 @@ a:focus {
   margin-left: 6px;
   font-size: 13px;
 }
-.latest-note-preview {
-  margin-top: 0;
-  margin-bottom: 10px;
-  border-bottom: var(--divider);
-  padding-bottom: 8px;
-}
 .latest-note-panel {
   margin-bottom: 12px;
 }
-.latest-note-preview p {
-  margin: 2px 0;
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
 }
-.latest-note-title {
-  margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 700;
+.panel-head .dir-title {
+  margin: 0;
+}
+.panel-more,
+.panel-more:visited {
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.panel-more:hover,
+.panel-more:focus-visible {
+  color: var(--link);
 }
 .latest-note-text {
-  color: var(--muted);
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
+}
+.latest-note-text time {
+  margin-right: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 /* 标签导航 */
 .tag-nav {
@@ -548,12 +558,41 @@ a:focus {
 .dir-item-title:focus {
   text-decoration: underline;
 }
-.dir-item .meta {
+.dir-item-meta time {
   color: var(--muted);
-  font-size: 12px;
-  display: block;
+  font-weight: 400;
+}
+.dir-item-meta {
   margin-top: 4px;
   overflow-wrap: anywhere;
+}
+
+/* A line of facts (date · 字数 · 时长): every item gets a leading dot; the
+   dot that starts a line sits in a clipped strip, so wraps stay clean. */
+.meta-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0 0 0 -1.2em;
+  clip-path: inset(0 0 0 1.2em);
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.meta-facts time {
+  color: var(--text);
+  font-weight: 500;
+}
+.meta-facts > ::before {
+  content: "·";
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  font-weight: 400;
+  opacity: 0.6;
+}
+.meta-facts > [hidden] {
+  display: none;
 }
 
 .site-footer {
@@ -642,6 +681,9 @@ a:focus {
   }
   .theme-toggle {
     position: absolute;
+  }
+  .site-header .pnc-logo-wrap {
+    zoom: 0.8;
   }
   .site-header {
     min-height: 32px;

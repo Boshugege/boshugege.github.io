@@ -93,15 +93,16 @@ function renderPosts(posts: PostIndexDocument[]) {
     title.href = `/${post.url}`;
     title.dataset.astroPrefetch = "";
     title.textContent = post.title;
-    const meta = document.createElement("span");
-    meta.className = "meta dir-item-meta";
+    const meta = document.createElement("p");
+    meta.className = "meta-facts dir-item-meta";
     const slug = `/${post.url}`;
-    const metaText = [
-      post.date,
-      `约 ${post.wordCount.toLocaleString("zh-CN")} 字`,
-      `约 ${post.readingMinutes} 分钟读完`,
-      post.tags.join(" / "),
-    ].filter(Boolean).join(" · ");
+    const date = document.createElement("time");
+    date.dateTime = post.date;
+    date.textContent = post.date;
+    const words = document.createElement("span");
+    words.textContent = `${post.wordCount.toLocaleString("zh-CN")} 字`;
+    const minutes = document.createElement("span");
+    minutes.textContent = `${post.readingMinutes} 分钟`;
     const viewCount = document.createElement("span");
     viewCount.dataset.postListView = "";
     viewCount.dataset.postSlug = slug;
@@ -109,8 +110,8 @@ function renderPosts(posts: PostIndexDocument[]) {
     const viewWrap = document.createElement("span");
     viewWrap.className = "view-count";
     viewWrap.hidden = !viewCountsLoaded;
-    viewWrap.append(" · 阅读：", viewCount, " 次");
-    meta.append(metaText, viewWrap);
+    viewWrap.append(viewCount, " 次阅读");
+    meta.append(date, words, minutes, viewWrap);
     item.append(title, meta);
     fragment.append(item);
   }

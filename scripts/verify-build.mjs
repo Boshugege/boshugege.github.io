@@ -112,7 +112,7 @@ if (aboutIndex < 0 || sidebarToolsIndex < aboutIndex || contentIndex < sidebarTo
 if (!/@media \(max-width: 800px\)[\s\S]*?\.sidebar-home-tools\s*\{\s*display:\s*none;/.test(globalCss)) {
   throw new Error("Home search and tags must be hidden on mobile");
 }
-if (!indexHtml.includes("data-post-list-view") || !indexHtml.includes("阅读：")) {
+if (!indexHtml.includes("data-post-list-view") || !indexHtml.includes("次阅读")) {
   throw new Error("Home article metadata is missing dynamic view counts");
 }
 if (!aboutHtml.includes("站点侧写") || !aboutHtml.includes("resume-content")) {

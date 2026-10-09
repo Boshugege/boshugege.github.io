@@ -15,8 +15,8 @@
 .about-yearly { margin-top: 12px; }
 .about-year-bars { display: grid; gap: 5px; }
 .about-year-row { display: grid; grid-template-columns: 44px 1fr 28px; align-items: center; gap: 8px; font-size: 13px; }
-.about-year-track { height: 8px; border: 1px solid var(--border); background: var(--panel); }
-.about-year-track i { display: block; height: 100%; background: var(--text); }
+.about-year-track { height: 6px; border-radius: 999px; background: var(--control-hover-bg); overflow: hidden; }
+.about-year-track i { display: block; height: 100%; border-radius: 999px; background: var(--link); }
 .resume-content {
   min-width: 0;
   line-height: 1.7;

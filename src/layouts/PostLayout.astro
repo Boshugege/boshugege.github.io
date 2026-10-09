@@ -91,7 +91,7 @@ const postSlug = Astro.url.pathname;
     </header>
     <h1>{title}</h1>
     <div class="post-meta">
-      <p class="post-meta-facts" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
+      <p class="meta-facts" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
         <time datetime={dateText}>{dateText}</time>
         {updatedText && updatedText !== dateText && <span>更新于 {updatedText}</span>}
         {typeof wordCount === "number" && <span>{wordCount.toLocaleString("zh-CN")} 字</span>}
@@ -121,15 +121,18 @@ const postSlug = Astro.url.pathname;
         )}
         <Comments postSlug={canonicalPath} />
         <nav class="post-nav" aria-label="文章导航">
-          <div class="post-nav-item post-nav-prev">
-            {previousPost && <a href={previousPost.url}>上一篇文章（{previousPost.title}）</a>}
-          </div>
-          <div class="post-nav-item post-nav-home">
-            <a class="post-nav-link" href="/index.html">返回首页</a>
-          </div>
-          <div class="post-nav-item post-nav-next">
-            {nextPost && <a href={nextPost.url}>下一篇文章（{nextPost.title}）</a>}
-          </div>
+          {previousPost ? (
+            <a class="post-nav-prev" href={previousPost.url}>
+              <span class="post-nav-label">← 上一篇</span>
+              <span class="post-nav-title">{previousPost.title}</span>
+            </a>
+          ) : <span />}
+          {nextPost && (
+            <a class="post-nav-next" href={nextPost.url}>
+              <span class="post-nav-label">下一篇 →</span>
+              <span class="post-nav-title">{nextPost.title}</span>
+            </a>
+          )}
         </nav>
       </div>
       {toc && <PostToc items={toc.items} count={toc.count} variant="rail" />}

@@ -158,7 +158,7 @@ async function setupComments(root: HTMLElement) {
     }
     await loadComments();
   } catch (error) {
-    setStatus(root, error instanceof Error ? error.message : "评论加载失败", "error");
+    setStatus(root, "评论暂时无法加载，请稍后再试。", "error");
   }
 
   form.addEventListener("submit", async (event) => {

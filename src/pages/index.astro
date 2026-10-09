@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getNotes } from "../lib/notes";
-import { getAllPosts } from "../lib/content/posts";
+import { getAllPosts, toPlainText } from "../lib/content/posts";
 import { absoluteUrl, site } from "../lib/site";
 
 const posts = await getAllPosts();
@@ -13,15 +13,6 @@ for (const post of posts) {
 }
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
-
-function getPostMeta(post: (typeof posts)[number]) {
-  return [
-    post.date,
-    `约 ${post.reading.wordCount.toLocaleString("zh-CN")} 字`,
-    `约 ${post.reading.readingMinutes} 分钟读完`,
-    post.tags.length > 0 ? post.tags.join(" / ") : "",
-  ].filter(Boolean);
-}
 ---
 
 <BaseLayout
@@ -63,11 +54,16 @@ function getPostMeta(post: (typeof posts)[number]) {
   </div>
 
   <aside class="directory latest-note-panel" id="latest-note-preview">
-    <p class="latest-note-title">最近随想</p>
-    <p class="latest-note-text" id="latest-note-text">
-      {latestNote ? `${latestNote.date} · ${latestNote.body.replace(/\s+/g, " ").slice(0, 120)}` : "暂无随想"}
-    </p>
-    <p class="latest-note-link"><a href="/notes.html">查看全部随想</a></p>
+    <div class="panel-head">
+      <h2 class="dir-title">最近随想</h2>
+      <a class="panel-more" href="/notes.html">全部随想 →</a>
+    </div>
+    {latestNote ? (
+      <p class="latest-note-text">
+        <time datetime={latestNote.date}>{latestNote.date}</time>
+        {toPlainText(latestNote.body, 120)}
+      </p>
+    ) : <p class="latest-note-text">暂无随想</p>}
   </aside>
 
   <aside class="directory" id="posts">
@@ -78,10 +74,12 @@ function getPostMeta(post: (typeof posts)[number]) {
           <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch>
             {post.title}
           </a>
-          <span class="meta dir-item-meta">
-            {getPostMeta(post).join(" · ")}
-            <span class="view-count" hidden>{" · 阅读："}<span data-post-list-view data-post-slug={`/${post.url}`}>—</span>{" 次"}</span>
-          </span>
+          <p class="meta-facts dir-item-meta">
+            <time datetime={post.date}>{post.date}</time>
+            <span>{post.reading.wordCount.toLocaleString("zh-CN")} 字</span>
+            <span>{post.reading.readingMinutes} 分钟</span>
+            <span class="view-count" hidden><span data-post-list-view data-post-slug={`/${post.url}`}>—</span> 次阅读</span>
+          </p>
         </div>
       ))}
     </div>
