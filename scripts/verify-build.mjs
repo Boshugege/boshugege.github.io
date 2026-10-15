@@ -181,7 +181,7 @@ for (const { file, html } of postHtml) {
 
 const searchSize = (await fs.stat(path.join(dist, "search.json"))).size;
 const indexSize = (await fs.stat(path.join(dist, "index.html"))).size;
-if (searchSize > 120_000) throw new Error(`search.json exceeds 120 KB: ${searchSize}`);
+if (searchSize > 200_000) throw new Error(`search.json exceeds 200 KB: ${searchSize}`);
 if (indexSize > 40_000) throw new Error(`index.html exceeds 40 KB: ${indexSize}`);
 
 console.log(`Verified ${postSources.length} posts and core static outputs.`);

@@ -1,0 +1,237 @@
+---
+title: "折腾笔记：让 Claude Code 通过 SSH 给 i5-8600K 部署黑苹果"
+date: "2026-10-15"
+tags: ["科技","硬件","黑苹果","OpenCore"]
+excerpt: "一台 i5-8600K + B365M D2V 的老台式机，只开一个 Arch Live 的 SSH，让 Claude Code 从硬件检测一路做到 OpenCore、Recovery、分区和 UEFI 启动项。它没有照单全收 OpCore-Simplify 的输出，而是拿 VBT、DSDT 和 Ventura 自带的显卡驱动逐项核对，顺手还帮我揪出了一块坏硬盘。"
+---
+
+手上有一台老台式机：i5-8600K + 技嘉 B365M D2V，没有独显，核显 UHD 630，显示器只有一台 VGA 的。Coffee Lake 加 UHD 630 算是黑苹果的“标准答案”平台，但我实在懒得再手搓一遍 config.plist。
+
+这次的玩法是：机器插一个 Ventoy U 盘启动 Arch Linux Live ISO，开好 SSH，剩下的全部交给 Claude Code。我只给了一份任务书，目标是**重启后直接进 OpenCore，选 macOS Recovery 就能开始装**。要求它真部署、真验证，别只吐一个 EFI 压缩包给我。
+
+权限边界也事先写死了：可以抹**明确识别出来的**内置硬盘；不许动 Ventoy U 盘，不许刷 BIOS，不许 Reset NVRAM，不许擅自重启关机。
+
+<Note type="warn" title="写在前面">
+本文记录的是部署和静态验证的全过程。截至发文，机器**还没有重启实测**。静态检查全部通过不代表 macOS 一定能启动，实测结果之后补。
+</Note>
+
+## 第一关：硬盘呢？
+
+Claude 连上 SSH 后先核对身份：CPU 是 i5-8600K，DMI 显示 Gigabyte B365M D2V、BIOS F2（2019-03-13），UEFI 64 位启动，Secure Boot 关闭。确认连的是这台机器。
+
+接着它就停下来了：**机器上根本没有内置硬盘**。`lsblk` 里只有 Ventoy U 盘，6 个 SATA 口全是 `link down`，PCI 总线上也没有 NVMe 控制器。它把 SATA 和 PCI 都重新扫了一遍，结果一样，于是明确告诉我“唯一的磁盘是 Ventoy U 盘，我不会动它”。
+
+我接上一块 WD 500G 的老机械盘，第一次还是没认出来（`ata1` 只报了一句 `found unknown device`），重新插了一遍才出现 `sdb`。Claude 却又拦住了：
+
+```text
+ata1: SATA link up 1.5 Gbps (SStatus 113 SControl 310)
+ata1.00: configured for UDMA/100
+ata1: SATA link down (SStatus 0 SControl 310)
+ata1.00: disable device
+I/O error, dev sdb, sector 8 op 0x0:(READ) ...
+ata1: reset failed (errno=-32), retrying in 8 secs
+ata1: limiting SATA link speed to 1.5 Gbps
+ata1: hardreset failed
+```
+
+链路只稳定了 50 秒左右就掉了，内核降速重试也救不回来。`lsblk` 里还挂着 `sdb`，其实盘已经没了。它的判断是线材接触不良或者盘本身坏了，在这种盘上分区、装系统都不靠谱。后来确认这块盘确实坏了，换掉了。
+
+第三块是一块 Samsung 850 EVO 120GB。这次 Claude 没有直接动手，先查了 SMART（PASSED，重映射扇区、CRC 错误、不可纠正错误都是 0，寿命余量 62%），又在磁盘头、中、尾各读了 1GiB，确认链路稳定才继续。
+
+## 抹盘之前的安全闸门
+
+任务书要求抹盘前必须核对身份。Claude 把核对条件直接写进了分区脚本，任何一条不满足就退出（节选，序列号已打码）：
+
+```bash
+ID=/dev/disk/by-id/ata-Samsung_SSD_850_EVO_120GB_S21VN*****
+DEV=$(readlink -f $ID)
+[ "$(cat /sys/class/dmi/id/board_name)" = "B365M D2V" ] || exit 1   # 主机对不对
+grep -q "i5-8600K" /proc/cpuinfo || exit 1
+[ "$DEV" = /dev/sdb ] || exit 1                                        # by-id 指向的设备
+[ "$SER" = "S21VN*****" ] || exit 1                                    # 序列号
+[ "$BUS" = ata ] || exit 1                                             # 必须是 SATA，不能是 USB
+[ "$(cat /sys/block/sdb/size)" = 234441648 ] || exit 1                 # 扇区数
+[ "$VENTOY" != "$DEV" ] || exit 1                                      # 不是 Ventoy 盘
+grep -q "^/dev/sdb" /proc/mounts && exit 1                             # 没被挂载
+```
+
+全部通过后才执行 `sgdisk --zap-all`、`blkdiscard` 和重新分区：
+
+```text
+sdb1   2.0 GiB   EF00  FAT32 "OPENCORE"   放 EFI 和 Recovery
+sdb2 109.8 GiB   AF0A  Apple APFS          先不格式化，进 Recovery 后用磁盘工具抹成 APFS
+```
+
+## 硬件实测
+
+| 项目 | 结果 |
+| --- | --- |
+| CPU | i5-8600K，6C6T，AVX2；**CFG Lock 锁着**（MSR 0xE2 bit15 = 1） |
+| 核显 | UHD 630 `8086:3E92`，macOS 原生支持；DVMT 预分配 64MB |
+| 网卡 | Realtek RTL8111H `10EC:8168` |
+| 声卡 | Realtek ALC887-VD |
+| USB | 200 系 xHCI `8086:A2AF`，HS01–HS14 + SS01–SS08 共 22 个端口，超过 15 个的上限 |
+| ACPI | 有 `AWAC`（通过 `STAS` 切换），`H_EC` 的 `_STA` 恒为 0，CPU 是 `\_PR.PR00` Processor 对象 |
+
+有意思的一点：B365 名义上是 300 系，但 PCH 各个功能的 ID 都是 200 系的（`A2xx`），本质上是 22nm 重制的 200 系芯片组。这个细节后面会用到。
+
+## 下载 Recovery
+
+macOS 版本 Claude 选了 **Ventura**：任务书给的候选是 Monterey 和 Ventura，Ventura 更新，而且原生支持 UHD 630，不需要 OCLP。
+
+它用 OpenCorePkg 自带的 `macrecovery.py` 直接从 Apple 服务器把 Recovery 下载到新分好的 ESP 上，同时开始做 EFI。之后它对 BaseSystem.dmg 做了**三次** chunklist 逐块校验：下载时一次，拷回 Mac 独立校验一次，部署完在 ESP 上再校验一次。它还把镜像只读挂载，看了一眼 `SystemVersion.plist`：macOS **13.6（22G120）**，分区格式是 HFS+，所以 EFI 里必须带上 `HfsPlus.efi`。
+
+Recovery 本身只是个引导，真正的系统要联网下载。Claude 没有只测一下“能 ping 通”，而是把安装器会走的路径完整跑了一遍：先拉 Ventura 的 Software Update 目录（HTTP 200，6.9MB），从里面解析出 `InstallAssistant.pkg` 的地址，再对 swcdn 上的真实文件发 HEAD 请求，也是 200。中间有两个域名根路径报 `000`，它也逐个查清了原因：一个是国内 CDN 的证书和域名不匹配，一个用的是 Linux CA 库里没有的 Apple 自有根证书，都不影响安装。
+
+## 用 OpCore-Simplify 生成，但不照单全收
+
+主力生成工具是 [OpCore-Simplify](https://github.com/lzhoang2801/OpCore-Simplify)。它需要 Hardware Sniffer 导出的 `Report.json`，而 Hardware Sniffer 的 README 写着 Linux 支持还在开发中。Claude 去翻了源码，发现主分支其实已经有 `platforms/linux.py`，只依赖 `lspci`、`lsusb` 和 sysfs，于是直接在 Arch Live 上跑，导出了一份原生报告和 ACPI dump。
+
+报告喂给 OpCore-Simplify 时被校验器拒了：几个风扇（`\_TZ.FAN0`）和 WMI 设备的 ACPI 路径不在 `\_SB` 下面，不符合它的正则。这些设备和黑苹果没有任何关系，Claude 就生成了一份清洗过的副本，只删掉这 6 个字段，并在过程记录里写明了这处改动。
+
+OpCore-Simplify 是交互式 TUI，Claude 没有往 stdin 里灌按键，而是写了个驱动脚本 import 它的类，把交互函数替换成预设答案，然后按菜单“1 → 6”的顺序调用：
+
+```python
+def scripted_input(self, prompt="Press Enter to continue..."):
+    p = prompt.lower()
+    if "codec layout" in p:
+        return layout_id               # ALC887 用 layout 1
+    if "select a " in p and ("combination" in p or "device" in p):
+        raise RuntimeError("Unexpected prompt: " + prompt)   # 没预料到的问题直接报错，不瞎猜
+    return ""
+
+utils.Utils.request_input = scripted_input
+```
+
+生成结果：iMac19,1、Ventura，SSDT 为 PLUG、EC、USBX、RTCAWAC、MCHC、SBUS，kext 为 Lilu、VirtualSMC、WhateverGreen、AppleALC、RealtekRTL8111、USBToolBox 等。
+
+如果到这一步就收工，我大概也就满意了。但 Claude 接下来花的时间比生成本身多得多：它拿 Dortania 的 Coffee Lake 指南，加上这台机器的实测数据，逐项审查 OpCore-Simplify 的输出。
+
+### 二进制全部换成官方 release
+
+它发现 OpCore-Simplify 拉的 OpenCore 和 kext 来自 Dortania 的 build-repo，也就是 master 分支的 CI 构建（例如 Lilu 1.7.3，而官方最新 release 是 1.7.2），OpenCore.efi 的哈希也和 1.0.8 正式版不同。于是它保留 OpCore-Simplify 生成的 config 和 SSDT，把所有二进制换成官方 release：OpenCore 1.0.8、Lilu 1.7.2、VirtualSMC 1.3.8、WhateverGreen 1.7.1、AppleALC 1.9.8、USBToolBox 1.2.0。这些 zip 都和 GitHub API 返回的资产 digest 做了比对，全部一致。
+
+RealtekRTL8111 保留了 2.4.2，没有升到 3.0.0。理由是 2.5 和 3.0 新增的主要是 AppleVTD 支持，而这套配置开了 `DisableIoMapper`，用不上；2.4.2 在 Ventura 上已经被大量验证了好几年。它是 2021 年的老资产，GitHub 不提供 digest，所以是通过 HTTPS 从 Mieze 的官方 release 下载的。
+
+### SSDTTime 交叉验证，顺带发现 SSDT-PMC
+
+Claude 又用 [SSDTTime](https://github.com/corpnewt/SSDTTime) 对同一份 DSDT 独立生成了一遍 EC、PLUG、AWAC、USBX。和 OpCore-Simplify 的结果逐个反编译对比，语义完全一致。
+
+然后它注意到一个 OpCore-Simplify 漏掉的问题。Dortania 说 SSDT-PMC 是给“真 300 系”用的：DSDT 没把 PMC 的 MMIO 区域声明出来，XNU 就会忽略它，原生 NVRAM 会失效。B365 本质是 200 系，按理说不需要。但 Claude 没有凭芯片组名字下结论，而是去机器上看了实际情况：
+
+```text
+$ lspci -vv -s 00:1f.2
+  Region 0: Memory at f7124000 (32-bit, non-prefetchable) [disabled] [size=16K]
+$ grep -E "^ *fe0" /proc/iomem
+  fe000000-fe010fff : Reserved
+  fe036000-fe03bfff : pnp 00:06
+```
+
+PWRM 区域 `0xFE000000` 只在 UEFI 内存映射里标成 Reserved，ACPI 里没有任何设备声明它，DSDT 里也搜不到。这正是需要 SSDT-PMC 的情况。安装器多次重启要靠 NVRAM 记住下一阶段该从哪里启动，所以它把 SSDTTime 生成的 SSDT-PMC 加了进去。
+
+### 其他几处修正
+
+- **Booter 内存映射**：EnableWriteUnprotector 组合改为 DevirtualiseMmio + RebuildAppleMemoryMap + SyncRuntimePermissions。dmesg 里有 `MEMATTR=`，说明固件提供 MAT，这也是 Dortania 给 Coffee Lake 的推荐。
+- **SIP**：`030A0000`（部分关闭）改为 `00000000`。原生系统不需要关 SIP，关了还会影响增量 OTA。
+- **HideAuxiliary**：YES 改为 NO，否则 Recovery 要按空格才显示。
+- **framebuffer-stolenmem**：去掉 19MB 的补丁。`/proc/iomem` 显示 Graphics Stolen Memory 已经是 64MB。
+- **ROM**：随机值改为网卡的真实 MAC（Dortania 建议）。
+
+`AppleXcpmCfgLock` 是 Claude 读了 MSR 0xE2、确认 CFG Lock 确实锁着之后才保留的，不是“反正开着也没坏处”就留着。
+
+## 重头戏：VGA 和 DVI-D
+
+这块板子只有 VGA 和 DVI-D 两个视频输出，而 UHD 630 在 macOS 下基本没法可靠驱动 VGA。任务书里专门提醒过：**不要因为 OpenCore 的菜单能在 VGA 上显示，就认为 Recovery 的图形界面也一定能显示。**
+
+### 先搞清楚哪个口接在哪个 DDI 上
+
+Claude 先看 Linux 的 i915：VGA 显示器接在 `DP-1` 上，挂在 `DDI B`，跑 2 lane RBR，EDID 能正常读到。也就是说，这里的 VGA 其实是**板载 DP→VGA 转换芯片**的输出，从显卡的角度看它就是一个 DP 口。
+
+剩下的 DVI-D 接在哪个 DDI 上，Linux 没有直接显示。Claude 从 debugfs 导出了 VBT，写了个小解析器解码 child device 表：
+
+| DDI | VBT 类型 | DDC pin | 推断 |
+| --- | --- | --- | --- |
+| A | eDP（内部） | 0x03 | 台式机不用 |
+| B | DP++ `0x60D6` | 0x05 | VGA（DP→VGA 转换芯片） |
+| C | HDMI/TMDS `0x60D2` | 0x04 | DVI-D 候选 |
+| D | HDMI/TMDS `0x60D2` | 0x06 | DVI-D 候选 |
+
+技嘉用的是通用 VBT，C 和 D 都标成了 HDMI，物理上只接了一个。那就两个都打 HDMI 类型补丁（DVI-D 就是没有音频的 TMDS）。
+
+### OpCore-Simplify 选的 framebuffer 不够用
+
+OpCore-Simplify 给的是 `00009B3E`。Dortania 把它列为 `07009B3E` 的备选，提到后者在 10.15.5 之后有些机器会黑屏。Claude 没有翻论坛帖子去比较两种说法，而是**直接打开 Ventura 13.6 Recovery 里的 Apple 核显驱动去读连接器表**。
+
+BaseSystem 里的驱动打包在 KernelCollection 里。它解析 Mach-O 的 `LC_FILESET_ENTRY`，找到 `AppleIntelCFLGraphicsFramebuffer` 所在的段，按 12 字节一条的连接器记录扫描，读出了两组关键配置：
+
+```text
+0xa86f00  idx0 LVDS bus0x00 pipe8  | idx1 DP bus0x05 pipe9 | idx2 DP bus0x04 pipe10   ← 移动版，只有 DDI B/C
+0xa86f90  idx1 DP bus0x05 pipe9    | idx2 DP bus0x04 pipe10 | idx3 DP bus0x06 pipe8   ← 台式机 3×DP，即 07009B3E
+```
+
+Ventura 的 CFL 驱动里**只有一组** 3×DP 配置，和 WhateverGreen 文档里 `07009B3E` 的布局一致：三个口分别对应 DDI B/C/D，busId `0x05/0x04/0x06` 和 VBT 里的 DDC pin 一一对应。按同一份文档，`00009B3E` 属于前一类“LVDS + DDI B/C”，**根本没有 DDI D**，如果 DVI-D 正好接在 D 上就永远点不亮。最终的核显属性是：
+
+```text
+AAPL,ig-platform-id      07009B3E
+framebuffer-patch-enable 01000000
+framebuffer-con1-enable  01000000
+framebuffer-con1-type    00080000   ← DDI C 改为 HDMI（DVI-D）
+framebuffer-con2-enable  01000000
+framebuffer-con2-type    00080000   ← DDI D 改为 HDMI（DVI-D）
+```
+
+con0（DDI B）保持 DP 类型，留给 VGA 转换芯片，能不能点亮看运气。
+
+### 同一个 ESP 里放两套 OpenCore
+
+问题来了：我现在只有 VGA 显示器。如果默认用核显加速的配置，安装器图形界面黑屏的风险不小；而 `-igfxvesa` 可以让 macOS 不加载 Intel framebuffer，直接沿用固件 GOP 的画面，也就是 OpenCore 菜单正在用的那一路输出，代价是没有图形加速。
+
+两种配置都想要，但 OpenCore 只读一个 config.plist。Claude 去翻了 OpenCore 1.0.8 的源码 `Application/OpenCore/OpenCore.c`：
+
+```c
+mStorageRoot  = OcCopyDevicePathFullName (LoadPath, &RemainingPath);
+...
+if (!UnicodeGetParentDirectory (mStorageRoot)) {
+```
+
+OpenCore 的存储根目录就是 `OpenCore.efi` 所在的目录。所以同一个 ESP 里可以放两套完全独立的 OpenCore，各自读自己的 config，再各自建一个 UEFI 启动项：
+
+```text
+\EFI\OC\       Accel：核显加速，DVI-D 已配好，长期使用
+\EFI\OCVESA\   SafeVideo：配置完全相同，只多一个 -igfxvesa，装系统时用
+
+BootOrder: 0004,0003,0001,0002,0000
+Boot0004* OpenCore SafeVideo  HD(1,GPT,...)/\EFI\OCVESA\OpenCore.efi   ← 默认
+Boot0003* OpenCore Accel      HD(1,GPT,...)/\EFI\OC\OpenCore.efi
+```
+
+安装阶段默认走 SafeVideo，不管接 VGA 还是 DVI-D 都能显示。装完后按 F12 选 Accel 测试加速，没问题就在 BIOS 里把它调到第一位。万一 Accel 黑屏，也不用回 Arch 改配置，开机按 F12 换回另一个启动项就行。我觉得这是整个过程里最巧的一步。
+
+## 验证
+
+最后一轮验证：
+
+- `ocvalidate` 1.0.8：Mac 版和 Linux 版在 ESP 上分别校验两份 config，都是 **No issues found**；
+- 自写的 `check_efi.py`：config 里引用的每个 ACPI、kext、driver 文件都存在；`ExecutablePath` 和 `CFBundleExecutable` 一致；kext 依赖顺序正确（比如 SMCProcessor 在 VirtualSMC 之后）；没有多余文件。结果 0 错误 0 警告；
+- OpenCore.efi、OpenRuntime.efi、BOOTx64.efi 和官方 1.0.8 包逐字节相同，所以版本一致；
+- ESP 上 185 个文件逐一比对 sha256，全部一致，也没有混进 macOS 的 `._` 元数据文件；
+- `fsck.fat -n` 无错误；macOS 分区开头 1MiB 全是 0，没有残留的文件系统签名；
+- RTC 是 UTC，和 Mac 时间一致（时间不对，Recovery 走 TLS 会出问题）。
+
+USB 没有做映射。安装阶段受 15 端口上限影响，USB 3.0 口只能以 USB 2.0 速度工作，但所有物理口都能用。真正的映射要逐个口插拔测试，只能等系统装好以后再做。
+
+## 重启以后要做的
+
+1. 拔掉 Ventoy U 盘（留着救援用），进 BIOS 关闭 CSM 和 Fast Boot；
+2. 开机自动进入 OpenCore SafeVideo，在菜单里选 Recovery；
+3. 打开磁盘工具，选择“显示所有设备”，**只抹 109.8G 的 macOS 分区**，格式选 APFS。别抹整块盘，否则 EFI 和 Recovery 会一起被删；
+4. 插好网线，重新安装 macOS Ventura；
+5. 装好后换 DVI-D 线，切到 Accel 启动项测试加速，然后做 USB 映射。
+
+## 一点感想
+
+整个过程我只做了两件事：写任务书，以及插拔了几次硬盘。
+
+印象最深的不是它会用多少工具，而是它**不信生成器**。OpCore-Simplify 的结论，它都要拿机器上的实测数据重新推一遍：framebuffer 去 Apple 驱动里读连接器表，PMC 去看 `/proc/iomem`，CFG Lock 去读 MSR，二进制去比对 GitHub 的 digest。前面那块 WD 硬盘也是这样，`lsblk` 里明明还挂着 `sdb`，它看 dmesg 判断出盘已经掉线，没有往上写一个字节。
+
+当然，这一切目前都还只是“静态检查通过”，它自己在报告里也反复强调了这一点。真机能不能一路装完，下回分解。
