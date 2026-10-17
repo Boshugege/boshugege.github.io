@@ -7,6 +7,8 @@
 :root {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", sans-serif;
   --font-serif: "Source Serif 4 Variable", "Songti SC", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Microsoft YaHei", serif;
+  /* Body text of posts and notes (see reading-font.css). */
+  --font-body: "PNC Times", "PNC Song", "Times New Roman", "Songti SC", serif;
   --font-mono: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Consolas, Menlo, "Liberation Mono", monospace;
   --radius: 8px;
   --divider: 1px solid var(--border);

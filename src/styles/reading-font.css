@@ -1,0 +1,27 @@
+/*
+ * 正文字体：宋体 + Times New Roman, consistent on every platform.
+ * Loaded by reading-font.ts, only on pages with body text (posts, notes, about).
+ *
+ * "PNC Times" is the system Times New Roman (Windows, macOS, iOS), else Tinos,
+ * a free font with identical metrics. "PNC Song" is the system 宋体-简 on
+ * Apple devices, else self-hosted 思源宋体 (Noto Serif SC) instead of Windows'
+ * thin SimSun; it is split by unicode-range, so a page downloads only the
+ * characters it shows. The renaming and system-first lookup happen in the
+ * readingFont plugin in astro.config.mjs.
+ */
+.post-body,
+.note-body,
+.resume-content {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.85;
+}
+
+@media (max-width: 640px) {
+  .post-body,
+  .note-body,
+  .resume-content {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+}

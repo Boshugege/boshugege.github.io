@@ -185,7 +185,7 @@ npm run note -- "今天的想法，支持 **Markdown**" "可选标题"
 整站外观集中在 `src/styles/global.css` 顶部的设计变量里：
 
 - `--bg` / `--panel` / `--text` / `--muted` / `--border` / `--link`：颜色（下方 `[data-theme="dark"]` 是深色版本）。
-- `--font-sans` / `--font-serif` / `--font-mono`：正文、标题、代码字体。标题英文用自托管的 Source Serif 4（`@fontsource-variable/source-serif-4`），中文回退到系统宋体；不依赖 Google Fonts。
+- `--font-sans` / `--font-serif` / `--font-body` / `--font-mono`：界面、标题、文章正文、代码字体。正文是宋体 + Times New Roman：苹果设备用系统自带的宋体-简和 Times New Roman，其他平台自动下载自托管的思源宋体（Noto Serif SC，按字符分片，只下载页面用到的字）和 Tinos（与 Times New Roman 等宽的免费字体），见 `src/styles/reading-font.css`。标题英文用自托管的 Source Serif 4（`@fontsource-variable/source-serif-4`），中文回退到系统宋体；不依赖 Google Fonts。
 - `--radius`：卡片、按钮圆角。
 - `--divider`：列表与段落间的分隔线样式。
 
