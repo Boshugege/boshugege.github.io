@@ -13,6 +13,7 @@
 | 静态站 | `pnc-blog.service` → **Caddy 2.6.2**，`127.0.0.1:46213` | 同名服务跑自写的 `server.mjs` |
 | 评论、阅读数、统计 | `pnc-api.service` → **Node + `node:sqlite`**，`127.0.0.1:46219`，数据在一个文件 `pnc.db` | `pnc-comment-api`（46215）→ Directus 容器 `pnc-cms`（46214）→ Directus 的 SQLite |
 | 「观测」计数 | `pnc-reactions.service` → Node + `node:sqlite`，`127.0.0.1:46220`，数据 `reactions.db`（第 9 节） | 无 |
+| 私人 Bot | `pnc-bot.service` → Python 3.13，Telegram 长轮询，不监听端口：发随想和草稿、评论通知、运维命令（第 10 节） | 无 |
 | 部署 | Runner 调用 `deploy.sh`：临时 worktree 里 `npm ci` + `npm run verify`，**只构建一次**；保留最近 5 个 release | GitHub 托管 Runner 和服务器各构建一次；部署成功后删除所有旧 release |
 | 回滚 | `deploy.sh --rollback`，实测 **0.3 秒** | 只能重新构建旧提交 |
 | 备份 | `pnc-api-backup.timer`（04:30）和 `pnc-reactions-backup.timer`（04:45）每日在线备份两个数据库，保留 30 天 | 只有全机的 btrbk 快照 |
@@ -31,19 +32,24 @@
 
 push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.service，作业守卫先检查）
     ├─ Verify and Deploy Site ──► deploy.sh：worktree → npm ci → npm run verify → 原子切换 → 健康检查 → 失败回滚
-    └─ 部署结束后：Security Checks ──► CodeQL + npm audit（每周一也跑一次）
+    └─ 部署结束后：Security Checks ──► CodeQL + npm audit（每周一也跑一次；pnc-bot 的提交跳过）
+
+手机 Telegram 私聊 ──► pnc-bot.service（长轮询，经 mihomo）──► 专用 clone → git push（Deploy Key）→ 上面的部署流程
+                                     └─► pnc.db（新评论通知、隐藏）、systemctl / journalctl、systemd-run deploy.sh
 ```
 
 ### 0.1 目录与端口
 
 ```text
 /home/lyy/services/
-├── pnc-infra/                  # 本地 git 仓库：Caddyfile、deploy.sh、作业守卫、api/、reactions/、systemd/、oneoff/
+├── pnc-infra/                  # 本地 git 仓库：Caddyfile、deploy.sh、作业守卫、api/、reactions/、bot/、systemd/、oneoff/
 ├── pnc-blog/
 │   ├── deploy.sh -> ../pnc-infra/deploy.sh      # workflow 调用的路径不变
 │   ├── repo/                   # 博客仓库的克隆，deploy.sh 从这里建临时 worktree
 │   ├── releases/               # 最近 5 个构建产物
 │   ├── current -> releases/…   # Caddy 的站点根目录
+│   ├── logs/                   # 每次部署 / 回滚的完整日志（保留 30 个）
+│   ├── state/                  # last-deploy.json、deploys.jsonl（Bot 和排障用）
 │   ├── backups/pre-caddy-*/    # 切换前的 unit 文件
 │   └── server.mjs, deploy.sh.pre-20261121       # 旧版，2026-12-05 后删除
 ├── pnc-api/                    # 0700
@@ -51,6 +57,7 @@ push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.ser
 │   ├── data/pnc.db             # 评论与阅读记录
 │   └── backups/                # 每日备份 pnc-YYYYMMDD-HHMMSS.db.gz
 ├── pnc-reactions/              # 0700：server.mjs、lib.mjs、schema.sql（来自 pnc-infra/reactions）、.env（0600）、data/、backups/
+├── pnc-bot/repo/               # Telegram Bot 专用的博客仓库 clone（Deploy Key 推送）；配置在 ~/.config/pnc-bot/，状态在 ~/.local/state/pnc-bot/
 ├── pnc-comment-api/            # 已停用（0700），2026-12-05 后删除
 ├── pnc-cms/                    # Directus 数据（已停用），2026-12-05 后归档并删除
 └── actions-runner-pnc-blog/    # GitHub Actions Runner（.env 里配置作业守卫）
@@ -745,7 +752,7 @@ WantedBy=timers.target
 ### 4.1 Workflow（本仓库 `.github/workflows/`）
 
 - `build-site.yml`（**Verify and Deploy Site**）：只由 push 到 `main` 和手动运行触发，跑在 `[self-hosted, linux, x64, pnc-blog]` 上。手动运行时可以填 `deploy_sha`，经过正则校验后以 `DEPLOY_SHA` 传给 `deploy.sh`。`concurrency: pnc-blog-production`，不取消正在进行的部署。
-- `security.yml`（**Security Checks**）：每次部署结束后（`workflow_run`，只接受本仓库 push 或手动触发产生的运行）、每周一 11:23 以及手动运行时，执行 CodeQL（`security-extended`）和 `npm audit`。action 全部钉死到 commit SHA。
+- `security.yml`（**Security Checks**）：每次部署结束后（`workflow_run`，只接受本仓库 push 或手动触发产生的运行）、每周一 11:23 以及手动运行时，执行 CodeQL（`security-extended`）和 `npm audit`。action 全部钉死到 commit SHA。作者为 `pnc-bot` 的提交（Telegram Bot 发的随想、随想图片、草稿和它们的撤销，第 10 节）部署后两项检查都跳过，并使用单独的 concurrency 组，避免发一条随想就取消正在进行的扫描；下一次别人的提交和每周的定时扫描仍会检查整个仓库。
 
 两条 workflow 都没有 `pull_request` 触发器。
 
@@ -758,7 +765,18 @@ WantedBy=timers.target
 #
 #   DEPLOY_SHA=<sha> deploy.sh    deploy a commit on main (default: origin/main)
 #   deploy.sh --rollback [name]   serve the previous (or the named) release again
+#                                 (back to the one it replaced if unhealthy)
 #   deploy.sh --list              list releases, marking the one being served
+#
+# Every deploy and rollback attempt (not --list) leaves a trail for pnc-bot and
+# monitoring:
+#   logs/deploy-<time>-<sha12|rollback>.log  all of its output (newest $KEEP_LOGS kept)
+#   state/last-deploy.json                   the attempt in progress, or the last one
+#   state/deploys.jsonl                      one line per finished attempt
+#   $DEPLOY_METRICS_DIR/pnc_blog_deploy.prom last result for node-exporter (if the dir exists)
+# DEPLOY_TRIGGER (github-actions | pnc-bot | manual) and DEPLOY_REQUEST_ID are
+# copied into the records. If another deploy is running, this one waits for
+# it, up to DEPLOY_LOCK_WAIT seconds.
 set -Eeuo pipefail
 umask 022
 
@@ -766,17 +784,48 @@ APP_ROOT=${APP_ROOT:-/home/lyy/services/pnc-blog}
 REPO_URL=${REPO_URL:-https://github.com/Boshugege/boshugege.github.io.git}
 SITE_URL=${SITE_URL:-http://127.0.0.1:46213}
 KEEP_RELEASES=${KEEP_RELEASES:-5}
+KEEP_LOGS=${KEEP_LOGS:-30}
+LOCK_WAIT=${DEPLOY_LOCK_WAIT:-1200}
+METRICS_DIR=${DEPLOY_METRICS_DIR:-/home/lyy/observability/data/node-textfile}
 REPO=${REPO:-$APP_ROOT/repo}
 RELEASES=$APP_ROOT/releases
 CURRENT=$APP_ROOT/current
+LOGS=$APP_ROOT/logs
+STATE=$APP_ROOT/state
 export ASTRO_TELEMETRY_DISABLED=1 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm_config_fund=false npm_config_audit=false
+# Build with the same npm as the Actions runner, whose PATH has ~/.local/bin
+# (npm 12) before /usr/bin (Debian's npm 10). systemd user units, where
+# pnc-bot starts deploys, get a PATH without ~/.local/bin.
+[[ :$PATH: == *":${HOME:-/home/lyy}/.local/bin:"* ]] || PATH=${HOME:-/home/lyy}/.local/bin:$PATH
+
+# The attempt being recorded (see record()).
+MODE="" SHA="" RELEASE_NAME="" ERROR="" FAILED_AT="" LOG_FILE="" STAMP="" STARTED_AT="" ATTEMPT_ID=""
+TEE_PID="" HAVE_LOCK=0
+TRIGGER=${DEPLOY_TRIGGER:-}
+if [[ -z $TRIGGER ]]; then
+  if [[ ${GITHUB_ACTIONS:-} == true ]]; then TRIGGER=github-actions; else TRIGGER=manual; fi
+fi
+REQUEST_ID=${DEPLOY_REQUEST_ID:-}
 
 log() { printf '[deploy %s] %s\n' "$(date '+%F %T')" "$*"; }
-die() { log "ERROR: $*"; exit 1; }
+# fail STATUS MESSAGE: stop here; MESSAGE becomes the attempt's error.
+fail() {
+  local status=$1
+  shift
+  ERROR=$*
+  log "ERROR: $*"
+  exit "$status"
+}
+die() { fail 1 "$@"; }
+# Anything else that stops the script under `set -e` is named in the record
+# (see on_exit). Only remembered here: this trap also runs inside $(...).
+trap 'FAILED_AT=${FAILED_AT:-"line $LINENO: $BASH_COMMAND (exit $?)"}' ERR
+trap 'fail 130 "interrupted (SIGINT)"' INT
+trap 'fail 143 "terminated (SIGTERM)"' TERM
+trap 'fail 129 "hung up (SIGHUP)"' HUP
 
+[[ $LOCK_WAIT =~ ^[0-9]+$ ]] || die "DEPLOY_LOCK_WAIT must be a whole number of seconds"
 mkdir -p "$RELEASES"
-exec 9>"$APP_ROOT/deploy.lock"
-flock -n 9 || die "another deploy is running"
 
 WORK=""
 cleanup() {
@@ -786,7 +835,148 @@ cleanup() {
     git -C "$REPO" worktree prune
   fi
 }
-trap cleanup EXIT
+
+utc_now() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
+
+# The attempt as one line of JSON. jq quotes every value, so error texts and
+# caller-supplied ids can hold any characters.
+record() { # RESULT [FINISHED_AT]
+  jq -cn --arg id "$ATTEMPT_ID" --arg mode "$MODE" --arg sha "$SHA" --arg release "$RELEASE_NAME" \
+    --arg result "$1" --arg started_at "$STARTED_AT" --arg finished_at "${2:-}" --arg log "$LOG_FILE" \
+    --arg error "${ERROR:0:2000}" --arg trigger "$TRIGGER" --arg request "$REQUEST_ID" '
+    def nullable: if . == "" then null else . end;
+    {id: $id, mode: $mode, sha: ($sha | nullable), release: ($release | nullable), result: $result,
+     started_at: $started_at, finished_at: ($finished_at | nullable), log: $log, error: $error,
+     trigger: $trigger, request: $request}'
+}
+
+# write_atomic FILE TEXT: readers see the old file or the new one, never a
+# partial one. The temporary name does not end in .prom, so node-exporter
+# skips it.
+write_atomic() {
+  local tmp=$1.tmp.$$
+  if printf '%s\n' "$2" >"$tmp" && mv -fT -- "$tmp" "$1"; then return 0; fi
+  rm -f -- "$tmp"
+  return 1
+}
+
+write_running() {
+  local json
+  if json=$(record running) && write_atomic "$STATE/last-deploy.json" "$json"; then return 0; fi
+  log "WARNING: could not write $STATE/last-deploy.json"
+}
+
+metric_text() { # SUCCESS(0|1) FINISHED_EPOCH
+  cat <<EOF
+# HELP pnc_blog_deploy_last_success Whether the last deploy or rollback of PNC's Blog succeeded (1) or failed (0).
+# TYPE pnc_blog_deploy_last_success gauge
+pnc_blog_deploy_last_success $1
+# HELP pnc_blog_deploy_last_finish_timestamp_seconds When the last deploy or rollback of PNC's Blog finished, as a Unix time.
+# TYPE pnc_blog_deploy_last_finish_timestamp_seconds gauge
+pnc_blog_deploy_last_finish_timestamp_seconds $2
+EOF
+}
+
+# Open this attempt's log under a name no other attempt has (created with
+# O_EXCL; on a clash, try again in the next second), then copy everything the
+# script and its commands print into it. stdout still reaches the caller.
+# tee ignores the signals that stop a deploy (Ctrl-C, a cancelled run hit
+# the whole process group) so the script can still log how it ended; tee
+# exits when the script closes its output (see on_exit).
+begin_attempt() { # LABEL
+  mkdir -p "$LOGS" "$STATE"
+  for _ in 1 2 3 4 5; do
+    STAMP=$(date '+%Y%m%d-%H%M%S')
+    if (set -o noclobber && : >"$LOGS/deploy-$STAMP-$1.log") 2>/dev/null; then
+      LOG_FILE=$LOGS/deploy-$STAMP-$1.log
+      break
+    fi
+    sleep 1
+  done
+  [[ -n $LOG_FILE ]] || die "cannot create a log file in $LOGS"
+  ATTEMPT_ID=$STAMP-$$
+  STARTED_AT=$(utc_now)
+  exec > >(trap '' INT TERM HUP && exec tee -a -- "$LOG_FILE") 2>&1
+  TEE_PID=$!
+}
+
+# A deploy log is opened before its commit is known; once it is, rename the
+# log to carry the commit. ln (unlike mv) never replaces an existing file.
+name_log() { # SHA12
+  local named=$LOGS/deploy-$STAMP-$1.log
+  if ln -- "$LOG_FILE" "$named" 2>/dev/null; then
+    rm -f -- "$LOG_FILE"
+    LOG_FILE=$named
+  fi
+}
+
+# Keep the newest $KEEP_LOGS logs (their names sort by start time), and
+# always this attempt's.
+prune_logs() {
+  local name
+  find "$LOGS" -maxdepth 1 -type f -name 'deploy-*.log' -printf '%f\n' | LC_ALL=C sort -r |
+    tail -n +"$((KEEP_LOGS + 1))" | while read -r name; do
+      [[ $LOGS/$name == "$LOG_FILE" ]] || rm -f -- "${LOGS:?}/$name"
+    done
+}
+
+# One deploy at a time: wait for a running one to finish. flock runs in the
+# background so that a signal (a cancelled run) is handled while waiting; the
+# lock is taken on fd 9, which this shell shares, so it outlives flock.
+take_lock() {
+  exec 9>"$APP_ROOT/deploy.lock"
+  if ! flock -n 9; then
+    log "another deploy is running; waiting up to ${LOCK_WAIT}s for it to finish"
+    flock -w "$LOCK_WAIT" 9 >/dev/null 2>&1 &
+    wait "$!" || die "another deploy was still running after ${LOCK_WAIT}s; giving up"
+    log "the other deploy has finished; continuing"
+  fi
+  HAVE_LOCK=1
+}
+
+# Full SHA of a release's commit if the deploy clone knows it, else nothing.
+full_sha() { git -C "$REPO" rev-parse --verify --quiet "$1^{commit}" 2>/dev/null || true; }
+
+# EXIT trap: remove the build worktree, then record how the attempt ended.
+# The log is completed first, so whoever sees the record can read all of it.
+on_exit() {
+  local status=$? result=success succeeded=1 now finished json
+  trap - ERR
+  trap '' INT TERM HUP
+  set +e
+  cleanup
+  [[ -n $LOG_FILE ]] || return 0
+  if ((status != 0)); then
+    result=failure succeeded=0
+    if [[ -z $ERROR ]]; then # not stopped by fail(), which has said why
+      ERROR=${FAILED_AT:-"exited with status $status"}
+      log "ERROR: $ERROR"
+    fi
+  else
+    ERROR=""
+  fi
+  exec >/dev/null 2>&1 # end of output: tee writes the rest of the log and exits
+  [[ -z $TEE_PID ]] || wait "$TEE_PID"
+  now=$(date +%s)
+  finished=$(date -u -d "@$now" '+%Y-%m-%dT%H:%M:%SZ')
+  # last-deploy.json and the metric belong to the lock holder: an attempt that
+  # gave up waiting must not overwrite what the running deploy reports.
+  if json=$(record "$result" "$finished"); then
+    printf '%s\n' "$json" >>"$STATE/deploys.jsonl" || note "WARNING: could not append to $STATE/deploys.jsonl"
+    if ((HAVE_LOCK)); then
+      write_atomic "$STATE/last-deploy.json" "$json" || note "WARNING: could not write $STATE/last-deploy.json"
+    fi
+  else
+    note "WARNING: could not build the deploy record (is jq installed?)"
+  fi
+  if ((HAVE_LOCK)) && [[ -d $METRICS_DIR ]]; then
+    write_atomic "$METRICS_DIR/pnc_blog_deploy.prom" "$(metric_text "$succeeded" "$now")" ||
+      note "WARNING: could not write $METRICS_DIR/pnc_blog_deploy.prom"
+  fi
+}
+# After the log is closed, a last word can only be appended to the file.
+note() { printf '[deploy %s] %s\n' "$(date '+%F %T')" "$*" >>"$LOG_FILE"; }
+trap on_exit EXIT
 
 serving() { readlink "$CURRENT" 2>/dev/null || true; }
 
@@ -857,26 +1047,49 @@ case ${1:-} in
     done
     exit 0
     ;;
-  --rollback)
-    current=$(basename "$(serving)")
-    target=${2:-$(ls -1 "$RELEASES" | sort | awk -v cur="$current" '$0 < cur' | tail -n 1)}
-    [[ $target =~ ^[0-9]{8}-[0-9]{6}-[0-9a-f]{12}$ && -d $RELEASES/$target ]] || die "no such release: ${target:-none} (see --list)"
-    switch_to "$RELEASES/$target"
-    health_check || die "health check failed on $target; current is still $target, see --list"
-    exit 0
-    ;;
-  "") ;;
+  --rollback) MODE=rollback ;;
+  "") MODE=deploy ;;
   *) die "unknown option: $1" ;;
 esac
 
+if [[ $MODE == rollback ]]; then begin_attempt rollback; else begin_attempt unresolved; fi
+take_lock
+prune_logs || log "WARNING: could not prune old logs in $LOGS"
+write_running
+
+if [[ $MODE == rollback ]]; then
+  previous=$(serving)
+  current=$(basename "$previous")
+  target=${2:-$(ls -1 "$RELEASES" | sort | awk -v cur="$current" '$0 < cur' | tail -n 1)}
+  [[ $target =~ ^[0-9]{8}-[0-9]{6}-[0-9a-f]{12}$ && -d $RELEASES/$target ]] || die "no such release: ${target:-none} (see --list)"
+  RELEASE_NAME=$target
+  SHA=$(full_sha "${target##*-}")
+  write_running
+  switch_to "$RELEASES/$target"
+  if ! health_check; then
+    # Like a deploy: an unhealthy release does not stay. Without a release to
+    # go back to (none was served, or it is gone) the target stays.
+    if [[ -n $previous && -d $previous && $previous != "$RELEASES/$target" ]]; then
+      switch_to "$previous"
+      log "rolled back to $(basename "$previous")"
+      die "health check failed on $target; switched back to $(basename "$previous")"
+    fi
+    die "health check failed on $target; current is still $target, see --list"
+  fi
+  exit 0
+fi
+
 # 1. Fetch main and resolve the commit. Only commits on main are deployable.
-[[ -d $REPO ]] || git clone --bare --quiet "$REPO_URL" "$REPO"
-git -C "$REPO" fetch --quiet --prune origin '+refs/heads/main:refs/remotes/origin/main'
+[[ -d $REPO ]] || git clone --bare --quiet "$REPO_URL" "$REPO" || fail $? "git clone of $REPO_URL failed"
+git -C "$REPO" fetch --quiet --prune origin '+refs/heads/main:refs/remotes/origin/main' || fail $? "git fetch of main failed"
 want=${DEPLOY_SHA:-origin/main}
 [[ $want == origin/main || $want =~ ^[0-9a-f]{7,40}$ ]] || die "DEPLOY_SHA must be a 7-40 character hex SHA"
 sha=$(git -C "$REPO" rev-parse --verify --quiet "${want}^{commit}") || die "unknown commit: $want"
-git -C "$REPO" merge-base --is-ancestor "$sha" origin/main || die "$sha is not on main; refusing to deploy"
 short=${sha:0:12}
+SHA=$sha
+name_log "$short"
+write_running
+git -C "$REPO" merge-base --is-ancestor "$sha" origin/main || die "$sha is not on main; refusing to deploy"
 
 # 2. Reuse a release already built from this commit (redeploy / rollback by
 #    SHA takes seconds), otherwise build one in a throwaway worktree.
@@ -885,12 +1098,14 @@ if [[ -n $release ]]; then
   log "reusing $(basename "$release") for $short"
 else
   WORK=$(mktemp -d "$APP_ROOT/.build.XXXXXX")
-  git -C "$REPO" worktree add --detach --quiet "$WORK/src" "$sha"
+  git -C "$REPO" worktree add --detach --quiet "$WORK/src" "$sha" || fail $? "git worktree add for $short failed"
   log "verifying and building $short"
-  (cd "$WORK/src" && npm ci --prefer-offline && npm run verify)
+  (cd "$WORK/src" && npm ci --prefer-offline) || fail $? "npm ci failed for $short (exit $?)"
+  (cd "$WORK/src" && npm run verify) || fail $? "npm run verify failed for $short (exit $?)"
   release=$RELEASES/$(date '+%Y%m%d-%H%M%S')-$short
-  mv "$WORK/src/dist" "$release"
+  mv "$WORK/src/dist" "$release" || fail $? "could not move the build of $short into $RELEASES"
 fi
+RELEASE_NAME=$(basename "$release")
 
 # 3. Switch, check, and go back automatically if the new release is unhealthy.
 previous=$(serving)
@@ -917,7 +1132,12 @@ log "deployed $short"
 - **只发布 `main` 上的提交**：`DEPLOY_SHA` 必须是 7–40 位十六进制，并且是 `origin/main` 的祖先。
 - **同一提交不重复构建**：已有该 SHA 的 release 时直接复用。
 - **健康检查**：首页、任意一篇文章、`/404`（必须是 404 + `no-store`）、随机缺失路径、`/404.html`、`/rss.xml`、`/api/healthz`、`/api/config`、`/api/views`、`/api/stats`。失败重试 3 次，仍失败就切回上一个 release 并以非零状态退出。检查用的是所有 release 都有的标记，所以回滚到较早的版本也能通过。
-- **保留最近 5 个 release**，正在服务的那个永远不会被删除；`flock` 防止并发部署。
+- **保留最近 5 个 release**，正在服务的那个永远不会被删除。
+- **一次只跑一个部署**：`flock` 加锁；另一次部署正在跑时，新的会等它结束（最多 `DEPLOY_LOCK_WAIT`，默认 1200 秒），不会直接失败。Runner 和 Bot 发起的部署因此可以排队。
+- **每次部署或回滚都留下记录**（2026-11-21 起）：`logs/deploy-<时间>-<sha12>.log`（完整输出，保留 30 个）；`state/last-deploy.json`（进行中或最近一次）；`state/deploys.jsonl`（每次结束追加一行：`mode` `sha` `release` `result` `error` `trigger`（`github-actions` / `pnc-bot` / `manual`）`request` 等，用 `jq` 生成）；以及 `~/observability/data/node-textfile/pnc_blog_deploy.prom`（`pnc_blog_deploy_last_success`、`pnc_blog_deploy_last_finish_timestamp_seconds`）。最后这个指标驱动告警 `PncBlogDeployFailed`（规则在 `~/observability/prometheus/rules/pnc-blog.yml`），失败时发到告警群；下一次部署或回滚成功后自动恢复。Bot 读 `deploys.jsonl` 来回报"已上线"或"部署失败"（第 10 节）。
+- **npm 与 Runner 一致**：`~/.local/bin` 不在 PATH 里时放到最前面（Runner 用 `~/.local/bin/npm` 12；systemd 用户单元的 PATH 只能找到 Debian 的 npm 10）。
+- **`--rollback` 也会回退**：目标版本健康检查不通过时，切回原来的版本并以非零状态退出。
+- 测试脚手架（假的 APP_ROOT、真的 git/flock/jq、桩 npm/curl，覆盖成功、构建失败、健康检查失败、回滚、等锁和超时、信号、JSON 转义、与旧版输出逐字一致等 362 项检查）在改动时跑过，没有放进仓库。
 
 ### 4.3 回滚
 
@@ -936,7 +1156,7 @@ log "deployed $short"
 cd ~/services/pnc-blog && ln -sfn "$PWD/releases/<名字>" .current.tmp && mv -Tf .current.tmp current
 ```
 
-也可以在 GitHub Actions 页面手动运行 **Verify and Deploy Site**，在 `deploy_sha` 中填写 `main` 上的历史提交。
+也可以在 GitHub Actions 页面手动运行 **Verify and Deploy Site**，在 `deploy_sha` 中填写 `main` 上的历史提交，或者在 Telegram 里给 Bot 发 `/deploy <sha>`（第 10 节）。`--rollback` 的目标健康检查不通过时会切回原来的版本。
 
 ### 4.4 依赖与 CPU：`Illegal instruction`
 
@@ -969,6 +1189,7 @@ cd ~ && git -C ~/services/pnc-blog/repo worktree remove --force "$W/src" && rm -
 | 私密漏洞报告 | 开启 | 见 [SECURITY.md](SECURITY.md) |
 | 外部贡献者的 PR 运行 | 一律需要审批 | `fork-pr-contributor-approval = all_external_contributors` |
 | `main` 分支规则 | 禁止删除和强制推送 | 不要求 PR 和状态检查，仍然可以直接 push |
+| Deploy key | 1 把，read-write（2026-11-21） | 「pnc-bot (personal server, notes/drafts)」，私钥只在服务器 `~/.config/pnc-bot/deploy_key`。只对本仓库有效，供 Telegram Bot 推送随想和草稿（第 10 节）。查看：`gh repo deploy-key list` |
 | Workflow 权限 | 只读 | 各 workflow 显式声明 `permissions` |
 | Action 必须钉到 commit SHA | 开启（2026-11-21） | `sha_pinning_required`：用标签引用 action 的 workflow 会被 GitHub 拒绝运行。这些作业跑在生产机器上，不能让上游改动的标签悄悄生效 |
 | GitHub Pages | 来源改为 GitHub Actions（2026-11-21） | `boshugege.github.io` 是用户主页仓库，GitHub 不允许停用它的 Pages，删除后下一次 push 又会自动按分支构建（legacy，每次失败）。把 Source 改成 GitHub Actions 后，因为仓库里没有部署 Pages 的 workflow，push 不再触发任何 Pages 构建。以后不要在 Settings → Pages 改回 *Deploy from a branch* |
@@ -1057,13 +1278,15 @@ echo "pnc runner guard: allowed ${GITHUB_EVENT_NAME} ${path}"
 
 ```bash
 # 状态
-systemctl --user status pnc-blog pnc-api pnc-reactions pnc-api-backup.timer pnc-reactions-backup.timer pnc-github-actions-runner
+systemctl --user status pnc-blog pnc-api pnc-reactions pnc-bot pnc-api-backup.timer pnc-reactions-backup.timer pnc-github-actions-runner
 ~/services/pnc-blog/deploy.sh --list
 curl -s http://127.0.0.1:46219/healthz; curl -s http://127.0.0.1:46213/api/stats; curl -s http://127.0.0.1:46213/api/reactions/healthz
 
 # 日志
 journalctl --user -u pnc-blog -f
 journalctl --user -u pnc-api -f
+journalctl --user -u pnc-bot -n 50 --no-pager
+tail -n 5 ~/services/pnc-blog/state/deploys.jsonl | jq -c '{trigger, sha: .sha[0:7], result, error}'
 journalctl --user -u pnc-github-actions-runner -n 100 --no-pager
 ls -t ~/services/actions-runner-pnc-blog/_diag/ | head      # Runner_*.log、Worker_*.log
 
@@ -1077,7 +1300,9 @@ curl -s http://127.0.0.1:19090/api/v1/alerts | python3 -m json.tool | grep alert
 | 部署作业在 *Set up runner* 失败，日志有 `pnc runner guard refused this job` | 作业不符合守卫规则：分支不是 `main`、事件类型不对，或 workflow 文件没有登记（5.2）。 |
 | 构建无输出地失败，退出码 132 | 某个原生模块需要 AVX2，见 4.4。 |
 | job 一直 *Waiting for a runner* | Runner 离线，或正在跑另一个作业（只有一个 Runner，CodeQL 首次约 7 分钟）。查看 `systemctl --user status pnc-github-actions-runner`。 |
-| `another deploy is running` | 确实有一次部署还在跑，用 `pgrep -af deploy.sh` 查看。 |
+| `another deploy is running; waiting…` | 另一次部署还在跑，这次会等它结束（最多 20 分钟）。用 `cat ~/services/pnc-blog/state/last-deploy.json` 查看是谁在跑。 |
+| `PncBlogDeployFailed` 告警 | 最近一次部署或回滚失败，站点仍是上一个版本。`tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"`。 |
+| Telegram Bot 相关 | 见 10.6。 |
 | `is not on main; refusing to deploy` | `deploy_sha` 不是 `main` 上的提交。 |
 | 健康检查在 `/api/*` 失败 | `pnc-api` 没在运行；脚本已经自动回滚了静态站。查看 `systemctl --user status pnc-api`。 |
 | `InventoryDrift` 告警 | 新建或删除了 unit 或端口，却没有改 `~/services.yaml`。 |
@@ -1113,6 +1338,8 @@ systemctl --user enable --now pnc-comment-api && systemctl --user start pnc-cms 
 - [ ] 可选：在 Cloudflare 加第 9.4 节第 7 步的边缘速率限制规则（服务内的限流和熔断已经生效）。
 - [ ] 可选：给 `pnc-infra` 加一个私有远端仓库（需要在服务器上配置部署密钥）。
 - [ ] 可选：Runner 改用专用用户运行（5.3）。
+- [x] **私人 Telegram Bot**：2026-11-22 上线（第 10 节）。
+- [ ] 可选：服务器上 `gh` 登录的 token 是全账号的 `repo` + `workflow` 权限，本机任何以 `lyy` 运行的进程都能用它。Bot 没有用它（用的是 Deploy Key）；可以考虑换成只对必要仓库有效的细粒度 token。
 
 ---
 
@@ -1264,3 +1491,133 @@ journalctl --user -u pnc-reactions -n 50 --no-pager          # 熔断、Telegram
   - 伪造 `Origin`、缺少 `Referer` 或 `Sec-Fetch-Site: cross-site` 的挑战请求都返回 403；响应带 `no-store`，Cloudflare 不缓存。
   - 浏览器真实点击：工作量证明加上两次经 Cloudflare 的请求，共约 0.8 秒，计数 0 → 1，刷新后仍是「已观测」。随想页只发一个 `?prefix=note:` 请求。
   - 测试写入的那条记录随后已删除，计数从 0 开始。
+
+---
+
+## 10. 私人 Telegram Bot（`pnc-bot`，2026-11-22 上线）
+
+在手机上私聊 Bot 就能发随想（文字、单图、相册）、建文章草稿、管理评论、查看状态和日志、重新部署或回滚、重启服务。Bot 复用监控告警的 **@lyy_server_monitor_bot**（同一个 token），只回应主人的私聊。代码在本仓库 [`ops/telegram-bot/`](ops/telegram-bot/README.md)，部署副本在服务器的 `~/services/pnc-infra/bot/`。命令细节、文件结构、安装步骤和测试方法见那份 README，本节只记录架构、安全设计、配置清单和排障。
+
+### 10.1 架构
+
+```text
+手机 Telegram（只认主人私聊）
+   │
+api.telegram.org ◄── 长轮询 getUpdates（经 mihomo 127.0.0.1:7890）── pnc-bot.service（Python 3.13 + 系统 Pillow，不监听端口）
+   ▲                                                                   │
+   │ sendMessage（同一个 token，只发不收）                               ├─ 随想 / 草稿：图片重编码去元数据 → ~/services/pnc-bot/repo（专用 clone）
+   ├─ Alertmanager → 告警群                                            │     → git push（Deploy Key，只有本仓库写权限）→ main
+   └─ observability-daily-report（每天 09:00）→ 告警群                  │     → Runner → deploy.sh → state/deploys.jsonl → Bot 回执「✅ 已上线」+ 链接
+                                                                       ├─ 评论：每 30 秒只读查询 pnc.db，有新评论就私聊推送；隐藏 = status 改为 hidden
+                                                                       ├─ /status /logs：systemctl、journalctl、本机健康检查、Alertmanager API
+                                                                       └─ /deploy /restart：systemd-run --user 临时单元跑 deploy.sh；systemctl --user restart
+
+deploy.sh（每次部署 / 回滚）──► logs/deploy-*.log、state/last-deploy.json、state/deploys.jsonl
+                           └─► node-textfile/pnc_blog_deploy.prom ──► Prometheus「PncBlogDeployFailed」──► Alertmanager ──► 告警群
+```
+
+- **只有一个 getUpdates 消费者**：告警链路（Alertmanager、日报）只调用 `sendMessage`，没有 webhook，所以由 Bot 独占接收不会影响告警。Bot 永远不调用 `setWebhook` / `deleteWebhook` / `logOut` / `close`。别的进程（例如 `observability/scripts/get-telegram-chat-id.py`）同时 `getUpdates` 会让双方收到 `409 Conflict`，Bot 会每 30 秒重试。
+- **服务异常仍由 Alertmanager 发到告警群**，Bot 不重复推送；`/status` 会列出正在触发的告警。**部署失败**有两路通知：Prometheus 规则 `PncBlogDeployFailed` 发到告警群；Bot 私聊回报（如果是 Bot 自己的提交或部署，就更新那条回执）。
+- 发随想的全过程：`⏳ 处理中…` → `📝 已提交 <sha>，部署中…` → 部署记录出现，且本机确认 `/notes/<id>.html` 返回 200 → `✅ 已上线` + `https://parityncsvt.top/notes/<id>.html`；失败则显示 `❌ 部署失败`、错误摘要，以及 `/logs deploy`、`/undo` 提示。
+- Bot 的提交作者是 `pnc-bot <pnc-bot@parityncsvt.top>`，带 `Pnc-Bot:` trailer。`security.yml` 跳过这些提交的 CodeQL 和 npm audit（4.1）。
+
+### 10.2 命令速览
+
+| 命令 | 作用 | 确认 |
+| --- | --- | --- |
+| 直接发文字 / 图片 / 相册，`/note 文本` | 新随想。首行 `# 标题` 或 `标题 \| 正文` 可带标题 | |
+| 回复回执或自己的原消息、`/append [id] 文本` | 追加到那条随想（文字或图片） | |
+| `/draft 标题[ \| slug]` + 正文 + 图片 | 新建 `src/content/posts/<slug>/index.mdx`（`draft: true`），图片放在同目录 | |
+| `/list` | 最近 5 条随想及链接 | |
+| `/undo` | 撤销 Bot 最近一次的随想、追加或草稿提交（`git revert`，图片一起移除，不改写历史） | ✅ |
+| `/comments`、`/delcomment <id>` | 最近 10 条评论；隐藏一条（新评论通知上也有按钮） | 隐藏 ✅ |
+| `/status`、`/logs [名称]` | 版本、服务、健康检查、告警、最近部署；`pnc-blog` `pnc-api` `pnc-reactions` `pnc-bot` `runner` `cloudflared` `deploy` 的最近日志 | |
+| `/deploy [sha]` | 不带参数：部署开始时 main 的最新提交；带 sha：保留版本几秒切换，否则重新构建 | ✅ |
+| `/restart <名称>` | 只限 `pnc-blog`（Caddy）、`pnc-api`、`pnc-reactions`，重启后做健康检查 | ✅ |
+| `/help` | 命令说明 | |
+
+确认按钮一次有效，120 秒过期，只认主人在私聊里点的。
+
+### 10.3 安全设计
+
+1. **严格单人鉴权**：只处理 `from.id`、`chat.id` 都等于 `PNC_BOT_ALLOWED_USER_ID` 且 `chat.type == "private"` 的消息和按钮。陌生人、群聊（包括告警群）、频道、编辑过的消息、内联查询等一律静默丢弃：不回复、不下载、不缓冲，日志只记 `ignored <类型>`，不含 id 和内容。命令菜单也只对主人的私聊设置（`setMyCommands` 的 chat scope）。user id 没填或者还是示例值时，Bot 拒绝启动。
+2. **没有任意命令执行**：没有执行 shell 的入口。所有子进程都是固定 argv、不经过 shell，服务名只能来自常量表，SHA 先过 `^[0-9a-f]{7,40}$` 再交给 git 解析，回滚目标只能是 releases 目录里、部署记录显示最后一次成功的版本。`/undo` `/delcomment` `/deploy` `/restart` 都要二次确认。`/undo` 只认作者是 `pnc-bot`、带 `Pnc-Bot` trailer、只改动随想、随想图片或草稿的提交。
+3. **隐私**：图片入库前一律重编码为 WebP（宽度不超过 1600，自动按 EXIF 方向摆正，色彩转 sRGB），不含 EXIF、XMP、GPS 或 ICC；写入前解析 RIFF 块再检查一遍。文件名用内容哈希，不暴露原文件名。日志里没有消息正文、文件 id、token 或用户 id；发到 Telegram 的日志尾部会去掉 token 形状的字符串。
+4. **凭据隔离**：token 只从 `~/observability/secrets/telegram_bot_token` 读取（与告警共用，0600）；user id 在 `~/.config/pnc-bot/config.env`（0600）。推送用专门的 **Deploy Key**，只对本仓库有写权限，没有用服务器上 gh 登录的全账号 token。公开仓库里没有任何密钥。
+5. **沙箱**：`pnc-bot.service` 设了 `ProtectSystem=strict` 和 `ProtectHome=read-only`，只能写自己的 clone、状态目录和评论库目录；另有 `NoNewPrivileges`、`PrivateTmp`、`MemoryMax=768M`。部署和重启通过用户管理器在沙箱外执行，Bot 发起的部署单元限制与 Runner 一致（`RuntimeMaxSec=1800`、`MemoryMax=4G`）。
+
+### 10.4 配置清单（脱敏）
+
+| 位置 | 权限 | 内容 | 进公开仓库？ |
+| --- | --- | --- | --- |
+| `~/.config/pnc-bot/config.env` | 0600 | `PNC_BOT_ALLOWED_USER_ID=<主人的数字 user id>`、`PNC_BOT_TOKEN_FILE=/home/lyy/observability/secrets/telegram_bot_token`、`PNC_BOT_PROXY=http://127.0.0.1:7890`；其余变量用默认值（见 `config.env.example`） | 否（仓库里只有占位的 example） |
+| `~/observability/secrets/telegram_bot_token` | 0600 | Bot token，与 Alertmanager、日报共用，没有改动 | 否 |
+| `~/.config/pnc-bot/deploy_key`、`.pub` | 0600 / 0644 | GitHub Deploy Key「pnc-bot (personal server, notes/drafts)」，read-write，只对 `Boshugege/boshugege.github.io` 有效。指纹 `SHA256:1w+SFaAMepq6T4ET0n6T5rt8Yq831r7FKiBtuUjAOTI` | 否 |
+| `~/services/pnc-bot/repo` | 0755 | Bot 专用 clone：`core.sshCommand` 为 `ssh -F /dev/null -i …/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes …`（原因见 10.6），`user.name=pnc-bot`，`core.hooksPath=/dev/null` | — |
+| `~/.local/state/pnc-bot/` | 0700 | `state.db`（update offset、评论游标、随想 ↔ 消息映射）、`git.lock` | 否 |
+| `~/services/pnc-infra/bot/` | — | 代码部署副本，在 pnc-infra 的 git 里版本化 | 代码同 `ops/telegram-bot/` |
+| `~/.config/systemd/user/pnc-bot.service` | 0644 | 用户单元（同 `ops/telegram-bot/pnc-bot.service`） | 是 |
+| `~/services.yaml` → `pnc-bot` | — | 关键单元 `pnc-bot.service` 存活监控；不监听端口 | — |
+| `~/services/pnc-blog/{logs,state}/` | — | deploy.sh 的每次部署日志（保留 30 个）、`last-deploy.json`、`deploys.jsonl` | — |
+| `~/observability/prometheus/rules/pnc-blog.yml` | 0644 | `PncBlogDeployFailed`（`pnc_blog_deploy_last_success == 0` 持续 1 分钟，warning） | 否 |
+
+### 10.5 安装与升级
+
+首次安装按 README 的「配置与部署」执行（clone、配置、`--check-config`、`--selftest-command`、启用单元）。新建单元前**先在 `~/services.yaml` 登记**。升级：
+
+```bash
+# 在 Mac 上
+rsync -a --delete --exclude __pycache__ --exclude tests ops/telegram-bot/ personal:services/pnc-infra/bot/
+# 在服务器上
+cd ~/services/pnc-infra && git add bot && git commit -m "bot: …"
+python3 -I bot/bot.py --check-config   # 先 set -a; . ~/.config/pnc-bot/config.env; set +a
+systemctl --user restart pnc-bot && journalctl --user -u pnc-bot -n 30 --no-pager
+```
+
+停用：`systemctl --user disable --now pnc-bot`，从 `~/services.yaml` 删掉条目，并在 GitHub 仓库的 Settings → Deploy keys 删除这把 key。
+
+### 10.6 排障
+
+```bash
+systemctl --user status pnc-bot
+journalctl --user -u pnc-bot -n 100 --no-pager          # 只有事件类型和结果，没有消息内容
+set -a; . ~/.config/pnc-bot/config.env; set +a
+python3 -I ~/services/pnc-infra/bot/bot.py --check-config
+python3 -I ~/services/pnc-infra/bot/bot.py --selftest-command "/status"   # 不读 token、不连 Telegram
+git -C ~/services/pnc-bot/repo log --author=pnc-bot -5 --format='%h %s'
+tail -n 5 ~/services/pnc-blog/state/deploys.jsonl | jq -c '{trigger, sha: .sha[0:7], result, error}'
+tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"
+```
+
+| 现象 | 原因与处理 |
+| --- | --- |
+| Bot 不回任何消息 | 先看 `systemctl --user status pnc-bot`。确认是在和 Bot **私聊**（群里一律忽略），并且 `PNC_BOT_ALLOWED_USER_ID` 是自己的 id。日志里有 `ignored message` 说明消息来自别的会话或别的账号。 |
+| 日志反复出现 `409 Conflict` | 别的进程在用同一个 token 调 `getUpdates` 或设了 webhook。不要随手 `deleteWebhook`；先查 `getWebhookInfo`，停掉那个进程。 |
+| Telegram 请求超时或 `TLS handshake timeout` | mihomo 代理不稳定，告警链路也会受影响。Bot 和 Alertmanager 都会自动重试，查 `systemctl status mihomo`。 |
+| 服务里 git fetch/push 失败，手动在 shell 里却正常 | 用户单元的命名空间里，root 拥有的 `/etc/ssh/ssh_config.d/*.conf` 显示成 `nobody` 所有，ssh 因此拒绝运行。clone 的 `core.sshCommand` 必须带 `-F /dev/null`（10.4）。在 Bot 里发 `/list` 可以验证。 |
+| `⚠️ 推送被拒` / 推送重试三次仍失败 | 同时有别的提交推到 main，Bot 会自动 fetch 后重做，三次都失败才报错。也可能是 deploy key 被删了或 GitHub 不可达，用 `ssh -F /dev/null -i ~/.config/pnc-bot/deploy_key -T git@github.com` 检查。 |
+| 回执一直停在「部署中」 | 看 `/status` 和 `deploys.jsonl`：Runner 可能在排队（例如 CodeQL 正在跑），或部署失败但没有记录。超过 20 分钟 Bot 会说明「未确认上线」。 |
+| `/undo` 说会冲突 | 在 Bot 的提交之后，有人在 notes.md 的相邻位置手动改过（例如在 Mac 上写了随想）。手动 `git revert` 并解决冲突。 |
+| 想恢复被隐藏的评论 | `sqlite3 ~/services/pnc-api/data/pnc.db "UPDATE comments SET status='visible' WHERE id=<id>;"`（3.4） |
+
+### 10.7 实际上线记录（2026-11-21 ~ 11-22）
+
+- **方案确认后才动手**：先只读探查了告警 Bot（只调用 `sendMessage`，没有 webhook，没有进程在 `getUpdates`）、代理路径（容器经 49847，宿主机经 7890）、图片工具（Pillow 11.1，不支持 HEIF）和 Git 凭据（`gh` 的 token 是全账号权限，所以不用它），把探查结果和方案交给本人确认后才开始实现。
+- **凭据**：Deploy Key 在服务器上生成，私钥没有离开过服务器。主人的 user id 用一次性绑定码从 `getUpdates` 读出，直接写进 `config.env`（0600），读完把这两条更新标记为已确认，Bot 启动后不会处理它们。
+- **测试**：488 个单元和集成测试全部通过（跑在服务器的 Python 3.13 上，也跑了 `-X dev -W error` 严格模式）。集成测试把真实的 App、git（临时 bare 远端）、Pillow 和部署跟踪器接在一起，只把 Telegram 的 HTTP 层换成假的。
+- **对抗式审查**：从安全隐私、内容和 Git、运行稳定性、运维部署和网站四个角度审查，共报出 30 个问题。逐条反驳后 2 个被推翻，确认 28 个：1 个高、6 个中、21 个低。修复分三组并行进行，每个问题都有"修复前失败、修复后通过"的回归测试。
+  - 高：草稿正文里的 MDX `import`/`export` 行或行内三个反引号会让构建失败。现在草稿内容按 MDX 结构转义成字符引用；用约 16,400 份随机草稿以网站真实的 remark/rehype 配置编译，0 失败。
+  - 中：
+    - 部署跟踪改为先登记、后启动，记录不会在登记前被读走。
+    - 回复追加在 Git 队列里解析，不会因为上一条还在提交而变成新随想。
+    - `/deploy` 只回滚到最后一次部署成功的保留版本。
+    - 草稿引用了不存在的图片时直接拒绝。
+    - 中文标点旁的加粗、斜体在 CommonMark 规则下会显示成字面上的星号，这种位置改用 HTML 标签。
+  - 安全底线（鉴权、无任意命令、EXIF 去除、凭据）没有发现问题。
+- **沙箱实测**：发现 ssh 在 `ProtectSystem=strict` 的用户单元里拒绝运行（见 10.6），改用 `ssh -F /dev/null`。systemctl、journalctl、嵌套的 systemd-run、对 pnc.db 的读写、代理和本机健康检查在沙箱里都正常，写其他目录会被拒绝。
+- **deploy.sh**：新版装好后，手动重部署（`manual`）和 Runner 部署 `31a31a4`（`github-actions`）都正确写出了日志、记录和指标。`PncBlogDeployFailed` 规则已经通过 `promtool check rules` 并加载。
+- **上线**：先在 `~/services.yaml` 登记 `pnc-bot`，再启用单元，漂移为 0。验证：
+  - Telegram 端：命令菜单只设在主人的私聊里，默认范围为空；没有 webhook；常驻内存约 37 MB。
+  - 正式沙箱里的只读自检（`/status`、`/logs`、`/comments`、`/list`）输出正确。
+  - **原有告警链路**：向 Alertmanager 发了一条 `PncBotAlertChainTest`（90 秒后自动恢复），触发和恢复两条消息都第一次就发到告警群（Telegram 请求 +2，失败 +0）。
+- **待主人验收**：用手机发一条图文随想，做端到端验收（步骤见 README「用法」）。

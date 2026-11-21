@@ -1,0 +1,32 @@
+[Unit]
+Description=pnc-bot: private Telegram bot for PNC's Blog (notes, drafts, comments, ops)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/lyy/services/pnc-bot
+EnvironmentFile=%h/.config/pnc-bot/config.env
+ExecStart=/usr/bin/python3 -I /home/lyy/services/pnc-infra/bot/bot.py
+Restart=always
+RestartSec=10
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+# Read-only home still lets it read the token file, the blog releases, deploy
+# logs and the deploy history. It writes only its git clone, its state and
+# the comments DB (to hide comments). Deploys and restarts go through the
+# user manager (systemd-run / systemctl over AF_UNIX) and run outside this
+# sandbox. Inside it, root-owned /etc/ssh/ssh_config.d files show up as owned
+# by nobody and ssh refuses them, so the clone's core.sshCommand runs
+# "ssh -F /dev/null ..." with every option on the command line (README).
+ProtectHome=read-only
+ReadWritePaths=/home/lyy/services/pnc-bot /home/lyy/.local/state/pnc-bot /home/lyy/services/pnc-api/data
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+MemoryMax=768M
+
+[Install]
+WantedBy=default.target
