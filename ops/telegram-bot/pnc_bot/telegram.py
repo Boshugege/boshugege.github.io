@@ -1,5 +1,15 @@
 """Minimal Telegram Bot API client (urllib through the local proxy).
 
+The proxy is either an HTTP proxy (``http://host:port``, CONNECT tunnel) or a
+SOCKS5 proxy (``socks5h://host:port``; the host name is resolved by the
+proxy). On ``personal`` the bot talks to NaiveProxy's SOCKS5 listener directly
+(one hop less than mihomo). Measured on 2026-11-22, roughly one new tunnel in
+seven to ten never finishes its TLS handshake with Telegram, through mihomo or
+NaiveProxy alike, while a healthy one opens in about 0.6 s. So opening a
+connection (TCP + SOCKS + TLS) has its own short timeout and a stalled attempt
+is retried at once on a fresh tunnel: nothing has been sent yet, so the retry
+cannot duplicate a message.
+
 The request URL contains the bot token, so no urllib exception, URL or
 response object is ever allowed to escape this module: every failure becomes
 a ``TelegramError`` built from sanitised text, raised outside the ``except``
@@ -11,6 +21,9 @@ from __future__ import annotations
 import http.client
 import json
 import re
+import socket
+import ssl
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -42,6 +55,137 @@ _URL_RE = re.compile(r"[A-Za-z][A-Za-z0-9+.-]*://\S+")
 _NETWORK_ERRORS = (urllib.error.URLError, http.client.HTTPException, OSError)
 
 Buttons = Sequence[Sequence[tuple[str, str]]]
+
+# TCP connect + SOCKS handshake + TLS handshake, together (healthy: ~0.7 s).
+CONNECT_TIMEOUT = 2.0
+# One request opens at most this many connections (each on a fresh tunnel),
+# allowing CONNECT_TIMEOUT times these factors: 2 s, 3 s, 6 s. A stall
+# usually costs 2 s; a generally slow network still gets through.
+CONNECT_BACKOFF = (1.0, 1.5, 3.0)
+CONNECT_ATTEMPTS = len(CONNECT_BACKOFF)
+# Per thread: the factor for the connection being opened right now.
+_attempt = threading.local()
+# Waiting for an answer once the request is out. Telegram answers in well
+# under a second; a tunnel can also die after the handshake, and then only
+# this timeout ends the wait. A long poll may take its own timeout plus this.
+READ_TIMEOUT = 12.0
+POLL_GRACE = 7.0
+# Methods that can safely be sent again when no answer came back (the second
+# copy changes nothing). sendMessage is not one of them: a resend could post
+# the message twice, so the callers decide (App retries final results).
+REPEATABLE = frozenset({"getMe", "getUpdates", "getFile", "editMessageText", "answerCallbackQuery", "setMyCommands"})
+
+
+class ProxyError(OSError):
+    """The SOCKS5 proxy refused or broke the tunnel (no URL or token inside)."""
+
+
+class ConnectStageError(OSError):
+    """Opening the connection failed before any request byte was sent."""
+
+
+_SOCKS_REPLIES = {
+    1: "general failure",
+    2: "not allowed by ruleset",
+    3: "network unreachable",
+    4: "host unreachable",
+    5: "connection refused",
+    6: "TTL expired",
+    7: "command not supported",
+    8: "address type not supported",
+}
+
+
+def _recv_exact(sock: socket.socket, n: int) -> bytes:
+    data = b""
+    while len(data) < n:
+        chunk = sock.recv(n - len(data))
+        if not chunk:
+            raise ProxyError("SOCKS5 proxy closed the connection")
+        data += chunk
+    return data
+
+
+def socks5_connect(sock: socket.socket, host: str, port: int) -> None:
+    """Open a CONNECT tunnel to ``host:port`` on a socket connected to a SOCKS5
+    proxy (RFC 1928, no authentication, host name resolved by the proxy)."""
+    name = host.encode("idna")
+    if not 0 < len(name) < 256 or not 0 < port < 65536:
+        raise ProxyError("invalid SOCKS5 target")
+    sock.sendall(b"\x05\x01\x00")  # version 5, one method: no authentication
+    version, method = _recv_exact(sock, 2)
+    if version != 5 or method != 0:
+        raise ProxyError("SOCKS5 proxy wants authentication or is not SOCKS5")
+    sock.sendall(b"\x05\x01\x00\x03" + bytes([len(name)]) + name + port.to_bytes(2, "big"))
+    version, reply, _reserved, atyp = _recv_exact(sock, 4)
+    if version != 5:
+        raise ProxyError("SOCKS5 proxy sent an invalid reply")
+    if reply != 0:
+        raise ProxyError(f"SOCKS5 proxy: {_SOCKS_REPLIES.get(reply, f'error {reply}')}")
+    if atyp == 1:
+        _recv_exact(sock, 4 + 2)
+    elif atyp == 4:
+        _recv_exact(sock, 16 + 2)
+    elif atyp == 3:
+        _recv_exact(sock, _recv_exact(sock, 1)[0] + 2)
+    else:
+        raise ProxyError("SOCKS5 proxy sent an invalid address type")
+
+
+class _SocksHTTPSConnection(http.client.HTTPSConnection):
+    """HTTPS over a SOCKS5 tunnel; opening it is bounded by CONNECT_TIMEOUT."""
+
+    proxy: tuple[str, int] = ("127.0.0.1", 1080)
+    connect_timeout: float = CONNECT_TIMEOUT
+
+    def connect(self) -> None:
+        failure = ""
+        sock = None
+        limit = self.connect_timeout * getattr(_attempt, "factor", 1.0)
+        try:
+            sock = socket.create_connection(self.proxy, timeout=limit)
+            sock.settimeout(limit)
+            socks5_connect(sock, self.host, self.port)
+            tls = self._context.wrap_socket(sock, server_hostname=self.host)
+        except (OSError, ssl.SSLError, ValueError) as exc:
+            if sock is not None:
+                sock.close()
+            failure = "timed out" if isinstance(exc, TimeoutError) else f"{type(exc).__name__}: {exc}"
+        else:
+            tls.settimeout(self.timeout)  # the read timeout for the request
+            self.sock = tls
+            return
+        raise ConnectStageError(f"connect: {failure}")
+
+
+class SocksHTTPSHandler(urllib.request.HTTPSHandler):
+    """urllib handler sending every https:// request through a SOCKS5 proxy."""
+
+    def __init__(self, proxy_host: str, proxy_port: int, connect_timeout: float = CONNECT_TIMEOUT):
+        context = ssl.create_default_context()
+        super().__init__(context=context)
+        self._context = context
+        self._connection = type(
+            "SocksHTTPSConnection",
+            (_SocksHTTPSConnection,),
+            {"proxy": (proxy_host, proxy_port), "connect_timeout": connect_timeout},
+        )
+
+    def https_open(self, req: urllib.request.Request) -> Any:
+        return self.do_open(self._connection, req, context=self._context)
+
+
+def build_opener(proxy: str) -> urllib.request.OpenerDirector:
+    """An opener for ``proxy``: ``socks5h://`` / ``socks5://`` or ``http(s)://``.
+
+    Environment proxy variables are ignored either way.
+    """
+    parts = urllib.parse.urlsplit(proxy)
+    if parts.scheme in ("socks5", "socks5h"):
+        if not parts.hostname or not parts.port:
+            raise ValueError("SOCKS5 proxy needs a host and a port")
+        return urllib.request.build_opener(urllib.request.ProxyHandler({}), SocksHTTPSHandler(parts.hostname, parts.port))
+    return urllib.request.build_opener(urllib.request.ProxyHandler({"http": proxy, "https": proxy}))
 
 
 class TelegramError(Exception):
@@ -110,7 +254,7 @@ class TelegramClient:
         token: str,
         proxy: str,
         *,
-        timeout: float = 70,
+        timeout: float = READ_TIMEOUT,
         opener: Any = None,
         sleep: Callable[[float], None] = time.sleep,
     ):
@@ -120,7 +264,7 @@ class TelegramClient:
         self.timeout = timeout
         self._sleep = sleep
         if opener is None:
-            opener = urllib.request.build_opener(urllib.request.ProxyHandler({"http": proxy, "https": proxy}))
+            opener = build_opener(proxy)
         self._opener = opener
 
     def __repr__(self) -> str:
@@ -163,23 +307,37 @@ class TelegramClient:
             chunks.append(chunk)
         return b"".join(chunks)
 
-    def _open(self, request: urllib.request.Request, timeout: float, max_bytes: int) -> tuple[int, bytes]:
-        """Perform one HTTP request; returns (status, body) or raises TelegramError."""
+    def _open(
+        self, request: urllib.request.Request, timeout: float, max_bytes: int, *, repeatable: bool = False
+    ) -> tuple[int, bytes]:
+        """Perform one HTTP request; returns (status, body) or raises TelegramError.
+
+        A connection that could not be opened (stalled tunnel or handshake) is
+        retried at once on a fresh one, up to CONNECT_ATTEMPTS: the request
+        had not been sent, so this never repeats it. A request that got no
+        answer is retried too, but only when ``repeatable``.
+        """
         failure = ""
-        try:
-            with self._opener.open(request, timeout=timeout) as resp:
-                return int(getattr(resp, "status", 200)), self._read_limited(resp, max_bytes)
-        except urllib.error.HTTPError as exc:
-            status = exc.code
+        for attempt in range(1, CONNECT_ATTEMPTS + 1):
+            _attempt.factor = CONNECT_BACKOFF[attempt - 1]
             try:
-                body = exc.read(MAX_JSON_BYTES) or b""
-            except Exception:  # noqa: BLE001 - the body is optional
-                body = b""
-            finally:
-                exc.close()
-            return status, body
-        except _NETWORK_ERRORS as exc:
-            failure = self._describe(exc)
+                with self._opener.open(request, timeout=timeout) as resp:
+                    return int(getattr(resp, "status", 200)), self._read_limited(resp, max_bytes)
+            except urllib.error.HTTPError as exc:
+                status = exc.code
+                try:
+                    body = exc.read(MAX_JSON_BYTES) or b""
+                except Exception:  # noqa: BLE001 - the body is optional
+                    body = b""
+                finally:
+                    exc.close()
+                return status, body
+            except _NETWORK_ERRORS as exc:
+                failure = self._describe(exc)
+                stage = exc.reason if isinstance(exc, urllib.error.URLError) else exc
+                if attempt < CONNECT_ATTEMPTS and (isinstance(stage, ConnectStageError) or repeatable):
+                    continue
+                break
         # Raised outside the except block: no __context__ holding the URL.
         raise TelegramError(f"network error: {failure}")
 
@@ -193,8 +351,8 @@ class TelegramClient:
         )
         timeout = self.timeout
         if method == "getUpdates":
-            timeout = max(timeout, float(params.get("timeout", 0)) + 20)
-        status, payload = self._open(request, timeout, MAX_JSON_BYTES)
+            timeout = float(params.get("timeout", 0)) + POLL_GRACE
+        status, payload = self._open(request, timeout, MAX_JSON_BYTES, repeatable=method in REPEATABLE)
         try:
             data = json.loads(payload.decode("utf-8"))
         except (UnicodeDecodeError, ValueError):
@@ -305,7 +463,7 @@ class TelegramClient:
         request = urllib.request.Request(
             f"{API_BASE}/file/bot{self._token}/{urllib.parse.quote(path)}", method="GET"
         )
-        status, data = self._open(request, self.timeout, max_bytes)
+        status, data = self._open(request, self.timeout, max_bytes, repeatable=True)
         if status != 200:
             raise TelegramError(f"download failed (HTTP {status})", status)
         return data

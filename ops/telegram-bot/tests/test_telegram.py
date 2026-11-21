@@ -4,6 +4,7 @@ import unittest
 import urllib.error
 
 from pnc_bot.telegram import (
+    CONNECT_ATTEMPTS,
     FileTooLarge,
     TelegramClient,
     TelegramError,
@@ -117,7 +118,8 @@ class CallTest(unittest.TestCase):
 
     def test_network_error_never_leaks_token_or_url(self):
         reason = OSError(f"failed to reach https://api.telegram.org/bot{TOKEN}/getUpdates")
-        tg, _ = client(urllib.error.URLError(reason))
+        # getUpdates is repeatable: every attempt fails the same way.
+        tg, _ = client(*[urllib.error.URLError(reason)] * CONNECT_ATTEMPTS)
         with self.assertRaises(TelegramError) as ctx:
             tg.call("getUpdates", timeout=0)
         exc = ctx.exception
@@ -129,9 +131,10 @@ class CallTest(unittest.TestCase):
         self.assertIsNone(exc.error_code)
 
     def test_timeout_is_a_network_error(self):
-        tg, _ = client(TimeoutError("timed out"))
+        tg, opener = client(*[TimeoutError("timed out")] * CONNECT_ATTEMPTS)
         with self.assertRaises(TelegramError) as ctx:
             tg.call("getMe")
+        self.assertEqual(len(opener.requests), CONNECT_ATTEMPTS)  # getMe is repeatable
         self.assertIn("network error", str(ctx.exception))
 
     def test_description_with_token_is_cleaned(self):
@@ -165,6 +168,7 @@ class HelperTest(unittest.TestCase):
         body = opener.json(0)
         self.assertEqual(body, {"timeout": 50, "allowed_updates": ["message", "callback_query"], "offset": 17})
         self.assertGreater(opener.requests[0][1], 50)
+        self.assertLess(opener.requests[0][1], 60)  # poll + a short grace, not a minute more
         tg.get_updates(0, 1)
         self.assertNotIn("offset", opener.json(1))
 
@@ -276,3 +280,235 @@ class TruncateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Socks5Test(unittest.TestCase):
+    """The SOCKS5 tunnel to NaiveProxy (RFC 1928, no auth, remote DNS)."""
+
+    def serve(self, script):
+        """A one-shot fake SOCKS5 proxy on localhost; ``script(conn)`` talks to the client."""
+        import socket
+        import threading
+
+        server = socket.socket()
+        server.bind(("127.0.0.1", 0))
+        server.listen(1)
+        self.addCleanup(server.close)
+        seen = {}
+
+        def run():
+            conn, _ = server.accept()
+            with conn:
+                conn.settimeout(5)
+                try:
+                    script(conn, seen)
+                except OSError:
+                    pass
+
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        client = socket.create_connection(server.getsockname(), timeout=5)
+        self.addCleanup(client.close)
+        return client, seen, thread
+
+    @staticmethod
+    def read(conn, n):
+        data = b""
+        while len(data) < n:
+            data += conn.recv(n - len(data))
+        return data
+
+    def test_connect_sends_the_host_name_and_accepts_every_reply_address_type(self):
+        from pnc_bot.telegram import socks5_connect
+
+        for atyp, addr in ((1, b"\x01\x02\x03\x04"), (4, b"\x00" * 16), (3, b"\x05proxy")):
+            def script(conn, seen, atyp=atyp, addr=addr):
+                seen["greeting"] = self.read(conn, 3)
+                conn.sendall(b"\x05\x00")
+                head = self.read(conn, 5)
+                seen["request"] = head + self.read(conn, head[4] + 2)
+                conn.sendall(b"\x05\x00\x00" + bytes([atyp]) + addr + b"\x01\xbb")
+                conn.sendall(b"after")  # the tunnel's first bytes stay unread
+
+            client, seen, thread = self.serve(script)
+            socks5_connect(client, "api.telegram.org", 443)
+            thread.join(5)
+            self.assertEqual(seen["greeting"], b"\x05\x01\x00")
+            self.assertEqual(seen["request"], b"\x05\x01\x00\x03\x10api.telegram.org\x01\xbb")
+            self.assertEqual(client.recv(5), b"after")
+
+    def test_refusals_become_proxy_errors(self):
+        from pnc_bot.telegram import ProxyError, socks5_connect
+
+        cases = {
+            "auth": lambda conn, seen: (self.read(conn, 3), conn.sendall(b"\x05\xff")),
+            "not socks": lambda conn, seen: (self.read(conn, 3), conn.sendall(b"HT")),
+            "host unreachable": lambda conn, seen: (
+                self.read(conn, 3), conn.sendall(b"\x05\x00"), self.read(conn, 23),
+                conn.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00"),
+            ),
+            "closed": lambda conn, seen: (self.read(conn, 3), conn.close()),
+        }
+        for name, script in cases.items():
+            with self.subTest(name):
+                client, _, thread = self.serve(script)
+                with self.assertRaises(ProxyError) as caught:
+                    socks5_connect(client, "api.telegram.org", 443)
+                thread.join(5)
+                self.assertNotIn("bot", str(caught.exception))
+
+    def test_a_silent_proxy_times_out_quickly(self):
+        import socket
+        from pnc_bot.telegram import socks5_connect
+
+        client, _, thread = self.serve(lambda conn, seen: (self.read(conn, 3), __import__("time").sleep(1.5)))
+        client.settimeout(0.3)
+        with self.assertRaises(socket.timeout):
+            socks5_connect(client, "api.telegram.org", 443)
+
+    def test_opener_uses_socks_for_socks_urls_only(self):
+        from pnc_bot.telegram import SocksHTTPSHandler, build_opener
+
+        socks = build_opener("socks5h://127.0.0.1:10801")
+        self.assertTrue(any(isinstance(h, SocksHTTPSHandler) for h in socks.handlers))
+        http_proxy = build_opener("http://127.0.0.1:7890")
+        self.assertFalse(any(isinstance(h, SocksHTTPSHandler) for h in http_proxy.handlers))
+        handler = next(h for h in socks.handlers if isinstance(h, SocksHTTPSHandler))
+        self.assertEqual(handler._connection.proxy, ("127.0.0.1", 10801))
+
+    def test_network_failure_through_socks_is_a_clean_telegram_error(self):
+        """A proxy that is not listening fails fast with no token or URL in the text."""
+        import socket
+        from pnc_bot.telegram import TelegramClient, TelegramError
+
+        free = socket.socket()
+        free.bind(("127.0.0.1", 0))
+        port = free.getsockname()[1]
+        free.close()
+        client = TelegramClient(TOKEN, f"socks5h://127.0.0.1:{port}", sleep=lambda s: None)
+        with self.assertRaises(TelegramError) as caught:
+            client.call("getMe")
+        text = str(caught.exception)
+        self.assertIn("network error", text)
+        self.assertNotIn(TOKEN, text)
+        self.assertNotIn("api.telegram.org", text)
+
+
+class ConnectRetryTest(unittest.TestCase):
+    """A tunnel that never finishes opening is retried at once; nothing was sent."""
+
+    class Opener:
+        def __init__(self, failures):
+            self.failures = list(failures)
+            self.opens = 0
+
+        def open(self, request, timeout):
+            self.opens += 1
+            if self.failures:
+                raise self.failures.pop(0)
+            body = json.dumps({"ok": True, "result": {"is_bot": True}}).encode()
+
+            class Resp(io.BytesIO):
+                status = 200
+                headers = {}
+
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *exc):
+                    return False
+
+            return Resp(body)
+
+    def client(self, failures):
+        from pnc_bot.telegram import TelegramClient
+
+        opener = self.Opener(failures)
+        return TelegramClient(TOKEN, "socks5h://127.0.0.1:10801", opener=opener, sleep=lambda s: None), opener
+
+    def test_stalled_connects_are_retried_until_one_opens(self):
+        from pnc_bot.telegram import ConnectStageError
+
+        stalled = urllib.error.URLError(ConnectStageError("connect: timed out"))
+        client, opener = self.client([stalled, stalled])
+        self.assertEqual(client.call("getMe"), {"is_bot": True})
+        self.assertEqual(opener.opens, 3)
+
+    def test_gives_up_after_the_last_attempt(self):
+        from pnc_bot.telegram import CONNECT_ATTEMPTS, ConnectStageError, TelegramError
+
+        stalled = urllib.error.URLError(ConnectStageError("connect: timed out"))
+        client, opener = self.client([stalled] * CONNECT_ATTEMPTS)
+        with self.assertRaises(TelegramError) as caught:
+            client.call("getMe")
+        self.assertEqual(opener.opens, CONNECT_ATTEMPTS)
+        self.assertIn("timed out", str(caught.exception))
+        self.assertNotIn(TOKEN, str(caught.exception))
+
+    def test_failures_after_the_request_was_sent_are_not_retried_here(self):
+        """A read timeout may mean Telegram already got the message: never resend it blindly."""
+        from pnc_bot.telegram import TelegramError
+
+        client, opener = self.client([TimeoutError("read timed out")])
+        with self.assertRaises(TelegramError):
+            client.call("sendMessage", chat_id=1, text="x")
+        self.assertEqual(opener.opens, 1)
+
+    def test_unanswered_repeatable_calls_are_sent_again(self):
+        for method, params in (("getMe", {}), ("editMessageText", {"chat_id": 1, "message_id": 2, "text": "x"}),
+                               ("getUpdates", {"timeout": 1})):
+            with self.subTest(method):
+                client, opener = self.client([TimeoutError("read timed out")])
+                client.call(method, **params)
+                self.assertEqual(opener.opens, 2)
+
+    def test_read_timeouts_are_short(self):
+        from pnc_bot import telegram as tgmod
+
+        client, opener = self.client([])
+        client.call("sendMessage", chat_id=1, text="x")
+        self.assertEqual(client.timeout, tgmod.READ_TIMEOUT)
+        self.assertLessEqual(tgmod.READ_TIMEOUT, 15)
+
+    def test_a_real_stalled_tls_handshake_is_cut_after_the_connect_timeout(self):
+        """A SOCKS proxy that accepts the tunnel but never speaks TLS."""
+        import socket
+        import threading
+        import time as _time
+        from pnc_bot import telegram as tgmod
+
+        server = socket.socket()
+        server.bind(("127.0.0.1", 0))
+        server.listen(8)
+        self.addCleanup(server.close)
+
+        def run():
+            while True:
+                try:
+                    conn, _ = server.accept()
+                except OSError:
+                    return
+                conn.settimeout(5)
+                try:
+                    conn.recv(3)
+                    conn.sendall(b"\x05\x00")
+                    conn.recv(64)
+                    conn.sendall(b"\x05\x00\x00\x01\x00\x00\x00\x00\x00\x00")
+                    _time.sleep(2)  # the TLS handshake stalls
+                except OSError:
+                    pass
+                finally:
+                    conn.close()
+
+        threading.Thread(target=run, daemon=True).start()
+        port = server.getsockname()[1]
+        handler = tgmod.SocksHTTPSHandler("127.0.0.1", port, connect_timeout=0.3)
+        opener = tgmod.urllib.request.build_opener(tgmod.urllib.request.ProxyHandler({}), handler)
+        client = tgmod.TelegramClient(TOKEN, f"socks5h://127.0.0.1:{port}", opener=opener, sleep=lambda s: None)
+        started = _time.monotonic()
+        with self.assertRaises(tgmod.TelegramError) as caught:
+            client.call("getMe")
+        elapsed = _time.monotonic() - started
+        self.assertLess(elapsed, 0.3 * sum(tgmod.CONNECT_BACKOFF) + 1.0)
+        self.assertGreater(elapsed, 0.3 * sum(tgmod.CONNECT_BACKOFF) - 0.2)  # each attempt got its own, longer limit
+        self.assertIn("timed out", str(caught.exception))

@@ -53,7 +53,9 @@ CONFIRM_TTL = 120
 MAX_IMAGES = 10
 MAX_TOTAL_IMAGE_BYTES = 15 * 1024 * 1024
 COMMENT_POLL = 30
-LONG_POLL = 50
+# Short polls: a tunnel that dies mid-poll is noticed after LONG_POLL +
+# telegram.POLL_GRACE seconds (27 s), not after a minute.
+LONG_POLL = 20
 CONFLICT_SLEEP = 30
 MAX_BACKOFF = 60
 # Waits between attempts of a Telegram call that failed on the network, with a

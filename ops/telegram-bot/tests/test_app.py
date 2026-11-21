@@ -613,7 +613,7 @@ class LoopTest(AppTestBase):
         self.app.poll_once()
         self.assertEqual(self.state.get_int("update_offset"), 0)
         self.app.poll_once()
-        self.assertEqual(self.tg.calls[-1], ("get_updates", (0, 50), {}))
+        self.assertEqual(self.tg.calls[-1], ("get_updates", (0, appmod.LONG_POLL), {}))
 
     def test_offset_persisted_per_update_even_on_errors(self):
         self.state.set("update_offset", 5)

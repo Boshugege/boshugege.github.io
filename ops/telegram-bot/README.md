@@ -8,7 +8,7 @@
 | --- | --- |
 | `bot.py` | 入口；`python3 -I bot.py`、`--check-config`、`--selftest-command "/status"` |
 | `pnc_bot/config.py` | 环境变量 → `Config`，启动时校验；token 从文件读，不进 `repr` |
-| `pnc_bot/telegram.py` | Bot API 客户端（urllib，经 `PNC_BOT_PROXY`）；方法白名单，错误信息不含 token/URL |
+| `pnc_bot/telegram.py` | Bot API 客户端（urllib，经 `PNC_BOT_PROXY`：默认 NaiveProxy 的 socks5 `socks5h://127.0.0.1:10801`，也支持 http 代理）；建连接 2/3/6 秒限时并换新隧道重试，读超时 12 秒，可安全重发的请求没回应就重发；方法白名单，错误信息不含 token/URL |
 | `pnc_bot/auth.py` | 授权判断：`from.id`、`chat.id` 都等于主人且 `chat.type == "private"` |
 | `pnc_bot/app.py` | 轮询循环、路由、相册缓冲、确认按钮、git 单线程队列、只读线程池 |
 | `pnc_bot/ops.py` | `/status` `/logs` `/deploy` `/restart`：固定 argv，名字只从常量表里取 |

@@ -19,7 +19,7 @@ TOKEN_RE = re.compile(r"^\d{6,12}:[A-Za-z0-9_-]{30,}$")
 
 DEFAULTS = {
     "PNC_BOT_TOKEN_FILE": "/home/lyy/observability/secrets/telegram_bot_token",
-    "PNC_BOT_PROXY": "http://127.0.0.1:7890",
+    "PNC_BOT_PROXY": "socks5h://127.0.0.1:10801",
     "PNC_BOT_REPO": "/home/lyy/services/pnc-bot/repo",
     "PNC_BOT_STATE_DIR": "/home/lyy/.local/state/pnc-bot",
     "PNC_BOT_BLOG_ROOT": "/home/lyy/services/pnc-blog",
@@ -102,6 +102,21 @@ def _url(env: Mapping[str, str], name: str) -> str:
     return value
 
 
+def _proxy_url(env: Mapping[str, str], name: str) -> str:
+    """An HTTP proxy URL, or ``socks5h://host:port`` / ``socks5://host:port``."""
+    value = _get(env, name).rstrip("/")
+    parts = urlsplit(value)
+    if parts.scheme in ("socks5", "socks5h"):
+        try:
+            port = parts.port
+        except ValueError:
+            port = None
+        if not parts.hostname or not port or parts.path or parts.query or parts.fragment or parts.username:
+            raise ConfigError(f"{name} must look like socks5h://host:port")
+        return value
+    return _url(env, name)
+
+
 # The example id older copies of config.env.example shipped: a copied config
 # that was never edited must not hand the bot to that (real) account.
 PLACEHOLDER_USER_IDS = frozenset({123456789})
@@ -145,7 +160,7 @@ def load_config(env: Mapping[str, str] | None = None, *, read_token_file: bool =
     cfg = Config(
         allowed_user_id=_user_id(env),
         token_file=token_file,
-        proxy=_url(env, "PNC_BOT_PROXY"),
+        proxy=_proxy_url(env, "PNC_BOT_PROXY"),
         repo=_path(env, "PNC_BOT_REPO"),
         state_dir=_path(env, "PNC_BOT_STATE_DIR"),
         blog_root=_path(env, "PNC_BOT_BLOG_ROOT"),

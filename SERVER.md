@@ -34,7 +34,7 @@ push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.ser
     ├─ Verify and Deploy Site ──► deploy.sh：worktree → npm ci → npm run verify → 原子切换 → 健康检查 → 失败回滚
     └─ 部署结束后：Security Checks ──► CodeQL + npm audit（每周一也跑一次；pnc-bot 的提交跳过）
 
-手机 Telegram 私聊 ──► pnc-bot.service（长轮询，经 mihomo）──► 专用 clone → git push（Deploy Key）→ 上面的部署流程
+手机 Telegram 私聊 ──► pnc-bot.service（长轮询，经 NaiveProxy socks5）──► 专用 clone → git push（Deploy Key）→ 上面的部署流程
                                      └─► pnc.db（新评论通知、隐藏）、systemctl / journalctl、systemd-run deploy.sh
 ```
 
@@ -1503,7 +1503,7 @@ journalctl --user -u pnc-reactions -n 50 --no-pager          # 熔断、Telegram
 ```text
 手机 Telegram（只认主人私聊）
    │
-api.telegram.org ◄── 长轮询 getUpdates（经 mihomo 127.0.0.1:7890）── pnc-bot.service（Python 3.13 + 系统 Pillow，不监听端口）
+api.telegram.org ◄── 长轮询 getUpdates（经 NaiveProxy socks5 127.0.0.1:10801）── pnc-bot.service（Python 3.13 + 系统 Pillow，不监听端口）
    ▲                                                                   │
    │ sendMessage（同一个 token，只发不收）                               ├─ 随想 / 草稿：图片重编码去元数据 → ~/services/pnc-bot/repo（专用 clone）
    ├─ Alertmanager → 告警群                                            │     → git push（Deploy Key，只有本仓库写权限）→ main
@@ -1550,7 +1550,7 @@ deploy.sh（每次部署 / 回滚）──► logs/deploy-*.log、state/last-dep
 
 | 位置 | 权限 | 内容 | 进公开仓库？ |
 | --- | --- | --- | --- |
-| `~/.config/pnc-bot/config.env` | 0600 | `PNC_BOT_ALLOWED_USER_ID=<主人的数字 user id>`、`PNC_BOT_TOKEN_FILE=/home/lyy/observability/secrets/telegram_bot_token`、`PNC_BOT_PROXY=http://127.0.0.1:7890`；其余变量用默认值（见 `config.env.example`） | 否（仓库里只有占位的 example） |
+| `~/.config/pnc-bot/config.env` | 0600 | `PNC_BOT_ALLOWED_USER_ID=<主人的数字 user id>`、`PNC_BOT_TOKEN_FILE=/home/lyy/observability/secrets/telegram_bot_token`、`PNC_BOT_PROXY=socks5h://127.0.0.1:10801`（NaiveProxy `naive@main` 的 socks5，绕过 mihomo）；其余变量用默认值（见 `config.env.example`） | 否（仓库里只有占位的 example） |
 | `~/observability/secrets/telegram_bot_token` | 0600 | Bot token，与 Alertmanager、日报共用，没有改动 | 否 |
 | `~/.config/pnc-bot/deploy_key`、`.pub` | 0600 / 0644 | GitHub Deploy Key「pnc-bot (personal server, notes/drafts)」，read-write，只对 `Boshugege/boshugege.github.io` 有效。指纹 `SHA256:1w+SFaAMepq6T4ET0n6T5rt8Yq831r7FKiBtuUjAOTI` | 否 |
 | `~/services/pnc-bot/repo` | 0755 | Bot 专用 clone：`core.sshCommand` 为 `ssh -F /dev/null -i …/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes …`（原因见 10.6），`user.name=pnc-bot`，`core.hooksPath=/dev/null` | — |
@@ -1593,7 +1593,7 @@ tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"
 | --- | --- |
 | Bot 不回任何消息 | 先看 `systemctl --user status pnc-bot`。确认是在和 Bot **私聊**（群里一律忽略），并且 `PNC_BOT_ALLOWED_USER_ID` 是自己的 id。日志里有 `ignored message` 说明消息来自别的会话或别的账号。 |
 | 日志反复出现 `409 Conflict` | 别的进程在用同一个 token 调 `getUpdates` 或设了 webhook。不要随手 `deleteWebhook`；先查 `getWebhookInfo`，停掉那个进程。 |
-| Telegram 请求超时或 `TLS handshake timeout` | mihomo 代理不稳定，告警链路也会受影响。Bot 和 Alertmanager 都会自动重试，查 `systemctl status mihomo`。 |
+| 回复偶尔慢几秒 / 日志里有 `timed out` | 到 Telegram 的隧道不稳：实测约每 7–10 个新连接就有 1 个 TLS 握手不完成，或请求发出后得不到回应。直连 NaiveProxy 和经 mihomo 都一样，问题出在 naive 到 Telegram 这一段；Alertmanager 的 `TLS handshake timeout` 也是同一原因。Bot 的应对（10.8）：建连接限时 2/3/6 秒，失败马上换新隧道重试；普通请求 12 秒读超时，可安全重发的请求会重发；长轮询每轮 20 秒。所以通常约 1 秒回复，偶尔 3–6 秒。如果一直失败，查 `systemctl status naive@main`。 |
 | 服务里 git fetch/push 失败，手动在 shell 里却正常 | 用户单元的命名空间里，root 拥有的 `/etc/ssh/ssh_config.d/*.conf` 显示成 `nobody` 所有，ssh 因此拒绝运行。clone 的 `core.sshCommand` 必须带 `-F /dev/null`（10.4）。在 Bot 里发 `/list` 可以验证。 |
 | `⚠️ 推送被拒` / 推送重试三次仍失败 | 同时有别的提交推到 main，Bot 会自动 fetch 后重做，三次都失败才报错。也可能是 deploy key 被删了或 GitHub 不可达，用 `ssh -F /dev/null -i ~/.config/pnc-bot/deploy_key -T git@github.com` 检查。 |
 | 回执一直停在「部署中」 | 看 `/status` 和 `deploys.jsonl`：Runner 可能在排队（例如 CodeQL 正在跑），或部署失败但没有记录。超过 20 分钟 Bot 会说明「未确认上线」。 |
@@ -1621,3 +1621,20 @@ tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"
   - 正式沙箱里的只读自检（`/status`、`/logs`、`/comments`、`/list`）输出正确。
   - **原有告警链路**：向 Alertmanager 发了一条 `PncBotAlertChainTest`（90 秒后自动恢复），触发和恢复两条消息都第一次就发到告警群（Telegram 请求 +2，失败 +0）。
 - **待主人验收**：用手机发一条图文随想，做端到端验收（步骤见 README「用法」）。
+
+### 10.8 上线后修正：回复慢（2026-11-22）
+
+主人发 `/help`、`/status` 后，回复要等很久才到。排查：
+
+- Bot 本身没问题：命令在毫秒级完成，日志里也没有错误。
+- 慢在网络：用 Bot 自己的客户端连续调用 `getMe`，经 mihomo（127.0.0.1:7890）和直连 NaiveProxy socks5（127.0.0.1:10801）都一样，约每 7–10 个新连接就有 1 个 TLS 握手一直不完成，偶尔还有请求发出后一直没有回应。健康的连接约 0.7 秒建好，请求约 1 秒完成。
+- 旧代码每次调用都新建连接，超时统一是 70 秒。一旦碰上卡住的隧道，取消息或发回复就要白等几十秒，而且最后往往又能成功，所以日志里看不出来。
+
+修正（`ops/telegram-bot/pnc_bot/telegram.py`、`app.py`）：
+
+1. 直连 NaiveProxy 的 socks5，少经过 mihomo 一跳。标准库不支持 socks，所以自己实现了一个很小的 RFC 1928 客户端：不认证，域名交给代理解析。`PNC_BOT_PROXY=socks5h://127.0.0.1:10801`，原来的 http 代理写法仍然可用。
+2. 建连接（TCP + socks + TLS）单独限时，三次依次为 2、3、6 秒，失败就马上换新隧道重试。这时请求还没发出去，不会重复发送。
+3. 普通请求的读超时从 70 秒降到 12 秒。`getMe`、`getUpdates`、`getFile`、`editMessageText`、`answerCallbackQuery`、`setMyCommands` 和文件下载在没有回应时直接重发。`sendMessage` 不在这一层重发（可能重复），由上层原有的 2/5/15 秒重试处理。
+4. 长轮询每轮从 50 秒缩到 20 秒（读超时 27 秒）。如果隧道在轮询中途断了，最多耽误 27 秒。
+
+修正后在服务器上用真实链路连续调用 40 次 `getMe`，全部成功：中位数 0.9 秒，最慢 5.9 秒；修正前会卡 20–70 秒，还有失败。502 个测试全部通过，新增了本地假 socks5 服务器测试：握手、各种拒绝、握手卡住时按时切断、读超时后的重发规则。

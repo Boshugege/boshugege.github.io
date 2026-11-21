@@ -79,3 +79,21 @@ class UserIdTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProxyConfigTest(unittest.TestCase):
+    def load(self, proxy):
+        return load_config({"PNC_BOT_ALLOWED_USER_ID": "5550001234", "PNC_BOT_PROXY": proxy}, read_token_file=False)
+
+    def test_default_is_naiveproxy_socks(self):
+        config = load_config({"PNC_BOT_ALLOWED_USER_ID": "5550001234"}, read_token_file=False)
+        self.assertEqual(config.proxy, "socks5h://127.0.0.1:10801")
+
+    def test_socks_and_http_proxies_accepted(self):
+        for value in ("socks5h://127.0.0.1:10801", "socks5://127.0.0.1:1080", "http://127.0.0.1:7890"):
+            self.assertEqual(self.load(value).proxy, value)
+
+    def test_bad_socks_urls_refused(self):
+        for value in ("socks5h://127.0.0.1", "socks5h://u:p@127.0.0.1:1080", "socks5h://127.0.0.1:1080/x", "socks4://127.0.0.1:1080", "socks5h://127.0.0.1:99999"):
+            with self.subTest(value), self.assertRaises(ConfigError):
+                self.load(value)
