@@ -4,7 +4,7 @@ name: Security Checks
 # Runs after every production deploy, weekly (to catch newly published
 # advisories) and on demand. Never on pull requests: this public repository
 # must not run outside code on the runner (the runner's job guard enforces
-# this, see SERVER.md 6.1). Actions are pinned to commit SHAs because they
+# this, see SERVER.md 5.2). Actions are pinned to commit SHAs because they
 # execute on the production host.
 on:
   workflow_run:

@@ -135,3 +135,20 @@ test("comparison labels stay paired with their images on phones", async ({ page 
     expect(label.y).toBeGreaterThanOrEqual(image.y + image.height - 1);
   }
 });
+
+test("comments stay readable when the Turnstile script is blocked", async ({ page }) => {
+  await page.route("**/challenges.cloudflare.com/**", (route) => route.abort("blockedbyclient"));
+  await page.route("**/api/config", (route) => route.fulfill({ json: { turnstileSiteKey: "test-site-key" } }));
+  await page.route("**/api/views", (route) => route.fulfill({ json: { views: 7, counted: true } }));
+  await page.route("**/api/comments?**", (route) => route.fulfill({
+    json: { comments: [{ id: 1, author_name: "读者", content: "一条旧评论", created_at: "2026-08-31T08:42:23.933Z" }] },
+  }));
+  await page.goto("/posts/cg-final-path-tracing.html");
+  const comments = page.locator("[data-comments]");
+  await expect(comments.locator(".comment-item")).toHaveCount(1);
+  await expect(comments.locator(".comment-body")).toHaveText("一条旧评论");
+  await expect(comments.locator("[data-comments-status]")).toHaveText("1 条评论");
+  await expect(comments.locator(".comments-turnstile-note")).toContainText("暂时无法发表评论");
+  await expect(comments.locator("[data-comments-submit]")).toBeDisabled();
+  await expect(page.locator("[data-post-view-count]")).toHaveText("7");
+});

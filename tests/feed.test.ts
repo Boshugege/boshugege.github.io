@@ -37,3 +37,10 @@ test("removeElements handles nesting and repeated matches", () => {
   const html = "a<span class=\"drop\"><span>1</span><span><span>2</span></span></span>b<span class=\"drop\">3</span>c<span>keep</span>";
   assert.equal(removeElements(html, /<span class="drop">/, "span"), "abc<span>keep</span>");
 });
+
+test("feed HTML removal survives nested and attribute-bearing end tags", () => {
+  const html = '<p>a</p><scr<script>x</script>ipt>alert(1)</script foo="1"><STYLE>p{}</style >b<sty<style></style>le>c</style\t>';
+  const feed = toFeedHtml(html, page);
+  assert.doesNotMatch(feed, /<script|<style/i);
+  assert.match(feed, /<p>a<\/p>/);
+});

@@ -45,7 +45,7 @@ npm run build
 
 系统开启“减少动态效果”时默认静止；没有 JavaScript 或 WebGL 时显示静态字符画，返回首页链接仍然可用。动画脚本放在文档 head 中提前发现；同一页面只初始化一次，Astro 页面切换时释放并重建场景。测试截图保存在被 Git 忽略的 `test-results/`。
 
-生产静态服务器将 `/404` 和其他未找到的静态请求交给 `404.html`，保留 HTTP 404 状态和原始地址，并使用 `Cache-Control: no-store`，避免 CDN 缓存过期的缺页结果。直接访问 `/404.html` 仍返回 200。此行为由服务器上的 `server.mjs` 实现，Astro 的本地预览测试不能代替生产路由验证。
+生产静态服务器将 `/404` 和其他未找到的静态请求交给 `404.html`，保留 HTTP 404 状态和原始地址，并使用 `Cache-Control: no-store`，避免 CDN 缓存过期的缺页结果。直接访问 `/404.html` 仍返回 200。此行为由服务器上的 Caddy 实现（见 SERVER.md 第 2 节），Astro 的本地预览测试不能代替生产路由验证。
 
 ## 写文章
 
@@ -222,27 +222,17 @@ scripts/
 
 ## 生产服务
 
-本仓库是博客文章、随想、About 和前端实现的权威来源。服务器运维手册和瘦身方案（用 Caddy 替代 `server.mjs`、用单文件 SQLite 替代 Directus、保留 5 个 release 实现秒级回滚、Runner 安全）见 [SERVER.md](SERVER.md)。
+本仓库是博客文章、随想、About 和前端实现的权威来源。服务器上的实际部署、配置文件、回滚和排障方法见 [SERVER.md](SERVER.md)。下面是概要（2026-11-21 起）：
 
-服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
+- `pnc-blog.service` 运行 **Caddy**，只监听 `127.0.0.1:46213`，由 Cloudflare Tunnel 接入。它直接托管 `/home/lyy/services/pnc-blog/current`（指向 `releases/` 中的某个 release）：按 `Accept-Encoding` 返回预压缩的 `.br` / `.gz` 旁文件；哈希资源一年不可变缓存，并带 `no-transform`，避免 CDN 重复压缩；`/404` 和缺失路径返回 `404.html`，状态码保持 404，带 `Cache-Control: no-store`。
+- `/api/*` 由 Caddy 转发给 `pnc-api.service`（`127.0.0.1:46219`）：一个零依赖的 Node 进程，评论和阅读记录存在单个 SQLite 文件里，每天在线备份。它取代了原来的 Directus 和 `pnc-comment-api`，接口不变。阅读次数按同一 IP + User-Agent、同一文章、同一天只计一次。文章页负责记录阅读，首页批量读取各文章次数，About 页面读取总阅读、最多阅读文章和公开评论数量；接口不可用时保留静态排版和占位值。
+- 部署完全不使用 GitHub 托管的算力：push 到 `main`（或在 Actions 页面手动运行 workflow）后，标签为 `pnc-blog` 的本机 self-hosted Runner 调用 `deploy.sh`，在临时 worktree 里执行一次 `npm run verify`（验证和构建一起完成），然后发布这次的产物。`releases/` 保留最近 5 个版本，`deploy.sh --rollback` 一秒内就能切回上一个版本；手动运行 workflow 时也可以在 `deploy_sha` 中填写 `main` 上的历史提交。健康检查覆盖首页、文章、自定义 404 的内容和状态码、RSS 以及 `/api/*`，失败会自动回滚。
 
-- `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
-- `deploy.sh` 获取 `origin/main`，在临时 worktree 中验证并构建指定提交，再将 `current` 原子切换到新 release。
-- 构建为较大的 `_astro/*.js` 和 CSS 生成 Brotli/gzip 旁文件。`server.mjs` 按 `Accept-Encoding` 返回压缩内容和正确的 `Content-Type`、`Content-Length`、`Vary`，旧版本没有旁文件时仍可返回原文件。
-- 哈希资源保持一年不可变缓存；源站预压缩响应使用 `no-transform` 避免 CDN 再压缩。Cloudflare 仍负责边缘缓存和客户端编码兼容，不需要缓存 `/api/*` 或错误页面。
-- `releases/` 在部署健康检查期间保留旧版本用于回滚；部署成功后只保留当前 release。
+因为仓库是公开的，workflow 不响应 `pull_request`。但 fork 的 PR 可以自带 workflow 文件，所以另有两道保护：外部贡献者的 PR 运行必须经维护者批准；服务器上 Runner 的作业守卫只放行本仓库 `main` 上的 push、手动、定时和 `workflow_run` 作业（见 SERVER.md 5.2）。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
 
-部署完全不使用 GitHub 托管的算力：push 到 `main`（或在 Actions 页面手动运行 workflow）后，标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`，在临时 worktree 里执行一次 `npm run verify`（验证与构建一起完成），然后发布这次的产物。手动运行时可以在 `deploy_sha` 中填写 `main` 上的历史提交，用来重新部署或回滚。健康检查覆盖首页、自定义 404 内容及状态码、评论 API；失败会自动回滚。
+安全检查：开启了 secret scanning（含 push protection）、Dependabot 告警、私密漏洞报告和 `main` 分支保护；`.github/workflows/security.yml` 在每次部署后和每周一在自托管 Runner 上跑 CodeQL 与 `npm audit`。报告漏洞的方式见 [SECURITY.md](SECURITY.md)。
 
-因为仓库是公开的，workflow 不响应 `pull_request`。但 fork 的 PR 可以自带 workflow 文件，所以另有两道保护：外部贡献者的 PR 运行必须经维护者批准；服务器上 Runner 的作业守卫只放行本仓库 `main` 上的 push、手动、定时和 `workflow_run` 作业（见 SERVER.md 6.1）。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
-
-安全检查：开启了 secret scanning（含 push protection）、Dependabot 告警和私密漏洞报告；`.github/workflows/security.yml` 在每次部署后和每周一在自托管 Runner 上跑 CodeQL 与 `npm audit`。报告漏洞的方式见 [SECURITY.md](SECURITY.md)。
-
-`/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
-
-动态统计使用 Directus 的 `post_views` collection：同一 IP + User-Agent、同一文章、同一天只计一次。文章页负责记录阅读，首页批量读取各文章次数，About 页面读取总阅读、最多阅读文章和公开评论数量；接口不可用时保留静态排版和占位值。
-
-后端不属于本仓库，由服务器上的 `/home/lyy/services` 独立维护并每日备份。本仓库只维护浏览器端的 `/api/*` 调用和接口不可用时的降级体验。
+服务器端的配置和脚本（Caddyfile、`deploy.sh`、`pnc-api`、systemd 单元、作业守卫）保存在服务器上的 `/home/lyy/services/pnc-infra`（本地 git 仓库），不在本仓库里；SERVER.md 收录了它们的当前版本。
 
 ## 构建与验证细节
 

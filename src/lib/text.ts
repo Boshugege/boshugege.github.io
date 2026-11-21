@@ -1,11 +1,22 @@
+// Removes every match, repeating until none is left, so the pieces around
+// one removal ("<<b>b>") cannot join into a new match.
+export function removeRepeatedly(text: string, pattern: RegExp) {
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(pattern, "");
+  } while (text !== previous);
+  return text;
+}
+
 // Plain-text summary for meta descriptions, RSS and search: drops Markdown
 // and MDX syntax so previews never show backticks, links or tags.
 export function toPlainText(markdown: string, maxLength = 160) {
-  const text = markdown
+  const withoutCode = markdown
     .replace(/^(import|export) .*$/gm, "")
     .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
-    .replace(/^```[\s\S]*?^```/gm, "")
-    .replace(/<[^>]+>/g, "")
+    .replace(/^```[\s\S]*?^```/gm, "");
+  const text = removeRepeatedly(withoutCode, /<[^>]+>/g)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/^#{1,6}\s+/gm, "")

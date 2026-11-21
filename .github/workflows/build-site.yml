@@ -10,7 +10,7 @@ name: Verify and Deploy Site
 # PR can carry its own workflow file. Two settings outside this file do:
 # fork PR runs need a maintainer's approval (all external contributors), and
 # the runner's job-started hook refuses any job that is not a push, manual,
-# scheduled or workflow_run job on main of this repository (SERVER.md, 6.1).
+# scheduled or workflow_run job on main of this repository (SERVER.md 5.2).
 on:
   push:
     branches: [main]

@@ -144,12 +144,28 @@ async function setupComments(root: HTMLElement) {
     renderComments(root, data.comments || []);
   }
 
+  // Shown where the Turnstile widget would be when posting is unavailable.
+  const submitButton = submit;
+  const turnstileSlot = turnstileContainer;
+  function blockPosting(message: string) {
+    submitButton.disabled = true;
+    const note = document.createElement("p");
+    note.className = "comments-turnstile-note";
+    note.textContent = message;
+    turnstileSlot.replaceChildren(note);
+  }
+
+  // Reading comments never waits for Turnstile: its script lives on
+  // challenges.cloudflare.com, which ad blockers and some networks block.
+  const commentsLoaded = loadComments().catch(() => {
+    setStatus(root, "评论暂时无法加载，请稍后再试。", "error");
+  });
+
   try {
     const config = await fetchJson<CommentsConfig>(`${commentsApi}/config`);
     const siteKey = root.dataset.turnstileSiteKey || config.turnstileSiteKey || "";
     if (!siteKey) {
-      submit.disabled = true;
-      setStatus(root, "评论服务未配置 Turnstile。", "error");
+      blockPosting("评论服务未配置人机验证，暂时无法发表评论。");
     } else {
       await loadTurnstileScript();
       // Match the site theme rather than the system one, and follow it when
@@ -183,10 +199,10 @@ async function setupComments(root: HTMLElement) {
       themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
       document.addEventListener("astro:before-swap", () => themeObserver.disconnect(), { once: true });
     }
-    await loadComments();
-  } catch (error) {
-    setStatus(root, "评论暂时无法加载，请稍后再试。", "error");
+  } catch {
+    blockPosting("人机验证没有加载出来（可能被浏览器插件或网络拦截），暂时无法发表评论。已有评论不受影响。");
   }
+  await commentsLoaded;
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();

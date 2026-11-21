@@ -36,10 +36,20 @@ export function removeElements(html: string, opening: RegExp, tag: string) {
   return result + rest;
 }
 
+// Removes every match, repeating until none is left, so the pieces around
+// one removal cannot join into a new element.
+function removeRepeatedly(text: string, pattern: RegExp) {
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(pattern, "");
+  } while (text !== previous);
+  return text;
+}
+
 export function toFeedHtml(html: string, pageUrl: string) {
-  let out = html
-    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, "")
-    .replace(/<style\b[\s\S]*?<\/style\s*>/gi, "")
+  // End tags may carry whitespace or junk attributes (</script foo>).
+  let out = removeRepeatedly(removeRepeatedly(html, /<script\b[\s\S]*?<\/script\b[^>]*>/gi), /<style\b[\s\S]*?<\/style\b[^>]*>/gi)
     .replace(/<link\b[^>]*>/gi, "")
     .replace(/\sdata-astro-[\w-]+(?:="[^"]*")?/g, "")
     // Shiki tokens carry only --shiki-light/--shiki-dark variables, which

@@ -243,6 +243,11 @@
 .comments-form textarea {
   resize: vertical;
 }
+.comments-turnstile-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
 .comments-form-row {
   display: flex;
   align-items: center;

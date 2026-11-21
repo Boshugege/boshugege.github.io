@@ -75,3 +75,9 @@ test("search text keeps bare URLs and collapses whitespace", () => {
 test("plain-text summaries stay unchanged", () => {
   assert.equal(toPlainText("## 标题\n\n**粗体** 和 [链接](https://example.com)", 160), "标题 粗体 和 链接");
 });
+
+test("plain-text summaries cannot be left with a rebuilt tag", () => {
+  for (const input of ["<<b>b>粗体<</b>/b> 文本", "<scr<script>ipt>x", "a <<<i>>> b"]) {
+    assert.doesNotMatch(toPlainText(input), /<[a-z/!]/i, input);
+  }
+});
