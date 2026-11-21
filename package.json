@@ -37,6 +37,7 @@
     "typescript": "^6.0.3"
   },
   "overrides": {
-    "katex": "$katex"
+    "katex": "$katex",
+    "@astrojs/compiler-binding": "0.5.2"
   }
 }

@@ -270,6 +270,13 @@ node scripts/verify-build.mjs
 - RSS 包含全部文章的全文（`content:encoded`），链接和图片都是绝对地址，引用的 `_astro` 资源确实存在。
 - `_astro` 只输出 woff2 字体，不输出 woff。
 
+### 依赖固定说明
+
+`package.json` 的 `overrides` 里有两项：
+
+- `katex`：让 `rehype-katex` 使用与本站相同的 KaTeX 版本（0.19，修复了 0.16 的安全告警）。升级 KaTeX 后运行 `node scripts/generate-katex-css.mjs` 重新生成 `src/styles/katex-local.css`。
+- `@astrojs/compiler-binding`：固定在 0.5.2。0.5.3 的 Linux 原生二进制需要 AVX2，生产服务器的 Xeon E5-2450 v2 不支持，构建会直接以 `Illegal instruction`（退出码 132）崩溃；0.5.2 与 0.5.3 的 JS 和类型完全相同，只有原生文件不同。升级 astro 后，先在服务器上确认新版本能构建，再去掉这项。
+
 ## 发布流程
 
 1. 修改 `src/` 下的源码或内容。
