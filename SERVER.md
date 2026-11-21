@@ -12,9 +12,10 @@
 | --- | --- | --- |
 | 静态站 | `pnc-blog.service` → **Caddy 2.6.2**，`127.0.0.1:46213` | 同名服务跑自写的 `server.mjs` |
 | 评论、阅读数、统计 | `pnc-api.service` → **Node + `node:sqlite`**，`127.0.0.1:46219`，数据在一个文件 `pnc.db` | `pnc-comment-api`（46215）→ Directus 容器 `pnc-cms`（46214）→ Directus 的 SQLite |
+| 「观测」计数 | `pnc-reactions.service` → Node + `node:sqlite`，`127.0.0.1:46220`，数据 `reactions.db`（第 9 节） | 无 |
 | 部署 | Runner 调用 `deploy.sh`：临时 worktree 里 `npm ci` + `npm run verify`，**只构建一次**；保留最近 5 个 release | GitHub 托管 Runner 和服务器各构建一次；部署成功后删除所有旧 release |
 | 回滚 | `deploy.sh --rollback`，实测 **0.3 秒** | 只能重新构建旧提交 |
-| 备份 | `pnc-api-backup.timer` 每日 04:30 在线备份 `pnc.db`，保留 30 天 | 只有全机的 btrbk 快照 |
+| 备份 | `pnc-api-backup.timer`（04:30）和 `pnc-reactions-backup.timer`（04:45）每日在线备份两个数据库，保留 30 天 | 只有全机的 btrbk 快照 |
 | 安全检查 | secret scanning + push protection、Dependabot、私密漏洞报告、`main` 分支保护、外部贡献者审批、自托管 CodeQL + npm audit、Runner 作业守卫 | 全部未开启 |
 | 常驻内存 | Caddy + 一个 Node 进程 | `server.mjs` + `pnc-comment-api` + Directus 容器 |
 
@@ -23,6 +24,8 @@
                                                         ├─ file_server：pnc-blog/current → releases/<时间>-<SHA>
                                                         │    · .br / .gz 旁文件优先；/_astro/* 一年 immutable
                                                         │    · /404 与缺失路径 → 404.html，HTTP 404 + no-store
+                                                        ├─ /api/reactions* ──► 127.0.0.1:46220  pnc-reactions（观测计数）
+                                                        │                        └─ ~/services/pnc-reactions/data/reactions.db
                                                         └─ /api/*（去掉前缀）──► 127.0.0.1:46219  pnc-api（pnc-api.service）
                                                                                     └─ ~/services/pnc-api/data/pnc.db
 
@@ -35,7 +38,7 @@ push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.ser
 
 ```text
 /home/lyy/services/
-├── pnc-infra/                  # 本地 git 仓库：Caddyfile、deploy.sh、作业守卫、api/、systemd/、oneoff/
+├── pnc-infra/                  # 本地 git 仓库：Caddyfile、deploy.sh、作业守卫、api/、reactions/、systemd/、oneoff/
 ├── pnc-blog/
 │   ├── deploy.sh -> ../pnc-infra/deploy.sh      # workflow 调用的路径不变
 │   ├── repo/                   # 博客仓库的克隆，deploy.sh 从这里建临时 worktree
@@ -47,6 +50,7 @@ push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.ser
 │   ├── .env                    # 0600，密钥（沿用旧评论 API 的 Turnstile 密钥和 HMAC 密钥）
 │   ├── data/pnc.db             # 评论与阅读记录
 │   └── backups/                # 每日备份 pnc-YYYYMMDD-HHMMSS.db.gz
+├── pnc-reactions/              # 0700：server.mjs、lib.mjs、schema.sql（来自 pnc-infra/reactions）、.env（0600）、data/、backups/
 ├── pnc-comment-api/            # 已停用（0700），2026-12-05 后删除
 ├── pnc-cms/                    # Directus 数据（已停用），2026-12-05 后归档并删除
 └── actions-runner-pnc-blog/    # GitHub Actions Runner（.env 里配置作业守卫）
@@ -56,6 +60,7 @@ push main / 手动运行 ──► 本机 Runner（pnc-github-actions-runner.ser
 | --- | --- |
 | 46213 | Caddy（博客，cloudflared 的上游） |
 | 46219 | pnc-api |
+| 46220 | pnc-reactions（观测计数） |
 | 46214 / 46215 | 原 Directus / 原评论 API，已释放 |
 | 2019 | naive-relay 容器里另一个 Caddy 的管理接口，与博客无关。博客的 Caddy 用 unix socket |
 
@@ -96,6 +101,12 @@ http://:46213 {
 	header {
 		X-Content-Type-Options nosniff
 		-Server
+	}
+
+	# 0. 观测 counter (pnc-reactions accepts the /api prefix itself). handle
+	#    sorts before handle_path, so this wins over the /api/* block below.
+	handle /api/reactions* {
+		reverse_proxy 127.0.0.1:46220
 	}
 
 	# 1. Comments, views and stats. The API's routes have no /api prefix.
@@ -674,7 +685,7 @@ sqlite3 "$DB" ".backup '$tmp'"
 gzip -9 "$tmp"
 mv "$tmp.gz" "$DEST/pnc-$stamp.db.gz"
 find "$DEST" -name 'pnc-*.db.gz' -mtime +"$KEEP_DAYS" -delete
-echo "backup: $DEST/pnc-$stamp.db.gz ($(sqlite3 "$DB" 'SELECT COUNT(*) FROM comments;') comments)"
+echo "backup: $DEST/pnc-$stamp.db.gz ($(stat -c %s "$DEST/pnc-$stamp.db.gz") bytes)"
 ```
 
 ```bash
@@ -699,7 +710,7 @@ fi
 rm -f "$DB-wal" "$DB-shm"
 mv "$DB.restoring" "$DB"
 $SYSTEMCTL start "$SERVICE"
-echo "restored $BACKUP ($(sqlite3 "$DB" 'SELECT COUNT(*) FROM comments;') comments)"
+echo "restored $BACKUP into $DB"
 ```
 
 ```ini
@@ -959,7 +970,7 @@ cd ~ && git -C ~/services/pnc-blog/repo worktree remove --force "$W/src" && rm -
 | 外部贡献者的 PR 运行 | 一律需要审批 | `fork-pr-contributor-approval = all_external_contributors` |
 | `main` 分支规则 | 禁止删除和强制推送 | 不要求 PR 和状态检查，仍然可以直接 push |
 | Workflow 权限 | 只读 | 各 workflow 显式声明 `permissions` |
-| GitHub Pages | **待处理** | 用户主页仓库不能停用 Pages。把来源改为 GitHub Actions 可以停止每次 push 产生的失败构建（`pages-build-deployment`），这一步需要本人在 Settings → Pages 里操作 |
+| GitHub Pages | 已删除（2026-11-21，本人操作） | 不再有每次 push 都失败的 `pages-build-deployment`；`boshugege.github.io` 早已是 404 |
 
 快速检查：
 
@@ -1044,9 +1055,9 @@ echo "pnc runner guard: allowed ${GITHUB_EVENT_NAME} ${path}"
 
 ```bash
 # 状态
-systemctl --user status pnc-blog pnc-api pnc-api-backup.timer pnc-github-actions-runner
+systemctl --user status pnc-blog pnc-api pnc-reactions pnc-api-backup.timer pnc-reactions-backup.timer pnc-github-actions-runner
 ~/services/pnc-blog/deploy.sh --list
-curl -s http://127.0.0.1:46219/healthz; curl -s http://127.0.0.1:46213/api/stats
+curl -s http://127.0.0.1:46219/healthz; curl -s http://127.0.0.1:46213/api/stats; curl -s http://127.0.0.1:46213/api/reactions/healthz
 
 # 日志
 journalctl --user -u pnc-blog -f
@@ -1093,20 +1104,21 @@ systemctl --user enable --now pnc-comment-api && systemctl --user start pnc-cms 
 
 ## 8. 待办
 
-- [ ] **GitHub Pages**：在 Settings → Pages 把来源改为 *GitHub Actions*，停止每次 push 都会失败的旧版构建。自动操作被权限策略拦下了，需要本人确认。
-- [ ] **Cloudflare**：在 Zero Trust → Networks → Tunnels → Public hostnames 中删除 `cms.parityncsvt.top`。Directus 已停用，这个主机名现在只会返回 502。
+- [x] **GitHub Pages**：已删除（2026-11-21，本人操作）。
+- [x] **Cloudflare**：`cms.parityncsvt.top` 已删除（2026-11-21，本人操作）。
 - [ ] **2026-12-05 后清理**：`~/services/pnc-comment-api`、`~/services/pnc-cms`（先把 `data/` 和 `uploads/` 归档到 `/srv/backup`）、`pnc-cms.container.retired`、Directus 镜像（`podman rmi`）、`~/services.yaml` 里的 `comment-api` 和 `cms` 条目、`pnc-blog/server.mjs`、`deploy.sh.pre-20261121`、`pnc-blog/backups/pre-caddy-*`。
-- [ ] **启用「观测」计数 API**：按第 9.4 节部署 `pnc-reactions`。部署之前，网站上的观测按钮一直保持隐藏，页面不受影响。
+- [x] **启用「观测」计数 API**：2026-11-21 按第 9.4 节部署，见 9.7。
+- [ ] 可选：在 Cloudflare 加第 9.4 节第 7 步的边缘速率限制规则（服务内的限流和熔断已经生效）。
 - [ ] 可选：给 `pnc-infra` 加一个私有远端仓库（需要在服务器上配置部署密钥）。
 - [ ] 可选：Runner 改用专用用户运行（5.3）。
 
 ---
 
-## 9. 「观测」计数 API（`pnc-reactions`，参考实现，尚未部署）
+## 9. 「观测」计数 API（`pnc-reactions`，2026-11-21 上线）
 
 文章页的分享按钮旁、以及每条随想旁有一个「观测」按钮：每位读者对每篇文章、每条随想只能观测一次，按钮显示累计次数。前端已经在本仓库上线（`src/components/ObserveButton.astro`、`src/scripts/reactions.ts`、`src/lib/pow.ts`），后端参考实现放在本仓库的 `ops/reactions-api/`。这个目录不参与构建，`verify-build.mjs` 会检查它没有进入 `dist/`，里面也不含任何密钥。
 
-**部署之前**：`/api/reactions` 会落到 `pnc-api`，返回 404，按钮就一直保持隐藏，页面和以前完全一样。所以先上线网站、后部署 API 是安全的。
+生产环境按 9.4 部署，实际情况见 9.7。即使这个服务停掉，按钮也会自动隐藏，页面不受影响。所以先上线网站、后部署 API 是安全的，以后升级也是一样。
 
 ### 9.1 五层防滥刷（读者无感，不用验证码）
 
@@ -1236,3 +1248,17 @@ journalctl --user -u pnc-reactions -n 50 --no-pager          # 熔断、Telegram
 ### 9.6 撤销
 
 `systemctl --user disable --now pnc-reactions`，删掉 Caddyfile 里的 `handle /api/reactions*` 块并重载，再从 `~/services.yaml` 删掉对应条目。网站不需要改：API 不可用时，按钮会自动隐藏。
+
+### 9.7 实际部署记录（2026-11-21）
+
+- 网站：`12ec45c` 经 Runner 部署，服务器上 73 个测试全部通过，包括在 Node 22.23 上跑的 SQLite 后端测试。
+- 服务：严格按 9.4 执行，代码取自 `origin/main` 的 `ops/reactions-api/`，在 `pnc-infra/reactions/` 版本化（含当前的 `README.md`）。所有配置用默认值，两个密钥新生成，只存在于 `.env`（0600）。
+- 告警：`.env` 里的 `TELEGRAM_BOT_TOKEN_FILE` / `TELEGRAM_CHAT_ID_FILE` 指向 `~/observability/secrets/` 下监控告警 Bot 的现成文件，熔断时由同一个 Bot 通知。服务启动时会读取这两个文件，所以服务能正常运行就说明它们可读。上线时没有发送测试消息。
+- Caddy：`handle /api/reactions*` 放在 `handle_path /api/*` 之前（第 2.1 节的 Caddyfile 已同步），`caddy adapt` 确认路由顺序为 `/api/reactions*`、`/api/*`、`/404`，热重载不中断服务。
+- 监控（`~/services.yaml`，先登记、后建单元）：`pnc-reactions.service` 和 `pnc-reactions-backup.timer` 存活检查；本机健康检查 `pnc-reactions`；经 Cloudflare 的公网探测 `reactions-public`（`https://parityncsvt.top/api/reactions/healthz`）。失败时触发现有的 `server_local_http_probe_success == 0` / `server_public_direct_probe_success == 0` 告警。漂移为 0，没有告警。
+- 备份：`pnc-infra/reactions/pnc-reactions-backup.{service,timer}` 每天 04:45 调用 `pnc-infra/api/backup.sh`（设置 `DB_PATH` 和 `BACKUP_DIR`），备份存入 `~/services/pnc-reactions/backups/`，保留 30 天。`backup.sh` 和 `restore.sh` 结尾的统计已改成通用写法（3.6）。
+- 验证：
+  - 直连和经 Cloudflare 都通过：计数、白名单（不存在的文章返回 400）。
+  - 伪造 `Origin`、缺少 `Referer` 或 `Sec-Fetch-Site: cross-site` 的挑战请求都返回 403；响应带 `no-store`，Cloudflare 不缓存。
+  - 浏览器真实点击：工作量证明加上两次经 Cloudflare 的请求，共约 0.8 秒，计数 0 → 1，刷新后仍是「已观测」。随想页只发一个 `?prefix=note:` 请求。
+  - 测试写入的那条记录随后已删除，计数从 0 开始。

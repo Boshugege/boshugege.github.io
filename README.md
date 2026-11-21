@@ -227,6 +227,7 @@ scripts/
 
 - `pnc-blog.service` 运行 **Caddy**，只监听 `127.0.0.1:46213`，由 Cloudflare Tunnel 接入。它直接托管 `/home/lyy/services/pnc-blog/current`（指向 `releases/` 中的某个 release）：按 `Accept-Encoding` 返回预压缩的 `.br` / `.gz` 旁文件；哈希资源一年不可变缓存，并带 `no-transform`，避免 CDN 重复压缩；`/404` 和缺失路径返回 `404.html`，状态码保持 404，带 `Cache-Control: no-store`。
 - `/api/*` 由 Caddy 转发给 `pnc-api.service`（`127.0.0.1:46219`）：一个零依赖的 Node 进程，评论和阅读记录存在单个 SQLite 文件里，每天在线备份。它取代了原来的 Directus 和 `pnc-comment-api`，接口不变。阅读次数按同一 IP + User-Agent、同一文章、同一天只计一次。文章页负责记录阅读，首页批量读取各文章次数，About 页面读取总阅读、最多阅读文章和公开评论数量；接口不可用时保留静态排版和占位值。
+- `/api/reactions*` 由 Caddy 转发给 `pnc-reactions.service`（`127.0.0.1:46220`）：文章和随想「观测」按钮的计数服务，代码就是本仓库的 `ops/reactions-api/`，部署和防刷设计见 SERVER.md 第 9 节。
 - 部署完全不使用 GitHub 托管的算力：push 到 `main`（或在 Actions 页面手动运行 workflow）后，标签为 `pnc-blog` 的本机 self-hosted Runner 调用 `deploy.sh`，在临时 worktree 里执行一次 `npm run verify`（验证和构建一起完成），然后发布这次的产物。`releases/` 保留最近 5 个版本，`deploy.sh --rollback` 一秒内就能切回上一个版本；手动运行 workflow 时也可以在 `deploy_sha` 中填写 `main` 上的历史提交。健康检查覆盖首页、文章、自定义 404 的内容和状态码、RSS 以及 `/api/*`，失败会自动回滚。
 
 因为仓库是公开的，workflow 不响应 `pull_request`。但 fork 的 PR 可以自带 workflow 文件，所以另有两道保护：外部贡献者的 PR 运行必须经维护者批准；服务器上 Runner 的作业守卫只放行本仓库 `main` 上的 push、手动、定时和 `workflow_run` 作业（见 SERVER.md 5.2）。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
