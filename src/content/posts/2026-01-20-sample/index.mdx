@@ -61,6 +61,15 @@ $$
 </Compare>
 ```
 
+卷帘对比：两张同视角、同比例的图叠在一起，拖动中间的分割线（或点一下、用方向键）来回比较；`initial` 是分割线的起始位置（百分比，默认 50）。没有 JavaScript 时自动退回并排展示：
+
+```mdx
+<Compare mode="slider" initial={40} labels={["Whitted", "路径追踪"]} caption="同一场景的两种渲染">
+![Whitted 渲染](./whitted.jpg)
+![路径追踪渲染](./path.jpg)
+</Compare>
+```
+
 ## 提示框
 
 <Note>默认样式，用来补充说明。</Note>

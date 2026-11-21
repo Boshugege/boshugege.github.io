@@ -16,6 +16,7 @@
     "src/lib/content/year-counts.ts",
     "src/lib/text.ts",
     "src/lib/feed.ts",
+    "src/lib/pow.ts",
     "src/lib/toc.ts"
   ]
 }

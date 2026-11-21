@@ -7,8 +7,12 @@ const MIN_SIZE = 48;
 
 let cleanupLightbox: (() => void) | undefined;
 
+// Images that already do something on click: links, buttons, comments, and
+// before/after sliders (dragging one must never open the lightbox).
+const NOT_ZOOMABLE = "a, button, [data-comments], [data-compare-slider]";
+
 function isZoomable(image: HTMLImageElement) {
-  if (image.closest("a, button, [data-comments]")) return false;
+  if (image.closest(NOT_ZOOMABLE)) return false;
   const width = image.naturalWidth || image.width;
   const height = image.naturalHeight || image.height;
   return width >= MIN_SIZE && height >= MIN_SIZE;
@@ -59,7 +63,7 @@ function initializeLightbox() {
 
   const images = [...document.querySelectorAll<HTMLImageElement>(SELECTOR)];
   for (const image of images) {
-    if (image.closest("a, button, [data-comments]")) continue;
+    if (image.closest(NOT_ZOOMABLE)) continue;
     image.dataset.lightbox = "";
     image.tabIndex = 0;
     image.setAttribute("role", "button");

@@ -225,6 +225,56 @@ for (const item of rssItems) {
   for (const match of content.matchAll(/https:\/\/parityncsvt\.top\/(_astro\/[^"\s?#]+)/g)) await assertFile(match[1]);
 }
 
+// 观测 buttons: every post and every note has one, hidden until the API
+// answers, keyed by the same targets the reactions API whitelists.
+for (const { file, html } of postHtml) {
+  const button = /<button\b[^>]*\bdata-observe\b[^>]*>/.exec(html)?.[0] || "";
+  if (!button.includes(`data-observe-target="/posts/${file}"`) || !/\shidden(?=[\s>])/.test(button)) {
+    throw new Error(`${file}: missing its hidden observe button for /posts/${file}`);
+  }
+}
+for (const entry of JSON.parse(await read("notes.json")).entries) {
+  if (!notesHtml.includes(`data-observe-target="note:${entry.url.split("#")[1]}"`)) {
+    throw new Error(`notes.html: missing the observe button for ${entry.url}`);
+  }
+}
+
+// <Compare mode="slider">: two images, a keyboard-operable handle, and UI
+// that stays hidden until the script takes over (no-JS shows the pair).
+// Figures nest, so each slider is cut out by counting <figure> tags.
+function sliderFigures(html) {
+  const figures = [];
+  for (const start of html.matchAll(/<figure\b[^>]*\bdata-compare-slider\b[^>]*>/g)) {
+    const tags = /<figure\b[^>]*>|<\/figure>/g;
+    tags.lastIndex = start.index;
+    let depth = 0;
+    for (let tag = tags.exec(html); tag; tag = tags.exec(html)) {
+      depth += tag[0].startsWith("</") ? -1 : 1;
+      if (depth === 0) {
+        figures.push(html.slice(start.index, tags.lastIndex));
+        break;
+      }
+    }
+  }
+  return figures;
+}
+let sliderCount = 0;
+for (const { file, html } of postHtml) {
+  const declared = html.match(/<figure\b[^>]*\bdata-compare-slider\b/g)?.length || 0;
+  const figures = sliderFigures(html);
+  if (figures.length !== declared) throw new Error(`${file}: could not read every compare slider`);
+  for (const figure of figures) {
+    const images = figure.match(/<img\b/g)?.length || 0;
+    if (images !== 2 || !/role="slider"/.test(figure) || !/data-compare-ui\b[^>]*\shidden/.test(figure) || !/aria-valuenow="\d+"/.test(figure)) {
+      throw new Error(`${file}: a compare slider is missing its images, handle or hidden UI`);
+    }
+  }
+  sliderCount += figures.length;
+}
+
+// Server-side reference code under ops/ never ships with the site.
+await assertMissing("ops");
+
 // The CSS minifier keeps prefixed fallbacks for older Safari (cssTarget in
 // astro.config.mjs): the lightbox blur and the mobile tag-strip fade.
 const builtCss = (await Promise.all((await fs.readdir(path.join(dist, "_astro")))
@@ -267,6 +317,7 @@ for (const html of [indexHtml, aboutHtml, notesHtml, anyPost, notFoundHtml]) {
   }
 }
 console.log(`Verified PNC identity assets; index.html is ${indexSize} / 40,000 bytes.`);
+console.log(`Verified ${sliderCount} compare sliders and the observe buttons.`);
 
 if (!aboutHtml.includes("data-pnc-wordmark") || aboutHtml.indexOf("data-pnc-wordmark") > aboutHtml.indexOf('class="resume-content"')) {
   throw new Error("About page is missing its introductory PNC wordmark");

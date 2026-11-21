@@ -587,6 +587,72 @@
   color: var(--text);
 }
 
+/* Share and 观测 sit together, same pill shape. */
+.post-actions,
+.note-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+.observe-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--control-bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.observe-button[hidden] {
+  display: none;
+}
+.observe-button:hover,
+.observe-button:focus-visible {
+  background: var(--control-hover-bg);
+  color: var(--text);
+}
+.observe-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.observe-count {
+  min-width: 1ch;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.observe-button[aria-busy="true"] {
+  cursor: progress;
+}
+.observe-button.is-observed {
+  border-color: var(--link-underline);
+  color: var(--text);
+  cursor: default;
+}
+.observe-button.is-observed svg circle {
+  fill: var(--link);
+  stroke: var(--link);
+}
+.observe-button.just-observed svg {
+  animation: observe-pop 420ms ease-out;
+}
+@keyframes observe-pop {
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .observe-button { transition: none; }
+  .observe-button.just-observed svg { animation: none; }
+}
 .share-button {
   display: inline-flex;
   flex: none;

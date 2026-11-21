@@ -1096,5 +1096,143 @@ systemctl --user enable --now pnc-comment-api && systemctl --user start pnc-cms 
 - [ ] **GitHub Pages**：在 Settings → Pages 把来源改为 *GitHub Actions*，停止每次 push 都会失败的旧版构建。自动操作被权限策略拦下了，需要本人确认。
 - [ ] **Cloudflare**：在 Zero Trust → Networks → Tunnels → Public hostnames 中删除 `cms.parityncsvt.top`。Directus 已停用，这个主机名现在只会返回 502。
 - [ ] **2026-12-05 后清理**：`~/services/pnc-comment-api`、`~/services/pnc-cms`（先把 `data/` 和 `uploads/` 归档到 `/srv/backup`）、`pnc-cms.container.retired`、Directus 镜像（`podman rmi`）、`~/services.yaml` 里的 `comment-api` 和 `cms` 条目、`pnc-blog/server.mjs`、`deploy.sh.pre-20261121`、`pnc-blog/backups/pre-caddy-*`。
+- [ ] **启用「观测」计数 API**：按第 9.4 节部署 `pnc-reactions`。部署之前，网站上的观测按钮一直保持隐藏，页面不受影响。
 - [ ] 可选：给 `pnc-infra` 加一个私有远端仓库（需要在服务器上配置部署密钥）。
 - [ ] 可选：Runner 改用专用用户运行（5.3）。
+
+---
+
+## 9. 「观测」计数 API（`pnc-reactions`，参考实现，尚未部署）
+
+文章页的分享按钮旁、以及每条随想旁有一个「观测」按钮：每位读者对每篇文章、每条随想只能观测一次，按钮显示累计次数。前端已经在本仓库上线（`src/components/ObserveButton.astro`、`src/scripts/reactions.ts`、`src/lib/pow.ts`），后端参考实现放在本仓库的 `ops/reactions-api/`。这个目录不参与构建，`verify-build.mjs` 会检查它没有进入 `dist/`，里面也不含任何密钥。
+
+**部署之前**：`/api/reactions` 会落到 `pnc-api`，返回 404，按钮就一直保持隐藏，页面和以前完全一样。所以先上线网站、后部署 API 是安全的。
+
+### 9.1 五层防滥刷（读者无感，不用验证码）
+
+| 层 | 做法 | 挡住什么 |
+| --- | --- | --- |
+| 1. 目标白名单 | 只接受 `/posts/<slug>.html` 和 `note:<id>` 两种格式，而且必须出现在当前 release 的 `index.json` / `notes.json` 里（文件变化后 10 秒内重新读取）。两份清单都读不到时，写入直接拒绝（503） | 编造 key 往库里塞垃圾 |
+| 2. 同源校验 | 申请挑战和提交观测时：如果带了 `Sec-Fetch-Site`，必须是 `same-origin`；并且 `Origin` 等于 `https://parityncsvt.top`，或者（没有 `Origin` 时）`Referer` 以 `https://parityncsvt.top/` 开头 | 别的网站借访客的浏览器代刷。脚本可以伪造这些头，所以这只是第一道门 |
+| 3. 无感工作量证明 | `GET /api/reactions/challenge` 返回 HMAC 签名的挑战：绑定目标、访客、难度，60 秒过期，只能用一次（签名校验通过就作废，算错也不能重试）。浏览器要找到 nonce，使 `SHA-256(challenge + ":" + nonce)` 有 14 个前导零比特 | 每一次刷量都要花 CPU；挑战不能跨 IP 转用，也不能重放 |
+| 4. 永久去重 | 表 `reactions` 的主键是 `(target, visitor_hash)`，`visitor_hash = HMAC(VISITOR_SALT, IPv4 地址或 IPv6 的 /64)`。重复提交是幂等的，返回当前计数和 `counted: false` | 同一地址重复计数；IPv6 轮换后缀绕过 |
+| 5. 限流、熔断、告警 | 每个访客的滑动窗口：读计数 120 次/分，申请挑战 20 次/分，提交 10 次/分、60 次/时，超出返回 429 和 `Retry-After`。同一目标 10 分钟内新增超过 30 次，或全站超过 200 次，就熔断 15 分钟（写入返回 503），每次熔断通过现有的 Telegram 告警 Bot 发一条消息。另在 Cloudflare 边缘加一条速率限制（9.4 第 7 步） | 用大量地址分散刷量：至少会被限速，还会通知到你 |
+
+几点取舍：
+
+- **计的是“不同地址”，不是“不同的人”**：校园网这类共用一个 IPv4 出口的读者会被算成同一位。这正是防刷的代价。浏览器会在 `localStorage` 里记住自己观测过什么；服务端在 `observed` 字段里返回“这个地址观测过哪些”，所以换浏览器也会显示“已观测”。
+- **难度取 14 bit，而不是 16 bit**：实测 Chromium 的 Web Crypto 在 M 系列 Mac 上算 65,536 次 SHA-256 需要 150–190 ms（浏览器分批并行计算），Node 22 更慢一些。16 bit 的期望耗时就在这个量级，手机上还要再乘 3–5，算不上“无感”。14 bit 在这台 Mac 上约 40 ms，手机上一两百毫秒，而每次刷量的成本仍然是 1.6 万次哈希。可以用 `POW_DIFFICULTY` 调整，范围 0–32；浏览器读取挑战里签名的难度，不需要重新部署前端。
+- **同源校验依赖 `Referer`**：浏览器对同源 GET 不发送 `Origin`，所以申请挑战时只能靠 `Referer`。目前站点没有设置 `Referrer-Policy`，浏览器默认（`strict-origin-when-cross-origin`）会在同源请求中带上完整地址。以后如果加 `Referrer-Policy: no-referrer`，观测功能就会失效。
+- **防重放记录在内存里**：服务重启会清空，但挑战 60 秒就过期，数据库的主键仍然保证同一地址只计一次，所以无害。
+
+### 9.2 接口（Caddy 把 `/api/reactions*` 原样转发，服务同时接受带和不带 `/api` 前缀的路径）
+
+| 方法与路径 | 请求 | 响应 |
+| --- | --- | --- |
+| `GET /api/reactions/healthz` | — | `{ "ok": true }` |
+| `GET /api/reactions?target=/posts/x.html` | — | `{ counts: { "/posts/x.html": 3 }, observed: [] }`（计数为 0 也会列出；目标不在白名单时返回 400） |
+| `GET /api/reactions?prefix=note:` | — | `{ counts: { "note:2026-04-11": 2, … }, observed: ["note:…"] }`，只列出计数大于 0 的；`prefix` 只能是 `note:` 或 `/posts/`。随想页只发这一个请求；读不到对应清单时返回 503（按钮保持隐藏，而不是显示一排 0） |
+| `GET /api/reactions/challenge?target=…` | 同源校验 | `{ challenge, difficulty, expiresAt }` |
+| `POST /api/reactions` | `{ target, challenge, nonce }`（同源校验，正文最大 4 KB） | `{ target, count, observed: true, counted }` |
+
+错误统一返回 `{ "error": "中文提示" }`：400 格式错误或目标不在白名单；403 同源校验失败，或挑战伪造、过期、属于别的访客或目标、被重放，或工作量不足；413 正文过大；429 限流（带 `Retry-After`）；503 熔断中（带 `Retry-After`）或两份清单都读不到；405 方法不对（带 `Allow`）。所有响应都带 `Cache-Control: no-store` 和 `nosniff`，不带任何 CORS 头。
+
+挑战的格式是 `v1.<base64url(JSON {t, v, d, e, r})>.<base64url(HMAC-SHA256(CHALLENGE_SECRET, "v1." + payload))>`。其中 `t` 是目标，`v` 是访客哈希的前 16 位，`d` 是难度，`e` 是过期时间（毫秒），`r` 是 16 字节随机数。浏览器把它当作不透明字符串。`nonce` 是十进制字符串（1–16 位，不带前导零）。前后端使用同一套检查逻辑，`tests/reactions.test.ts` 会验证浏览器解出的 nonce 能通过服务端的 `verifyPow`。
+
+### 9.3 配置
+
+完整说明见 `ops/reactions-api/.env.example`：
+
+- **必填**：`CHALLENGE_SECRET`、`VISITOR_SALT`。各至少 32 个字符，两者不能相同，也可以改用 `*_FILE` 从文件读取。**`VISITOR_SALT` 设定后不要再改**，去重依赖它。
+- **默认值**：
+  - 监听 `127.0.0.1:46220`；
+  - 数据库 `~/services/pnc-reactions/data/reactions.db`；
+  - 白名单读取 `~/services/pnc-blog/current/index.json` 和 `notes.json`；
+  - `POW_DIFFICULTY=14`，挑战有效期 60 秒；
+  - 各项限流和熔断阈值见 9.1。
+- **告警**：`TELEGRAM_BOT_TOKEN(_FILE)`、`TELEGRAM_CHAT_ID(_FILE)`，留空就不发。
+
+### 9.4 在 `personal` 上启用
+
+```bash
+# 0. 先登记清单，否则约 10 分钟后会触发 InventoryDrift。在 ~/services.yaml 的 pnc-api 条目后面加上：
+#   - name: pnc-reactions
+#     title: 观测计数 API pnc-reactions（Node + SQLite）
+#     layer: app
+#     scope: user
+#     units: [pnc-reactions.service]
+#     critical: true
+#     listen: ["127.0.0.1:46220"]
+#     public: Tunnel → parityncsvt.top/api/reactions*（经 pnc-blog）
+#     data: [~/services/pnc-reactions/data]
+#     health:
+#       - {name: pnc-reactions, url: "http://127.0.0.1:46220/reactions/healthz"}
+
+# 1. 代码：从博客仓库取出，放进 pnc-infra 版本化管理，再复制到运行目录
+R=~/services/pnc-blog/repo && git -C "$R" fetch -q origin main
+mkdir -p ~/services/pnc-infra/reactions
+for f in server.mjs lib.mjs schema.sql pnc-reactions.service .env.example; do
+  git -C "$R" show "origin/main:ops/reactions-api/$f" > ~/services/pnc-infra/reactions/$f
+done
+git -C ~/services/pnc-infra add reactions && git -C ~/services/pnc-infra commit -m "pnc-reactions from ops/reactions-api"
+install -d -m 700 ~/services/pnc-reactions ~/services/pnc-reactions/data
+cp ~/services/pnc-infra/reactions/{server.mjs,lib.mjs,schema.sql} ~/services/pnc-reactions/
+
+# 2. 密钥（.env 为 0600；生成后只放在这个文件里，不进任何仓库）
+( umask 077 && cp ~/services/pnc-infra/reactions/.env.example ~/services/pnc-reactions/.env )
+sed -i "s/^CHALLENGE_SECRET=$/CHALLENGE_SECRET=$(openssl rand -hex 32)/; s/^VISITOR_SALT=$/VISITOR_SALT=$(openssl rand -hex 32)/" ~/services/pnc-reactions/.env
+# Telegram：复用监控已有的告警 Bot，在 .env 里填 TELEGRAM_BOT_TOKEN_FILE / TELEGRAM_CHAT_ID_FILE，
+# 指向 ~/observability/secrets 下现成的文件，不要复制令牌本身。
+
+# 3. 启动
+systemctl --user link ~/services/pnc-infra/reactions/pnc-reactions.service
+systemctl --user daemon-reload && systemctl --user enable --now pnc-reactions
+curl -s http://127.0.0.1:46220/reactions/healthz
+
+# 4. Caddy：在 ~/services/pnc-infra/Caddyfile 的 handle_path /api/* 之前加上
+#      handle /api/reactions* {
+#          reverse_proxy 127.0.0.1:46220
+#      }
+#    （handle 在 Caddy 的指令顺序里排在 handle_path 之前，所以会先匹配；服务本身接受 /api 前缀。）
+caddy validate --config ~/services/pnc-infra/Caddyfile --adapter caddyfile
+caddy adapt --config ~/services/pnc-infra/Caddyfile --adapter caddyfile | grep -o '"/api/reactions\*"'
+systemctl --user reload pnc-blog
+git -C ~/services/pnc-infra commit -am "Caddy: route /api/reactions* to pnc-reactions"
+
+# 5. 端到端
+curl -s 'http://127.0.0.1:46213/api/reactions?prefix=note:'
+curl -s -H 'Referer: https://parityncsvt.top/notes.html' -H 'Sec-Fetch-Site: same-origin' \
+  "http://127.0.0.1:46213/api/reactions/challenge?target=note:$(jq -r '.entries[0].url' ~/services/pnc-blog/current/notes.json | cut -d'#' -f2)"
+curl -s -o /dev/null -w '%{http_code}\n' -H 'Origin: https://evil.example' \
+  "http://127.0.0.1:46213/api/reactions/challenge?target=/posts/arch-linux.html"   # 应为 403
+#    然后在浏览器里打开一篇文章：按钮出现，点一下变成「已观测」，计数加一，刷新后仍是已观测。
+
+# 6. 备份：btrbk 已经每天快照 /home。如果还想要单独的每日 SQLite 备份，可以照抄 pnc-api-backup 的
+#    service/timer，设 Environment=DB_PATH=…/reactions.db BACKUP_DIR=~/services/pnc-reactions/backups。
+#    注意 pnc-infra/api/backup.sh 最后一行统计用的是 comments 表，复用前改成通用的
+#    SELECT COUNT(*) FROM sqlite_master。
+
+# 7. Cloudflare 边缘限流（免费版）：Security → WAF → Rate limiting rules → Create rule
+#    匹配：(http.request.uri.path eq "/api/reactions") or (http.request.uri.path eq "/api/reactions/challenge")
+#    计数依据：IP；阈值：每 10 秒 20 次；动作：Block，持续 10 秒。
+#    免费版只能建 1 条规则，计数周期和封禁时长固定 10 秒，表达式只能用 URI Path 和 Verified Bot 两个字段，
+#    所以这里不区分请求方法。读者打开随想页是 1 个请求，每次观测再加 2 个（挑战 + 提交）：
+#    10 秒内连点 9 条随想也只有 19 个请求。这条规则只挡在边缘的高频洪泛，
+#    细粒度的限制交给服务里的每分钟、每小时滑动窗口。
+```
+
+### 9.5 日常操作
+
+```bash
+DB=~/services/pnc-reactions/data/reactions.db
+sqlite3 -box "$DB" "SELECT target, COUNT(*) AS n FROM reactions GROUP BY target ORDER BY n DESC;"
+sqlite3 -box "$DB" "SELECT target, COUNT(*) FROM reactions WHERE created_at > strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hour') GROUP BY target;"   # 最近一小时
+sqlite3 "$DB" "DELETE FROM reactions WHERE target = '/posts/x.html' AND created_at > '2026-12-01T00:00:00';"           # 清掉一次刷量
+journalctl --user -u pnc-reactions -n 50 --no-pager          # 熔断、Telegram 失败等记录
+```
+
+熔断后不需要手动处理：冷却 15 分钟后自动恢复。如果确认是误伤，`systemctl --user restart pnc-reactions` 会清空内存中的限流和熔断状态。
+
+### 9.6 撤销
+
+`systemctl --user disable --now pnc-reactions`，删掉 Caddyfile 里的 `handle /api/reactions*` 块并重载，再从 `~/services.yaml` 删掉对应条目。网站不需要改：API 不可用时，按钮会自动隐藏。

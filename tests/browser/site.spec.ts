@@ -123,9 +123,12 @@ test("post links stand out, images open in a lightbox and back-to-top appears", 
   expect(await noHorizontalOverflow(page)).toBe(true);
 });
 
-test("comparison labels stay paired with their images on phones", async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto("/posts/cg-final-path-tracing.html");
+// The side-by-side layout (also what a slider falls back to without
+// JavaScript): on phones the images stack and each keeps its own label.
+test("comparison labels stay paired with their images on phones", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 812 } });
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:4322/posts/cg-final-path-tracing.html");
   const items = page.locator(".mdx-compare").first().locator(".mdx-compare-item");
   await expect(items).toHaveCount(2);
   for (const item of await items.all()) {
@@ -134,6 +137,10 @@ test("comparison labels stay paired with their images on phones", async ({ page 
     const label = (await item.locator("figcaption").boundingBox())!;
     expect(label.y).toBeGreaterThanOrEqual(image.y + image.height - 1);
   }
+  const [first, second] = await items.evaluateAll((figures) => figures.map((figure) => figure.getBoundingClientRect().y));
+  expect(second).toBeGreaterThan(first);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await context.close();
 });
 
 test("comments stay readable when the Turnstile script is blocked", async ({ page }) => {

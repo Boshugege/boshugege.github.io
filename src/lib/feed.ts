@@ -57,6 +57,9 @@ export function toFeedHtml(html: string, pageUrl: string) {
     .replace(/\sstyle="--shiki-[^"]*"/g, "")
     .replace(/<span>([^<]*)<\/span>/g, "$1");
   out = removeElements(out, /<span class="katex-html"[^>]*>/, "span");
+  // A <Compare mode="slider"> reads as two labelled images; its drag handle
+  // and divider only work on the site.
+  out = removeElements(out, /<div\b[^>]*\bdata-compare-ui\b[^>]*>/, "div");
   out = out
     .replace(/\s(href|src|poster)="([^"]*)"/g, (_, attribute: string, value: string) => ` ${attribute}="${absolutize(value, pageUrl)}"`)
     .replace(/\ssrcset="([^"]*)"/g, (_, value: string) => ` srcset="${value

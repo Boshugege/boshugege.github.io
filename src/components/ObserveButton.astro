@@ -1,0 +1,29 @@
+---
+// 观测: a one-per-reader reaction for a post or a note. Hidden until the
+// reactions API answers (src/scripts/reactions.ts), so the page looks exactly
+// as before when the API is unavailable.
+interface Props {
+  /** "/posts/<slug>.html" or "note:<id>". */
+  target: string;
+}
+
+const { target } = Astro.props;
+const apiBase = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
+---
+
+<button
+  type="button"
+  class="observe-button"
+  data-observe
+  data-observe-target={target}
+  data-api-base={apiBase}
+  aria-pressed="false"
+  hidden
+>
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.6" /></svg>
+  <span data-observe-label aria-live="polite">观测</span>
+  <span class="observe-count" data-observe-count>0</span>
+</button>
+<script>
+  import "../scripts/reactions";
+</script>

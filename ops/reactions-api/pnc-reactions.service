@@ -1,0 +1,27 @@
+# ~/.config/systemd/user/pnc-reactions.service (user unit of lyy, like pnc-api).
+# Expects server.mjs, lib.mjs and schema.sql in /home/lyy/services/pnc-reactions.
+[Unit]
+Description=PNC's Blog reactions API (观测 counter, SQLite)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/lyy/services/pnc-reactions
+EnvironmentFile=/home/lyy/services/pnc-reactions/.env
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning /home/lyy/services/pnc-reactions/server.mjs
+Restart=always
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+# Read-only home still lets it read the blog's index.json / notes.json and any *_FILE secrets.
+ProtectHome=read-only
+ReadWritePaths=/home/lyy/services/pnc-reactions/data
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+MemoryMax=128M
+
+[Install]
+WantedBy=default.target

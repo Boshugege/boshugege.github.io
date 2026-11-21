@@ -44,3 +44,13 @@ test("feed HTML removal survives nested and attribute-bearing end tags", () => {
   assert.doesNotMatch(feed, /<script|<style/i);
   assert.match(feed, /<p>a<\/p>/);
 });
+
+test("feed HTML drops the compare slider's handle but keeps both images", () => {
+  const html = '<figure class="mdx-compare" data-compare-slider><div class="mdx-compare-grid"><figure class="mdx-compare-item"><img src="/_astro/a.webp" alt="a"><figcaption>A</figcaption></figure>'
+    + '<figure class="mdx-compare-item"><img src="/_astro/b.webp" alt="b"><figcaption>B</figcaption></figure>'
+    + '<div class="mdx-compare-ui" data-compare-ui hidden><span class="mdx-compare-divider"></span><span role="slider" tabindex="0"><svg><path d="M0"></path></svg></span></div></div></figure>';
+  const feed = toFeedHtml(html, page);
+  assert.doesNotMatch(feed, /data-compare-ui|role="slider"/);
+  assert.equal((feed.match(/<img /g) || []).length, 2);
+  assert.match(feed, /<figcaption>A<\/figcaption>.*<figcaption>B<\/figcaption>/);
+});

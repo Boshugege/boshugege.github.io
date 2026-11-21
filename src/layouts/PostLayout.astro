@@ -5,6 +5,7 @@ import ThemeToggle from "../components/ThemeToggle.astro";
 import Comments from "../components/Comments.astro";
 import PostToc from "../components/PostToc.astro";
 import ShareButton from "../components/ShareButton.astro";
+import ObserveButton from "../components/ObserveButton.astro";
 import DocumentLayout from "./DocumentLayout.astro";
 import type { TableOfContents } from "../lib/toc";
 import "../styles/content.css";
@@ -104,7 +105,10 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
         {typeof readingMinutes === "number" && <span>{readingMinutes} 分钟</span>}
         <span class="view-count" hidden><span data-post-view-count>—</span> 次阅读</span>
       </p>
-      <ShareButton title={title} text={excerpt} url={canonicalPath} />
+      <div class="post-actions">
+        <ObserveButton target={sitePath} />
+        <ShareButton title={title} text={excerpt} url={canonicalPath} />
+      </div>
     </div>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">
