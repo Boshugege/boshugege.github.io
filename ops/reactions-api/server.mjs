@@ -163,31 +163,39 @@ function breakerMessage({ scope, target: key, count, windowMs, until }) {
 // Whitelist: the posts and notes of the release Caddy is serving
 
 // Re-reads an index file when its identity (inode, size, mtime) changes,
-// stat()ing at most once per checkMs. A file that cannot be read yields null.
+// checking at most once per checkMs. The file is opened once and both the
+// identity and the contents come from that descriptor, so a release switch
+// between the two cannot pair one file's identity with another's contents.
+// A file that cannot be read yields null.
 function watchedIndex(file, parse, checkMs, now) {
   let state = { checkedAt: -Infinity, signature: "", keys: null };
   return () => {
     const time = now();
     if (time - state.checkedAt < checkMs) return state.keys;
     state.checkedAt = time;
-    let stat;
+    let fd;
     try {
-      stat = fs.statSync(file);
+      fd = fs.openSync(file, "r");
     } catch (error) {
       // Log the first failure (including a wrong path at startup), not every check.
       if (state.signature !== "missing") console.warn(`Index unavailable: ${file} (${error.code || error.message})`);
       state = { checkedAt: time, signature: "missing", keys: null };
       return null;
     }
-    const signature = `${stat.ino}:${stat.size}:${stat.mtimeMs}`;
-    if (signature === state.signature) return state.keys;
     try {
-      state = { checkedAt: time, signature, keys: parse(JSON.parse(fs.readFileSync(file, "utf8"))) };
-    } catch (error) {
-      console.warn(`Unable to read index ${file}: ${error.message}`);
-      state = { checkedAt: time, signature, keys: null };
+      const stat = fs.fstatSync(fd);
+      const signature = `${stat.ino}:${stat.size}:${stat.mtimeMs}`;
+      if (signature === state.signature) return state.keys;
+      try {
+        state = { checkedAt: time, signature, keys: parse(JSON.parse(fs.readFileSync(fd, "utf8"))) };
+      } catch (error) {
+        console.warn(`Unable to read index ${file}: ${error.message}`);
+        state = { checkedAt: time, signature, keys: null };
+      }
+      return state.keys;
+    } finally {
+      fs.closeSync(fd);
     }
-    return state.keys;
   };
 }
 

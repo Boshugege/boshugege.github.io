@@ -965,12 +965,13 @@ cd ~ && git -C ~/services/pnc-blog/repo worktree remove --force "$W/src" && rm -
 | 非服务商模式匹配、有效性检查 | 不可用 | 需要付费的 Secret Protection |
 | Dependabot alerts | 开启 | 开启时报出 38 条（13 个包），已通过升级依赖全部修复 |
 | Dependabot 自动修复 PR | 未开启 | 它跑在 GitHub 托管的算力上；由每周的 `npm audit` 代替 |
-| Code scanning（CodeQL） | 自托管 | `security.yml`。首次扫描报出 4 条，都是“标签过滤不彻底”，已在同一批改动中修复 |
+| Code scanning（CodeQL） | 自托管 | `security.yml`。首次扫描报出 4 条，都是“标签过滤不彻底”，已在同一批改动中修复。上线计数 API 后又报出 1 条 `js/file-system-race`（`ops/reactions-api/server.mjs` 先 stat 再读清单），已改为对同一文件句柄取 stat 再读取。注意：CodeQL 作业只上传结果，有告警时不会失败，要在 Security 页或用下面的命令查看 |
 | 私密漏洞报告 | 开启 | 见 [SECURITY.md](SECURITY.md) |
 | 外部贡献者的 PR 运行 | 一律需要审批 | `fork-pr-contributor-approval = all_external_contributors` |
 | `main` 分支规则 | 禁止删除和强制推送 | 不要求 PR 和状态检查，仍然可以直接 push |
 | Workflow 权限 | 只读 | 各 workflow 显式声明 `permissions` |
-| GitHub Pages | 已删除（2026-11-21，本人操作） | 不再有每次 push 都失败的 `pages-build-deployment`；`boshugege.github.io` 早已是 404 |
+| Action 必须钉到 commit SHA | 开启（2026-11-21） | `sha_pinning_required`：用标签引用 action 的 workflow 会被 GitHub 拒绝运行。这些作业跑在生产机器上，不能让上游改动的标签悄悄生效 |
+| GitHub Pages | 来源改为 GitHub Actions（2026-11-21） | `boshugege.github.io` 是用户主页仓库，GitHub 不允许停用它的 Pages，删除后下一次 push 又会自动按分支构建（legacy，每次失败）。把 Source 改成 GitHub Actions 后，因为仓库里没有部署 Pages 的 workflow，push 不再触发任何 Pages 构建。以后不要在 Settings → Pages 改回 *Deploy from a branch* |
 
 快速检查：
 
@@ -982,6 +983,7 @@ gh api "repos/$R/code-scanning/alerts?state=open" --jq length
 gh api "repos/$R/secret-scanning/alerts?state=open" --jq length
 gh api repos/$R/actions/permissions/fork-pr-contributor-approval
 gh api repos/$R/rulesets --jq '.[].name'
+gh api repos/$R/actions/permissions          # sha_pinning_required: true
 ```
 
 ### 5.2 Runner 作业守卫（公开仓库必需）
@@ -1104,7 +1106,7 @@ systemctl --user enable --now pnc-comment-api && systemctl --user start pnc-cms 
 
 ## 8. 待办
 
-- [x] **GitHub Pages**：已删除（2026-11-21，本人操作）。
+- [x] **GitHub Pages**：用户主页仓库不能停用 Pages，删除后 push 时又会自动启用；已把 Source 改为 GitHub Actions，不再产生失败的 `pages-build-deployment`（5.1）。
 - [x] **Cloudflare**：`cms.parityncsvt.top` 已删除（2026-11-21，本人操作）。
 - [ ] **2026-12-05 后清理**：`~/services/pnc-comment-api`、`~/services/pnc-cms`（先把 `data/` 和 `uploads/` 归档到 `/srv/backup`）、`pnc-cms.container.retired`、Directus 镜像（`podman rmi`）、`~/services.yaml` 里的 `comment-api` 和 `cms` 条目、`pnc-blog/server.mjs`、`deploy.sh.pre-20261121`、`pnc-blog/backups/pre-caddy-*`。
 - [x] **启用「观测」计数 API**：2026-11-21 按第 9.4 节部署，见 9.7。
