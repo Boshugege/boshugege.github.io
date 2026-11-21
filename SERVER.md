@@ -785,6 +785,14 @@ REPO_URL=${REPO_URL:-https://github.com/Boshugege/boshugege.github.io.git}
 SITE_URL=${SITE_URL:-http://127.0.0.1:46213}
 KEEP_RELEASES=${KEEP_RELEASES:-5}
 KEEP_LOGS=${KEEP_LOGS:-30}
+# GitHub is reached through a proxy whose tunnels sometimes stall; git's own
+# connect timeout is 5 minutes. Bound each fetch and try again instead.
+FETCH_TIMEOUT=${DEPLOY_FETCH_TIMEOUT:-90}
+# This host's own mihomo, whatever ~/.gitconfig says (its http.proxy pointed
+# at another machine's proxy, which stopped reaching GitHub on 2026-11-22).
+# Empty: no proxy.
+GIT_PROXY=${DEPLOY_GIT_PROXY-http://127.0.0.1:7890}
+FETCH_ATTEMPTS=${DEPLOY_FETCH_ATTEMPTS:-3}
 LOCK_WAIT=${DEPLOY_LOCK_WAIT:-1200}
 METRICS_DIR=${DEPLOY_METRICS_DIR:-/home/lyy/observability/data/node-textfile}
 REPO=${REPO:-$APP_ROOT/repo}
@@ -1053,6 +1061,9 @@ case ${1:-} in
 esac
 
 if [[ $MODE == rollback ]]; then begin_attempt rollback; else begin_attempt unresolved; fi
+# A full SHA from the caller (the runner passes one) goes into the record at
+# once, so a failure before the commit is resolved still names it.
+if [[ $MODE == deploy && ${DEPLOY_SHA:-} =~ ^[0-9a-f]{40}$ ]]; then SHA=$DEPLOY_SHA; fi
 take_lock
 prune_logs || log "WARNING: could not prune old logs in $LOGS"
 write_running
@@ -1080,8 +1091,20 @@ if [[ $MODE == rollback ]]; then
 fi
 
 # 1. Fetch main and resolve the commit. Only commits on main are deployable.
-[[ -d $REPO ]] || git clone --bare --quiet "$REPO_URL" "$REPO" || fail $? "git clone of $REPO_URL failed"
-git -C "$REPO" fetch --quiet --prune origin '+refs/heads/main:refs/remotes/origin/main' || fail $? "git fetch of main failed"
+[[ -d $REPO ]] || git -c http.proxy="$GIT_PROXY" clone --bare --quiet "$REPO_URL" "$REPO" || fail $? "git clone of $REPO_URL failed"
+fetch_main() {
+  local attempt
+  for ((attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++)); do
+    if timeout --kill-after=10 "$FETCH_TIMEOUT" git -C "$REPO" -c http.proxy="$GIT_PROXY" -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=30 \
+      fetch --quiet --prune origin '+refs/heads/main:refs/remotes/origin/main'; then
+      return 0
+    fi
+    log "git fetch of main did not finish (attempt $attempt of $FETCH_ATTEMPTS)"
+    ((attempt == FETCH_ATTEMPTS)) || sleep 5
+  done
+  return 1
+}
+fetch_main || fail 1 "git fetch of main failed $FETCH_ATTEMPTS times"
 want=${DEPLOY_SHA:-origin/main}
 [[ $want == origin/main || $want =~ ^[0-9a-f]{7,40}$ ]] || die "DEPLOY_SHA must be a 7-40 character hex SHA"
 sha=$(git -C "$REPO" rev-parse --verify --quiet "${want}^{commit}") || die "unknown commit: $want"
@@ -1137,6 +1160,7 @@ log "deployed $short"
 - **每次部署或回滚都留下记录**（2026-11-21 起）：`logs/deploy-<时间>-<sha12>.log`（完整输出，保留 30 个）；`state/last-deploy.json`（进行中或最近一次）；`state/deploys.jsonl`（每次结束追加一行：`mode` `sha` `release` `result` `error` `trigger`（`github-actions` / `pnc-bot` / `manual`）`request` 等，用 `jq` 生成）；以及 `~/observability/data/node-textfile/pnc_blog_deploy.prom`（`pnc_blog_deploy_last_success`、`pnc_blog_deploy_last_finish_timestamp_seconds`）。最后这个指标驱动告警 `PncBlogDeployFailed`（规则在 `~/observability/prometheus/rules/pnc-blog.yml`），失败时发到告警群；下一次部署或回滚成功后自动恢复。Bot 读 `deploys.jsonl` 来回报"已上线"或"部署失败"（第 10 节）。
 - **npm 与 Runner 一致**：`~/.local/bin` 不在 PATH 里时放到最前面（Runner 用 `~/.local/bin/npm` 12；systemd 用户单元的 PATH 只能找到 Debian 的 npm 10）。
 - **`--rollback` 也会回退**：目标版本健康检查不通过时，切回原来的版本并以非零状态退出。
+- **拉代码有界、走本机代理**（2026-11-22）：`git fetch` 每次最多 90 秒，失败后重试，共 3 次，并且显式走本机 mihomo（`DEPLOY_GIT_PROXY`，默认 `http://127.0.0.1:7890`），不依赖 `~/.gitconfig` 里的代理。调用方传入了完整 SHA（Runner 会传）时，从一开始就写进记录，所以即使拉代码失败，Bot 也能知道是哪个提交没上线。
 - 测试脚手架（假的 APP_ROOT、真的 git/flock/jq、桩 npm/curl，覆盖成功、构建失败、健康检查失败、回滚、等锁和超时、信号、JSON 转义、与旧版输出逐字一致等 362 项检查）在改动时跑过，没有放进仓库。
 
 ### 4.3 回滚
@@ -1638,3 +1662,10 @@ tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"
 4. 长轮询每轮从 50 秒缩到 20 秒（读超时 27 秒）。如果隧道在轮询中途断了，最多耽误 27 秒。
 
 修正后在服务器上用真实链路连续调用 40 次 `getMe`，全部成功：中位数 0.9 秒，最慢 5.9 秒；修正前会卡 20–70 秒，还有失败。502 个测试全部通过，新增了本地假 socks5 服务器测试：握手、各种拒绝、握手卡住时按时切断、读超时后的重发规则。
+
+同一晚，主人发的第一条测试随想（`5c54891`）部署失败了，原因不在 Bot：
+
+- `~/.gitconfig` 的 `http.proxy` / `https.proxy` / `socks.proxy` 都指向 `http://166.111.17.106:7890`。那不是本机：本机是 166.111.17.89，mihomo 只监听 `127.0.0.1`。那台机器的 7890 端口还能连上，但从 00:45 左右开始，它往 GitHub 的转发全部卡死（实测 5/5 超时）。经本机 mihomo 或 NaiveProxy 访问则都正常，约 0.7 秒。
+- deploy.sh 的 `git fetch` 用的就是这个全局代理，git 默认的连接超时是 5 分钟，所以部署等满 5 分钟后失败。部署失败告警 `PncBlogDeployFailed` 正常发到了告警群。
+- 修正（上面 4.2 的脚本已同步）：拉代码显式走本机 mihomo，每次限 90 秒，共试 3 次；部署一开始就记下请求的 SHA。重跑 `a81af0a`（包含那条随想）后部署成功，随想上线。
+- **还没改**：`~/.gitconfig` 的全局代理本身，因为它还影响服务器上其他 https 的 git 操作，包括 `security.yml` 里 `actions/checkout` 的拉取，要等主人决定。在它修好之前，Security Checks 的 checkout 会卡住；这次推送触发的那次扫描已经手动取消。
