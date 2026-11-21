@@ -18,23 +18,47 @@ export function toPlainText(markdown: string, maxLength = 160) {
 }
 
 // Searchable text for search.json: keeps every word a reader might look for
-// (prose, link text, image alt text, code, formulas) and drops what only the
-// renderer needs (MDX imports and comments, tags, URLs, Markdown markers).
-// Code blocks keep their contents verbatim (minus the fence lines), so
-// `#include <stdio.h>` is not mistaken for an HTML tag.
+// (prose, link text, image alt text, component titles and captions, code,
+// formulas, footnotes) and drops what only the renderer needs (MDX imports
+// and comments, tag syntax, URLs, Markdown markers). Code keeps its exact
+// characters, so `#include <stdio.h>` or `snake_case_` survive as written.
 const FENCED_BLOCK = /^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?^ {0,3}\1[`~]*[ \t]*$/gm;
+const INLINE_CODE = /(`+)((?:(?!\1)[^\n])+?)\1/g;
+// Attributes whose values are text a reader sees: <Note title>, <Figure
+// caption>, <img alt>, <Compare labels={["…", "…"]}>.
+const TEXT_ATTRIBUTE = /\b(?:title|caption|alt|label|summary)=(?:"([^"]*)"|'([^']*)')/g;
+const LABELS_ATTRIBUTE = /\blabels=\{\[([^\]]*)\]\}/g;
+const TAG = /<\/?[A-Za-z][\w.:-]*(?:\s(?:[^<>{}"']|"[^"]*"|'[^']*'|\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})*)?\/?>/g;
+
+/** Runs `clean` on the text between matches of `pattern`; `keep` turns each
+ *  match into the text to keep verbatim. */
+function splitClean(text: string, pattern: RegExp, keep: (match: RegExpMatchArray) => string, clean: (part: string) => string) {
+  const parts: string[] = [];
+  let last = 0;
+  for (const match of text.matchAll(pattern)) {
+    parts.push(clean(text.slice(last, match.index)), keep(match));
+    last = (match.index || 0) + match[0].length;
+  }
+  parts.push(clean(text.slice(last)));
+  return parts.join(" ");
+}
+
+function tagText(tag: string) {
+  const values = [...tag.matchAll(TEXT_ATTRIBUTE)].map((match) => match[1] ?? match[2]);
+  for (const labels of tag.matchAll(LABELS_ATTRIBUTE)) {
+    values.push(...[...labels[1].matchAll(/"([^"]*)"|'([^']*)'/g)].map((match) => match[1] ?? match[2]));
+  }
+  return ` ${values.join(" ")} `;
+}
 
 export function toSearchText(markdown: string) {
   const source = markdown.replace(/\r\n?/g, "\n");
-  const parts: string[] = [];
-  let last = 0;
-  for (const match of source.matchAll(FENCED_BLOCK)) {
-    parts.push(cleanProse(source.slice(last, match.index)));
-    parts.push(match[0].split("\n").slice(1, -1).join("\n"));
-    last = (match.index || 0) + match[0].length;
-  }
-  parts.push(cleanProse(source.slice(last)));
-  return parts.join(" ").replace(/\s+/g, " ").trim();
+  return splitClean(
+    source,
+    FENCED_BLOCK,
+    (match) => match[0].split("\n").slice(1, -1).join("\n"),
+    (prose) => splitClean(prose, INLINE_CODE, (match) => match[2], cleanProse),
+  ).replace(/\s+/g, " ").trim();
 }
 
 function cleanProse(markdown: string) {
@@ -42,13 +66,16 @@ function cleanProse(markdown: string) {
     .replace(/^(?:import|export)\s.*$/gm, " ")
     .replace(/\{\/\*[\s\S]*?\*\/\}/g, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
-    // JSX/HTML tags, including multi-line ones with {expression} attributes.
-    .replace(/<\/?[A-Za-z][\w.:-]*(?:\s(?:[^<>{}"']|"[^"]*"|'[^']*'|\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})*)?\/?>/g, " ")
+    // JSX/HTML tags, including multi-line ones with {expression} attributes;
+    // their visible text attributes stay.
+    .replace(TAG, tagText)
     // Images keep their alt text, links keep their label.
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, " $1 ")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    // Reference-style link definitions: [id]: https://...
-    .replace(/^\s*\[[^\]]+\]:\s+\S+.*$/gm, " ")
+    // Reference-style link definitions ([id]: https://...) go; footnote
+    // definitions ([^1]: text) keep their text, markers go.
+    .replace(/^\s*\[(?!\^)[^\]]+\]:\s+\S+.*$/gm, " ")
+    .replace(/\[\^[^\]\s]+\]:?/g, " ")
     .replace(/<(https?:\/\/[^>\s]+)>/g, "$1")
     .replace(/^\s{0,3}#{1,6}\s+/gm, "")
     .replace(/^\s*>\s?/gm, "")

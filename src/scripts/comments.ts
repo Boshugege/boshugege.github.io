@@ -26,6 +26,7 @@ declare global {
         "expired-callback": () => void;
       }) => string;
       reset: (widgetId: string) => void;
+      remove?: (widgetId: string) => void;
     };
   }
 }
@@ -151,10 +152,14 @@ async function setupComments(root: HTMLElement) {
       setStatus(root, "评论服务未配置 Turnstile。", "error");
     } else {
       await loadTurnstileScript();
-      turnstileWidgetId = window.turnstile?.render(turnstileContainer, {
+      // Match the site theme rather than the system one, and follow it when
+      // the reader toggles: Turnstile cannot restyle a rendered widget, so
+      // it is removed and rendered again (the reader re-verifies).
+      const currentTheme = () => document.documentElement.dataset.theme === "dark" ? "dark" as const : "light" as const;
+      let renderedTheme = currentTheme();
+      const renderWidget = () => window.turnstile?.render(turnstileContainer, {
         sitekey: siteKey,
-        // Match the site theme rather than the system one.
-        theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+        theme: renderedTheme,
         callback: (token: string) => {
           turnstileToken = token;
         },
@@ -162,6 +167,21 @@ async function setupComments(root: HTMLElement) {
           turnstileToken = "";
         },
       }) || "";
+      turnstileWidgetId = renderWidget();
+      const themeObserver = new MutationObserver(() => {
+        if (!root.isConnected) {
+          themeObserver.disconnect();
+          return;
+        }
+        const theme = currentTheme();
+        if (theme === renderedTheme || !turnstileWidgetId || !window.turnstile?.remove) return;
+        window.turnstile.remove(turnstileWidgetId);
+        renderedTheme = theme;
+        turnstileToken = "";
+        turnstileWidgetId = renderWidget();
+      });
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+      document.addEventListener("astro:before-swap", () => themeObserver.disconnect(), { once: true });
     }
     await loadComments();
   } catch (error) {

@@ -74,6 +74,12 @@ export default defineConfig({
   integrations: [mdx()],
   vite: {
     plugins: [readingFont(), notesReload()],
+    build: {
+      // Browsers the CSS must keep working in. Without targets the CSS
+      // minifier drops prefixed fallbacks (-webkit-backdrop-filter,
+      // -webkit-mask-image) that Safari before 18 still needs.
+      cssTarget: ["chrome107", "edge107", "firefox104", "safari15.4", "ios15.4"],
+    },
   },
   markdown: {
     processor: unified({

@@ -225,6 +225,15 @@ for (const item of rssItems) {
   for (const match of content.matchAll(/https:\/\/parityncsvt\.top\/(_astro\/[^"\s?#]+)/g)) await assertFile(match[1]);
 }
 
+// The CSS minifier keeps prefixed fallbacks for older Safari (cssTarget in
+// astro.config.mjs): the lightbox blur and the mobile tag-strip fade.
+const builtCss = (await Promise.all((await fs.readdir(path.join(dist, "_astro")))
+  .filter((file) => file.endsWith(".css"))
+  .map((file) => read(`_astro/${file}`)))).join("\n");
+for (const declaration of ["-webkit-backdrop-filter", "-webkit-mask-image"]) {
+  if (!builtCss.includes(declaration)) throw new Error(`Built CSS lost its ${declaration} fallback`);
+}
+
 // Reading fonts ship as woff2 only.
 const astroAssets = await fs.readdir(path.join(dist, "_astro"));
 if (astroAssets.some((file) => file.endsWith(".woff")) || !astroAssets.some((file) => file.endsWith(".woff2"))) {

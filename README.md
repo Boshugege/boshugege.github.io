@@ -234,7 +234,9 @@ scripts/
 
 部署完全不使用 GitHub 托管的算力：push 到 `main`（或在 Actions 页面手动运行 workflow）后，标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`，在临时 worktree 里执行一次 `npm run verify`（验证与构建一起完成），然后发布这次的产物。手动运行时可以在 `deploy_sha` 中填写 `main` 上的历史提交，用来重新部署或回滚。健康检查覆盖首页、自定义 404 内容及状态码、评论 API；失败会自动回滚。
 
-因为仓库是公开的，workflow 不响应 `pull_request`，以免 fork 的代码在服务器上运行。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
+因为仓库是公开的，workflow 不响应 `pull_request`。但 fork 的 PR 可以自带 workflow 文件，所以另有两道保护：外部贡献者的 PR 运行必须经维护者批准；服务器上 Runner 的作业守卫只放行本仓库 `main` 上的 push、手动、定时和 `workflow_run` 作业（见 SERVER.md 6.1）。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
+
+安全检查：开启了 secret scanning（含 push protection）、Dependabot 告警和私密漏洞报告；`.github/workflows/security.yml` 在每次部署后和每周一在自托管 Runner 上跑 CodeQL 与 `npm audit`。报告漏洞的方式见 [SECURITY.md](SECURITY.md)。
 
 `/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
 

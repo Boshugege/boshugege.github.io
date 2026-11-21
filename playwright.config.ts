@@ -12,7 +12,9 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run preview -- --host 127.0.0.1 --port 4322",
+    // --ignore-lock keeps the server in the foreground: astro 7.4 otherwise
+    // backgrounds it when it detects an AI agent, and Playwright needs to own it.
+    command: "npm run preview -- --host 127.0.0.1 --port 4322 --ignore-lock",
     url: "http://127.0.0.1:4322/404.html",
     reuseExistingServer: false,
   },

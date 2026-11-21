@@ -160,8 +160,9 @@ function appendTerm(parent: HTMLElement, label: string, value: string) {
   parent.append(`${label} `, term);
 }
 
-/** Shows what the list is filtered by, how many posts match, and a reset. */
-function updateFilterStatus(count?: number) {
+/** Shows what the list is filtered by, how many posts match (or why that is
+ *  unknown), and a reset. */
+function updateFilterStatus(count?: number, note?: string) {
   const bar = document.querySelector<HTMLElement>("[data-filter-status]");
   const text = bar?.querySelector<HTMLElement>("[data-filter-status-text]");
   if (!bar || !text) return;
@@ -171,7 +172,8 @@ function updateFilterStatus(count?: number) {
   text.replaceChildren();
   if (filters.tag) appendTerm(text, "标签", filters.tag);
   if (query) appendTerm(text, "搜索", `“${query}”`);
-  text.append(" · ", count === undefined ? "筛选中…" : count ? `${count} 篇文章` : "没有匹配的文章");
+  const result = count === undefined ? "筛选中…" : count ? `${count} 篇文章` : "没有匹配的文章";
+  text.append(" · ", note ? (count === undefined ? note : `${result}（${note}）`) : result);
 }
 
 function updateTagState(activeTag: string) {
@@ -197,23 +199,35 @@ function updateTagState(activeTag: string) {
   }
 }
 
+/** Renders the list for the current filters. Resolves false when the post
+ *  list could not be loaded (the page keeps what it showed before). */
 async function applyFilters() {
   const run = ++filterRun;
   const tag = filters.tag;
   const query = filters.query.trim();
   updateFilterStatus();
-  const posts = await loadPosts();
-  if (run !== filterRun) return;
+  let posts: PostIndexDocument[];
+  try {
+    posts = await loadPosts();
+  } catch {
+    if (run === filterRun) updateFilterStatus(undefined, "文章列表加载失败，请刷新重试");
+    return false;
+  }
+  if (run !== filterRun) return true;
   let results = filterPosts(posts, tag, query);
   renderPosts(results, !query);
   updateFilterStatus(results.length);
-  if (query.length >= 2) {
+  if (query.length < 2) return true;
+  try {
     const fullText = await loadSearchIndex();
-    if (run !== filterRun) return;
+    if (run !== filterRun) return true;
     results = filterPosts(posts, tag, query, fullText);
     renderPosts(results, false);
     updateFilterStatus(results.length);
+  } catch {
+    if (run === filterRun) updateFilterStatus(results.length, "全文索引加载失败，只搜索了标题、标签和摘要");
   }
+  return true;
 }
 
 function replaceQueryString() {
@@ -223,7 +237,8 @@ function replaceQueryString() {
   else next.delete("q");
   if (filters.tag) next.set("tag", filters.tag);
   else next.delete("tag");
-  history.replaceState(history.state, "", `${location.pathname}${next.size ? `?${next}` : ""}${location.hash}`);
+  const search = next.toString();
+  history.replaceState(history.state, "", `${location.pathname}${search ? `?${search}` : ""}${location.hash}`);
 }
 
 function initializeHome() {
@@ -236,13 +251,13 @@ function initializeHome() {
   input.value = filters.query;
   updateTagState(filters.tag);
   void hydrateViewCounts();
-  if (filters.tag || filters.query.trim()) void applyFilters().catch(() => updateFilterStatus(0));
+  if (filters.tag || filters.query.trim()) void applyFilters();
 
   input.addEventListener("input", () => {
     filters.query = input.value;
     replaceQueryString();
     window.clearTimeout(timer);
-    timer = window.setTimeout(() => void applyFilters().catch(() => updateFilterStatus(0)), SEARCH_DELAY);
+    timer = window.setTimeout(() => void applyFilters(), SEARCH_DELAY);
   });
 
   document.querySelector<HTMLButtonElement>("[data-filter-clear]")?.addEventListener("click", () => {
@@ -254,7 +269,10 @@ function initializeHome() {
     updateTagState("");
     // The button hides with the bar; keep keyboard focus on the list.
     document.querySelector<HTMLElement>("[data-post-list-title]")?.focus({ preventScroll: true });
-    applyFilters().catch(() => location.assign("/index.html"));
+    // Without the post list the reset cannot render; reload the full page.
+    void applyFilters().then((loaded) => {
+      if (!loaded) location.assign("/index.html");
+    });
   });
 
   document.querySelector<HTMLButtonElement>("[data-tag-toggle]")?.addEventListener("click", (event) => {
@@ -266,5 +284,11 @@ function initializeHome() {
   });
 }
 
+// A pass still waiting for index.json / search.json must not render into
+// the next page after a navigation.
+document.addEventListener("astro:before-swap", () => {
+  filterRun++;
+  window.clearTimeout(timer);
+});
 document.addEventListener("astro:page-load", initializeHome);
 initializeHome();

@@ -43,11 +43,14 @@ function createDialog() {
 }
 
 function initializeLightbox() {
+  const body = document.querySelector<HTMLElement>("[data-post-body]");
+  // On a first visit astro:page-load fires again at window load; leave an
+  // image the reader already opened alone. A page swap brings a fresh body.
+  if (body?.dataset.lightboxBound === "true") return;
   cleanupLightbox?.();
   cleanupLightbox = undefined;
-
-  const body = document.querySelector<HTMLElement>("[data-post-body]");
   if (!body || typeof HTMLDialogElement === "undefined") return;
+  body.dataset.lightboxBound = "true";
 
   const abortController = new AbortController();
   const { signal } = abortController;

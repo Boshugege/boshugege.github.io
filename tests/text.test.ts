@@ -41,6 +41,33 @@ test("search text keeps code verbatim inside fences", () => {
   assert.equal(text, "看代码： #include <stdio.h> int main() { return a | b; } Vec<String>");
 });
 
+test("search text keeps component titles, captions, labels, alt text and footnotes", () => {
+  const source = [
+    '<Note type="warn" title="写在前面">先备份。</Note>',
+    '<Figure caption="分区示意图">',
+    "![磁盘布局](./disk.png)",
+    "</Figure>",
+    '<Compare labels={["非 NEE 路径追踪", "NEE 路径追踪"]}>',
+    '<img src="/a.png" alt="手写 > 号的说明" />',
+    "</Compare>",
+    "正文提到脚注[^1]。",
+    "",
+    "[^1]: 脚注里的关键词 OpenCore。",
+    "[ref]: https://example.com/hidden",
+  ].join("\n");
+  const text = toSearchText(source);
+  for (const word of ["写在前面", "先备份", "分区示意图", "磁盘布局", "非 NEE 路径追踪", "NEE 路径追踪", "手写 > 号的说明", "脚注里的关键词 OpenCore"]) {
+    assert.ok(text.includes(word), `missing "${word}" in: ${text}`);
+  }
+  for (const noise of ["[^1]", "example.com", "type=", "labels="]) {
+    assert.ok(!text.includes(noise), `unexpected "${noise}" in: ${text}`);
+  }
+});
+
+test("search text keeps inline code exactly", () => {
+  assert.equal(toSearchText("用 `#include <stdio.h>` 和 `snake_case_` 以及 ``a`b``"), "用 #include <stdio.h> 和 snake_case_ 以及 a`b");
+});
+
 test("search text keeps bare URLs and collapses whitespace", () => {
   assert.equal(toSearchText("见 <https://rsshub.app>\n\n\n  第二段   内容"), "见 https://rsshub.app 第二段 内容");
 });

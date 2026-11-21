@@ -9,7 +9,8 @@
 interface Props { labels?: string[]; caption?: string; }
 const { labels = [], caption } = Astro.props;
 const html = await Astro.slots.render("default");
-const images = html.match(/<img\b[^>]*>/g) || [];
+// Quoted attribute values may contain ">" (alt text), so skip over them.
+const images = html.match(/<img\b(?:[^>"']|"[^"]*"|'[^']*')*>/g) || [];
 ---
 <figure class="mdx-compare">
   {images.length > 0 ? (

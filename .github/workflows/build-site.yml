@@ -5,9 +5,12 @@ name: Verify and Deploy Site
 # `npm run verify` (typecheck, tests, build, static checks) once, then
 # publishes that same build, so nothing is built twice.
 #
-# This repository is public: never add `pull_request` / `pull_request_target`
-# here. A fork's pull request would run its own code on the self-hosted
-# runner. Only pushes to main and manual runs by maintainers reach it.
+# This repository is public. Never add `pull_request` / `pull_request_target`
+# triggers here. That alone does not keep forks off the runner, though: a fork
+# PR can carry its own workflow file. Two settings outside this file do:
+# fork PR runs need a maintainer's approval (all external contributors), and
+# the runner's job-started hook refuses any job that is not a push, manual,
+# scheduled or workflow_run job on main of this repository (SERVER.md, 6.1).
 on:
   push:
     branches: [main]
