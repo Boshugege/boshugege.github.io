@@ -682,7 +682,7 @@
 }
 
 /* Image lightbox (src/scripts/lightbox.ts). */
-.post-body img[data-lightbox] {
+img[data-lightbox] {
   cursor: zoom-in;
 }
 html.lightbox-open {

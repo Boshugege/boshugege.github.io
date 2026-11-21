@@ -24,11 +24,13 @@ const notes = await getNotes();
       <h2 class="dir-title">每天随想</h2>
       <span class="panel-more">{notes.length} 条</span>
     </div>
-    <div class="notes-timeline">
+    <div class="notes-timeline" data-lightbox-root>
       {notes.map((note) => <NoteItem note={note} />)}
     </div>
   </aside>
   <script>
+    import "../scripts/lightbox";
+
     // Highlight the note a #link points at. A class instead of :target,
     // because client-side page navigation does not update :target.
     function highlightNote() {

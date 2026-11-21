@@ -1,9 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { rehypeNoteImages } from "./note-images";
 import { toPlainText } from "./text";
 
 const notesPath = path.join(process.cwd(), "src/content/notes.md");
+// Astro's publicDir (astro.config.mjs): note images live in src/static/assets/notes.
+const staticDir = path.join(process.cwd(), "src/static");
 
 // Each note in notes.md starts with "## YYYY-MM-DD" or "## YYYY-MM-DD | 标题".
 const HEADING = /^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm;
@@ -27,6 +30,7 @@ function getProcessor() {
   return processor ||= createMarkdownProcessor({
     syntaxHighlight: "shiki",
     shikiConfig: { themes: { light: "github-light", dark: "github-dark" }, defaultColor: false },
+    rehypePlugins: [[rehypeNoteImages, { staticDir }]],
   });
 }
 

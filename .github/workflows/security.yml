@@ -6,6 +6,12 @@ name: Security Checks
 # must not run outside code on the runner (the runner's job guard enforces
 # this, see SERVER.md 5.2). Actions are pinned to commit SHAs because they
 # execute on the production host.
+#
+# Deploys of commits by pnc-bot (the Telegram bot, ops/telegram-bot) skip
+# both jobs: the bot only adds notes, note images and drafts, or reverts its
+# own commits, so there is no new code or dependency to scan, and a note
+# should not cost a CodeQL run on the production host. The next deploy of a
+# commit by anyone else and the weekly run still scan the whole tree.
 on:
   workflow_run:
     workflows: ["Verify and Deploy Site"]
@@ -16,7 +22,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: security-checks
+  # pnc-bot runs (every job skipped) get their own group, so a note sent
+  # while a scan runs cannot cancel the scan of the commit before it.
+  group: security-checks${{ github.event.workflow_run.head_commit.author.name == 'pnc-bot' && '-pnc-bot' || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -28,7 +36,8 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' ||
       (github.event.workflow_run.head_repository.full_name == github.repository &&
-      contains(fromJSON('["push", "workflow_dispatch"]'), github.event.workflow_run.event)))
+      contains(fromJSON('["push", "workflow_dispatch"]'), github.event.workflow_run.event) &&
+      github.event.workflow_run.head_commit.author.name != 'pnc-bot'))
     runs-on: [self-hosted, linux, x64, pnc-blog]
     timeout-minutes: 30
     permissions:
@@ -55,7 +64,8 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' ||
       (github.event.workflow_run.head_repository.full_name == github.repository &&
-      contains(fromJSON('["push", "workflow_dispatch"]'), github.event.workflow_run.event)))
+      contains(fromJSON('["push", "workflow_dispatch"]'), github.event.workflow_run.event) &&
+      github.event.workflow_run.head_commit.author.name != 'pnc-bot'))
     runs-on: [self-hosted, linux, x64, pnc-blog]
     timeout-minutes: 10
     steps:

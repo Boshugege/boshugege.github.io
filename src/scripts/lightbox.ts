@@ -1,8 +1,11 @@
-// Click (or Enter on) an article image to see it full size. Uses a modal
-// <dialog>, so Esc, focus containment and the top layer come from the
-// browser. Set up per page and torn down before Astro swaps the page.
+// Click (or Enter on) an article or note image to see it full size. Uses a
+// modal <dialog>, so Esc, focus containment and the top layer come from the
+// browser. Set up per page and torn down before Astro swaps the page. A page
+// opts in by marking the element that holds its images (post body, notes
+// timeline) with data-lightbox-root and importing this script.
 
-const SELECTOR = "[data-post-body] img";
+const ROOT = "[data-lightbox-root]";
+const SELECTOR = `${ROOT} img`;
 const MIN_SIZE = 48;
 
 let cleanupLightbox: (() => void) | undefined;
@@ -47,14 +50,14 @@ function createDialog() {
 }
 
 function initializeLightbox() {
-  const body = document.querySelector<HTMLElement>("[data-post-body]");
+  const root = document.querySelector<HTMLElement>(ROOT);
   // On a first visit astro:page-load fires again at window load; leave an
-  // image the reader already opened alone. A page swap brings a fresh body.
-  if (body?.dataset.lightboxBound === "true") return;
+  // image the reader already opened alone. A page swap brings a fresh root.
+  if (root?.dataset.lightboxBound === "true") return;
   cleanupLightbox?.();
   cleanupLightbox = undefined;
-  if (!body || typeof HTMLDialogElement === "undefined") return;
-  body.dataset.lightboxBound = "true";
+  if (!root || typeof HTMLDialogElement === "undefined") return;
+  root.dataset.lightboxBound = "true";
 
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -100,11 +103,11 @@ function initializeLightbox() {
     dialog.showModal();
   }
 
-  body.addEventListener("click", (event) => {
+  root.addEventListener("click", (event) => {
     const image = (event.target as Element | null)?.closest<HTMLImageElement>("img[data-lightbox]");
     if (image) open(image);
   }, { signal });
-  body.addEventListener("keydown", (event) => {
+  root.addEventListener("keydown", (event) => {
     const image = (event.target as Element | null)?.closest<HTMLImageElement>("img[data-lightbox]");
     if (!image || (event.key !== "Enter" && event.key !== " ")) return;
     event.preventDefault();

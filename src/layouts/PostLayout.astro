@@ -112,7 +112,7 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
     </div>
     {toc && <PostToc items={toc.items} count={toc.count} variant="inline" />}
     <div class="post-reading-layout">
-      <div class="post-body" data-post-body>
+      <div class="post-body" data-post-body data-lightbox-root>
         <slot />
         {tagList.length > 0 && (
           <nav class="post-tags" aria-label="标签">

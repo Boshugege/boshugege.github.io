@@ -100,6 +100,7 @@ test("post links stand out, images open in a lightbox and back-to-top appears", 
 
   const image = page.locator("img[data-lightbox]").first();
   await image.scrollIntoViewIfNeeded();
+  await expect(image).toHaveCSS("cursor", "zoom-in");
   await image.click();
   const dialog = page.locator("dialog.lightbox");
   await expect(dialog).toBeVisible();
@@ -120,6 +121,38 @@ test("post links stand out, images open in a lightbox and back-to-top appears", 
   await backToTop.click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(backToTop).toBeHidden();
+  expect(await noHorizontalOverflow(page)).toBe(true);
+});
+
+// notes.md has no images yet, so the test adds one to the served page, as
+// src/lib/note-images.ts renders it; the lightbox script is the page's own.
+test("note images open in the lightbox", async ({ page }) => {
+  await page.route("**/notes.html", async (route) => {
+    const response = await route.fetch();
+    const html = (await response.text()).replace(
+      /<div class="note-body[^"]*"[^>]*>/,
+      '$&<p><img src="/assets/img/avatar.png" alt="测试配图" loading="lazy" decoding="async" width="1024" height="1024"></p>',
+    );
+    await route.fulfill({ status: response.status(), contentType: "text/html; charset=utf-8", body: html });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/notes.html");
+  const image = page.locator(".note-body img");
+  await expect(image).toHaveCount(1);
+  await expect(image).toHaveAttribute("data-lightbox", "");
+  await expect(image).toHaveCSS("cursor", "zoom-in");
+  await image.click();
+  const dialog = page.locator("dialog.lightbox");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator("img")).toHaveAttribute("src", /\/assets\/img\/avatar\.png$/);
+  await expect(dialog.locator("figcaption")).toHaveText("测试配图");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(image).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeVisible();
+  await dialog.click({ position: { x: 5, y: 5 } });
+  await expect(dialog).toBeHidden();
   expect(await noHorizontalOverflow(page)).toBe(true);
 });
 

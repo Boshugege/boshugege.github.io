@@ -147,6 +147,10 @@ for (const entry of JSON.parse(await read("notes.json")).entries) {
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");
 }
+// src/scripts/lightbox.ts only zooms images inside a data-lightbox-root.
+if (!notesHtml.includes("data-lightbox-root") || (imagePost && !imagePost.html.includes("data-lightbox-root"))) {
+  throw new Error("Notes and post bodies must be marked data-lightbox-root for the image lightbox");
+}
 for (const { file, html } of postHtml) {
   const hasMath = html.includes('class="katex"');
   const hasKatexCss = /href="\/_astro\/katex-local\.[^"]+\.css"/.test(html);
