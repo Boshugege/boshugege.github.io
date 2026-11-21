@@ -30,8 +30,12 @@ function getProcessor() {
   });
 }
 
+// A build renders notes.md once for every page that lists notes. The dev
+// server re-reads it on every request so edits show up on refresh (the
+// pnc-notes-reload plugin in astro.config.mjs triggers that refresh).
 let cache: Promise<NoteEntry[]> | undefined;
 export function getNotes() {
+  if (import.meta.env.DEV) return loadNotes();
   return cache ||= loadNotes();
 }
 

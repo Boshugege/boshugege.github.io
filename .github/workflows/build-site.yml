@@ -1,37 +1,59 @@
-name: Verify Site
+name: Verify and Deploy Site
 
+# Everything runs on the self-hosted runner on `personal`; no GitHub-hosted
+# machines. deploy.sh checks out the commit in a temporary worktree and runs
+# `npm run verify` (typecheck, tests, build, static checks) once, then
+# publishes that same build, so nothing is built twice.
+#
+# This repository is public: never add `pull_request` / `pull_request_target`
+# here. A fork's pull request would run its own code on the self-hosted
+# runner. Only pushes to main and manual runs by maintainers reach it.
 on:
   push:
     branches: [main]
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy_sha:
+        description: "要部署的提交 SHA（留空 = 当前 main；填写 main 上的历史提交即可重部署 / 回滚）"
+        required: false
+        default: ""
+        type: string
 
 concurrency:
-  group: site-${{ github.repository }}-${{ github.ref }}
+  group: pnc-blog-production
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "22"
-          cache: npm
-      - run: npm ci
-      - run: npm run verify
-
   deploy:
-    name: Deploy production
-    needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Verify and deploy
+    # Manual runs started from another branch run that branch's copy of this
+    # file; only main's copy may deploy.
+    if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64, pnc-blog]
-    timeout-minutes: 20
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Deploy verified commit
+      - name: Resolve commit
+        id: target
         env:
-          DEPLOY_SHA: ${{ github.sha }}
+          INPUT_SHA: ${{ inputs.deploy_sha }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          sha="${INPUT_SHA:-$EVENT_SHA}"
+          sha="$(printf '%s' "$sha" | tr -d '[:space:]' | tr 'A-F' 'a-f')"
+          if [[ ! "$sha" =~ ^[0-9a-f]{7,40}$ ]]; then
+            echo "::error::deploy_sha must be a 7-40 character hex commit SHA, got: $sha"
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Deploying $sha"
+
+      - name: Verify, build and deploy
+        env:
+          DEPLOY_SHA: ${{ steps.target.outputs.sha }}
         run: /home/lyy/services/pnc-blog/deploy.sh

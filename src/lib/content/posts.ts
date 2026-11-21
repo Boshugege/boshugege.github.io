@@ -3,9 +3,9 @@ import { getImage } from "astro:assets";
 import crypto from "node:crypto";
 import { getReadingStats, type ReadingStats } from "../reading";
 import { formatDate, normalizeTags, site } from "../site";
-import type { PostIndexDocument, PostSearchDocument } from "../search";
+import { stripSearchPunctuation, type PostIndexDocument, type PostSearchDocument } from "../search";
 import { getPostFeatures, type PostFeatures } from "./features";
-import { toPlainText } from "../text";
+import { toPlainText, toSearchText } from "../text";
 
 export { toPlainText };
 
@@ -104,6 +104,6 @@ export function toPostSearchDocument(post: PostSummary): PostSearchDocument {
     tags: post.tags,
     excerpt: post.excerpt,
     url: post.url,
-    content: post.content || "",
+    content: stripSearchPunctuation(toSearchText(post.content || "")),
   };
 }

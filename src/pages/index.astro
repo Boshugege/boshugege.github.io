@@ -2,7 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getNotes } from "../lib/notes";
 import { getAllPosts } from "../lib/content/posts";
-import { absoluteUrl, site } from "../lib/site";
+import { groupPostsByYear } from "../lib/search";
+import { site } from "../lib/site";
 
 const posts = await getAllPosts();
 const notes = await getNotes();
@@ -13,6 +14,7 @@ for (const post of posts) {
 }
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
+const yearGroups = groupPostsByYear(posts);
 ---
 
 <BaseLayout
@@ -32,7 +34,7 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
 >
   <div slot="sidebar-after" class="sidebar-home-tools">
     <input class="search-input" type="search" placeholder="搜索全文（标题 / 摘要 / 正文）" aria-label="搜索文章" data-post-search />
-    <nav class="tag-nav sidebar-tag-nav" aria-label="标签筛选">
+    <nav class="tag-nav sidebar-tag-nav" aria-label="标签筛选" data-tag-strip>
       <a href="/index.html" class="tag top active" data-tag="" aria-current="page">全部</a>
       <div class="tags-list collapsed" data-tag-list>
         {tags.map(([tag, count], index) => (
@@ -67,20 +69,29 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
   </aside>
 
   <aside class="directory" id="posts">
-    <h2 class="dir-title">文章目录</h2>
+    <h2 class="dir-title" tabindex="-1" data-post-list-title>文章目录</h2>
+    <div class="filter-status" data-filter-status hidden>
+      <p class="filter-status-text" role="status" data-filter-status-text></p>
+      <button class="filter-clear" type="button" data-filter-clear>清除筛选</button>
+    </div>
     <div class="dir-list" data-post-list data-views-api={statsApi}>
-      {posts.map((post) => (
-        <div class="dir-item">
-          <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch>
-            {post.title}
-          </a>
-          <p class="meta-facts dir-item-meta">
-            <time datetime={post.date}>{post.date}</time>
-            <span>{post.reading.wordCount.toLocaleString("zh-CN")} 字</span>
-            <span>{post.reading.readingMinutes} 分钟</span>
-            <span class="view-count" hidden><span data-post-list-view data-post-slug={`/${post.url}`}>—</span> 次阅读</span>
-          </p>
-        </div>
+      {yearGroups.map(({ year, posts: yearPosts }) => (
+        <section class="dir-year-group">
+          <h3 class="dir-year">{year}<small>{yearPosts.length} 篇</small></h3>
+          {yearPosts.map((post) => (
+            <div class="dir-item">
+              <a class="dir-item-title" href={`/${post.url}`} data-astro-prefetch>
+                {post.title}
+              </a>
+              <p class="meta-facts dir-item-meta">
+                <time datetime={post.date}>{post.date}</time>
+                <span>{post.reading.wordCount.toLocaleString("zh-CN")} 字</span>
+                <span>{post.reading.readingMinutes} 分钟</span>
+                <span class="view-count" hidden><span data-post-list-view data-post-slug={`/${post.url}`}>—</span> 次阅读</span>
+              </p>
+            </div>
+          ))}
+        </section>
       ))}
     </div>
   </aside>

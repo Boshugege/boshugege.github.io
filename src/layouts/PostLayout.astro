@@ -15,7 +15,11 @@ interface Props {
   description?: string;
   date: Date | string;
   tags?: string[] | string;
+  /** SEO canonical URL: the site path, or an external original. */
   canonicalPath: string;
+  /** Fixed on-site path such as /posts/arch-linux.html. Views and comments
+   *  are keyed by it, independent of canonical and of the dev server URL. */
+  sitePath: string;
   image?: string;
   imageAlt?: string;
   imageWidth?: number;
@@ -37,6 +41,7 @@ const {
   date,
   tags = [],
   canonicalPath,
+  sitePath,
   image = site.defaultCover,
   imageAlt = site.defaultCoverAlt,
   imageWidth,
@@ -57,7 +62,6 @@ const updatedText = updated ? formatDate(updated) : undefined;
 const tagList = normalizeTags(tags);
 const excerpt = description || site.homeDescription;
 const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, "");
-const postSlug = Astro.url.pathname;
 ---
 
 <DocumentLayout
@@ -93,7 +97,7 @@ const postSlug = Astro.url.pathname;
     </header>
     <h1>{title}</h1>
     <div class="post-meta">
-      <p class="meta-facts" data-post-view data-api-base={statsApi} data-post-slug={postSlug}>
+      <p class="meta-facts" data-post-view data-api-base={statsApi} data-post-slug={sitePath}>
         <time datetime={dateText}>{dateText}</time>
         {updatedText && updatedText !== dateText && <span>更新于 {updatedText}</span>}
         {typeof wordCount === "number" && <span>{wordCount.toLocaleString("zh-CN")} 字</span>}
@@ -111,7 +115,7 @@ const postSlug = Astro.url.pathname;
             {tagList.map((tag) => <a href={`/index.html?tag=${encodeURIComponent(tag)}`}>#{tag}</a>)}
           </nav>
         )}
-        <Comments postSlug={canonicalPath} />
+        <Comments postSlug={sitePath} />
         <nav class="post-nav" aria-label="文章导航">
           {previousPost ? (
             <a class="post-nav-prev" href={previousPost.url}>
@@ -130,9 +134,14 @@ const postSlug = Astro.url.pathname;
       {toc && <PostToc items={toc.items} count={toc.count} variant="rail" />}
     </div>
   </article>
+  <button class="back-to-top" type="button" data-back-to-top aria-label="回到顶部" title="回到顶部" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" /></svg>
+  </button>
   <script>
     import "../scripts/code-copy";
     import "../scripts/post-toc";
     import "../scripts/site-stats";
+    import "../scripts/lightbox";
+    import "../scripts/back-to-top";
   </script>
 </DocumentLayout>

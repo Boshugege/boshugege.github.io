@@ -16,6 +16,7 @@
   --bg: #f3f6f8;
   --text: #142130;
   --link: #2a5f86;
+  --link-underline: rgba(42, 95, 134, 0.35);
   --visited: var(--link);
   --muted: #586776;
   --border: #dbe3ea;
@@ -31,6 +32,7 @@
   --quote-border: #a9c1d3;
   --button-bg: #fafcfd;
   --button-text: #142130;
+  --lightbox-backdrop: rgba(243, 246, 248, 0.94);
   color-scheme: light;
 }
 
@@ -38,6 +40,7 @@
   --bg: #10161c;
   --text: #e3ebf2;
   --link: #93c3e3;
+  --link-underline: rgba(147, 195, 227, 0.4);
   --visited: var(--link);
   --muted: #93a3b2;
   --border: #273441;
@@ -53,6 +56,7 @@
   --quote-border: #3d5468;
   --button-bg: #161e26;
   --button-text: #e3ebf2;
+  --lightbox-backdrop: rgba(16, 22, 28, 0.94);
   color-scheme: dark;
 }
 
@@ -272,11 +276,20 @@ a:focus {
 .site-header .pnc-brand {
   gap: 14px;
 }
+/* Brand on the left, theme toggle on the right of the same row. */
 .site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 16px 0;
   padding: 0;
   border: 0;
   background: transparent;
+}
+.site-header .theme-toggle {
+  position: static;
+  flex: none;
 }
 .site-title {
   font-size: 28px;
@@ -553,8 +566,82 @@ a:focus {
   padding: 10px 0;
   border-top: var(--divider);
 }
-.dir-item:first-child {
+.dir-item:first-child,
+.dir-year + .dir-item {
   border-top: 0;
+}
+/* Year headings in the date-ordered list. */
+.dir-year {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding-bottom: 5px;
+  border-bottom: var(--divider);
+  color: var(--muted);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+.dir-year-group:first-child .dir-year {
+  margin-top: 4px;
+}
+.dir-year small {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Active tag / search summary above the list, with a one-click reset. */
+.filter-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin: 4px 0 8px;
+  padding: 7px 8px 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  font-size: 13px;
+}
+.filter-status[hidden] {
+  display: none;
+}
+.filter-status-text {
+  min-width: 0;
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.filter-status-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.filter-clear {
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+.filter-clear:hover,
+.filter-clear:focus-visible {
+  border-color: var(--active-bg);
+  background: var(--control-hover-bg);
+}
+[data-post-list-title]:focus {
+  outline: none;
 }
 .dir-item-title {
   color: var(--text);
@@ -624,6 +711,7 @@ a:focus {
   a,
   .directory,
   .theme-toggle,
+  .filter-clear,
   .site-footer {
     transition: none;
   }
@@ -662,9 +750,9 @@ a:focus {
 }
 
 @media (max-width: 800px) {
-  body {
-    overflow-x: hidden;
-  }
+  /* No body overflow here: html's overflow-x: clip already stops sideways
+     scrolling, and an overflowing body would become the scroll container
+     instead of the window (breaking scroll restoration and back-to-top). */
   .layout {
     flex-direction: column;
     gap: 12px;
@@ -699,7 +787,7 @@ a:focus {
   .site-header {
     min-height: 32px;
     margin: 0;
-    padding: 2px 44px 6px 2px;
+    padding: 2px 2px 6px;
   }
   .directory {
     margin-top: 0;
@@ -708,7 +796,44 @@ a:focus {
   .latest-note-panel {
     margin-bottom: 0;
   }
+  /* Search and tags stay available on phones as a compact toolbar: the
+     search box, then every tag in one horizontally scrolling row. */
   .sidebar-home-tools {
+    display: block;
+    margin-top: 12px;
+  }
+  .sidebar-home-tools .search-input {
+    height: 36px;
+    padding: 6px 12px;
+  }
+  .sidebar-tag-nav {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 3px 2px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+  .sidebar-tag-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .sidebar-tag-nav::after {
+    content: "";
+    flex: 0 0 16px;
+  }
+  .sidebar-tag-nav a,
+  .sidebar-tag-nav .tags-list .tag {
+    flex: none;
+    padding: 3px 10px;
+    font-size: 14px;
+  }
+  .sidebar-tag-nav .tags-list.collapsed .tag:not(.visible) {
+    display: inline-block;
+  }
+  .sidebar-tag-nav .tag-toggle {
     display: none;
   }
   .site-footer {

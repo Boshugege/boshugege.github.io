@@ -1,9 +1,14 @@
-.about-page .dir-title { margin-bottom: 12px; }
+/* Page title above the resume sections: one clear step larger, with room
+   before the first section heading. */
+.about-page .about-title { margin: 0; font-size: 24px; line-height: 1.3; }
+.about-updated { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 .about-stats { border-top: var(--divider); padding-top: 12px; margin-top: 14px; }
 .about-stats h2 { margin: 0 0 8px; font-size: 16px; }
 .about-stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
 .about-stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; min-width: 0; }
 .about-stat-value { display: block; font-size: 20px; font-weight: 700; line-height: 1.2; }
+/* "—" while the stats API is loading or unavailable: present, not loud. */
+.about-stat-value.is-placeholder { color: var(--muted); font-weight: 400; opacity: 0.6; }
 .about-stat-label { display: block; font-size: 13px; }
 .about-stat-detail { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; margin-top: 2px; }
 .about-highlight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
@@ -17,12 +22,14 @@
 .about-year-row { display: grid; grid-template-columns: 44px 1fr 28px; align-items: center; gap: 8px; font-size: 13px; }
 .about-year-track { height: 6px; border-radius: 999px; background: var(--control-hover-bg); overflow: hidden; }
 .about-year-track i { display: block; height: 100%; border-radius: 999px; background: var(--link); }
+.about-year-row.is-empty { color: var(--muted); }
 .resume-content {
   min-width: 0;
+  margin-top: 18px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.resume-content h2 { border-top: var(--divider); padding-top: 12px; margin: 14px 0 8px; font-size: 16px; }
+.resume-content h2 { border-top: var(--divider); padding-top: 12px; margin: 16px 0 6px; font-size: 16px; }
 .resume-content h2:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
 .resume-content h3 { margin: 10px 0 6px; font-size: 15px; }
 .resume-content p { margin: 0 0 8px; }
@@ -30,6 +37,7 @@
 .resume-content li { margin: 3px 0; }
 .resume-content .meta { color: var(--muted); }
 @media (max-width: 800px) {
+  .about-page .about-title { font-size: 22px; }
   .about-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .about-highlight-grid { grid-template-columns: 1fr; }
 }

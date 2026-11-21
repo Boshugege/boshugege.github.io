@@ -4,42 +4,48 @@
 // ![a](./a.jpg)
 // ![b](./b.jpg)
 // </Compare>
+// Each label is paired with its own image, so it stays next to the right
+// picture when the columns stack on a narrow screen.
 interface Props { labels?: string[]; caption?: string; }
 const { labels = [], caption } = Astro.props;
+const html = await Astro.slots.render("default");
+const images = html.match(/<img\b[^>]*>/g) || [];
 ---
 <figure class="mdx-compare">
-  <div class="mdx-compare-grid">
-    <slot />
-  </div>
-  {labels.length > 0 && (
-    <div class="mdx-compare-labels">{labels.map((label) => <span>{label}</span>)}</div>
+  {images.length > 0 ? (
+    <div class="mdx-compare-grid">
+      {images.map((image, index) => (
+        <figure class="mdx-compare-item">
+          <Fragment set:html={image} />
+          {labels[index] && <figcaption class="mdx-compare-label">{labels[index]}</figcaption>}
+        </figure>
+      ))}
+    </div>
+  ) : (
+    <div class="mdx-compare-grid mdx-compare-raw" set:html={html} />
   )}
-  {caption && <figcaption>{caption}</figcaption>}
+  {caption && <figcaption class="mdx-compare-caption">{caption}</figcaption>}
 </figure>
 <style>
   .mdx-compare { margin: 20px 0; }
-  /* Markdown wraps the images in one <p>; lay its children out as columns. */
-  .mdx-compare-grid :global(p) {
+  .mdx-compare-grid {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 8px;
-    margin: 0;
   }
-  .mdx-compare-grid :global(img) { width: 100%; height: auto; border-radius: var(--radius); }
-  .mdx-compare-labels {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    gap: 8px;
+  .mdx-compare .mdx-compare-item { min-width: 0; margin: 0; }
+  .mdx-compare-grid :global(img) { width: 100%; height: auto; margin: 0; border-radius: var(--radius); }
+  .mdx-compare-raw :global(p) { display: contents; }
+  .mdx-compare-label {
     margin-top: 4px;
     color: var(--muted);
     font-size: 13px;
+    line-height: 1.45;
     text-align: center;
   }
-  figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; text-align: center; }
+  .mdx-compare-caption { margin-top: 6px; color: var(--muted); font-size: 14px; text-align: center; }
   @media (max-width: 600px) {
-    .mdx-compare-grid :global(p), .mdx-compare-labels { grid-auto-flow: row; }
-    .mdx-compare-labels { display: none; }
+    .mdx-compare-grid { grid-auto-flow: row; gap: 14px; }
   }
 </style>

@@ -1,5 +1,6 @@
 ---
 import PncLogo from "./PncLogo.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 import { site } from "../lib/site";
 
 interface Props {
@@ -24,6 +25,7 @@ const contactLinks = [
       <PncLogo size={52} />
       <a class="site-title site-brand" href="/index.html">{site.name}</a>
     </div>
+    <ThemeToggle />
   </header>
 
   <section class="about">

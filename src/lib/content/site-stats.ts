@@ -1,6 +1,7 @@
 import type { NoteEntry } from "../notes";
 import type { PostSummary } from "./posts";
 import { site } from "../site";
+import { countPostsByYear } from "./year-counts";
 
 export interface StatItem {
   key?: "totalViews" | "siteAge" | "mostViewed" | "commentCount";
@@ -22,7 +23,7 @@ export function buildSiteStatistics(posts: PostSummary[], _notes: NoteEntry[]): 
     yearCounts.set(year, (yearCounts.get(year) || 0) + 1);
   }
 
-  const yearlyPosts = [...yearCounts.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+  const yearlyPosts = countPostsByYear(posts.map((post) => post.date), Number(site.foundedAt.slice(0, 4)));
   const totalWords = posts.reduce((sum, post) => sum + post.reading.wordCount, 0);
   const averageWords = posts.length ? Math.round(totalWords / posts.length) : 0;
   const longestPost = posts.reduce<PostSummary | undefined>(

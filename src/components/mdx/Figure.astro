@@ -10,6 +10,7 @@ const { caption } = Astro.props;
 <style>
   .mdx-figure { margin: 20px 0; text-align: center; }
   .mdx-figure :global(p) { margin: 0; }
-  .mdx-figure :global(img) { border-radius: var(--radius); }
+  /* Images are blocks, so text-align alone leaves narrow ones on the left. */
+  .mdx-figure :global(img) { margin-inline: auto; border-radius: var(--radius); }
   figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; }
 </style>

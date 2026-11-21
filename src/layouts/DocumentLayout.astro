@@ -95,7 +95,8 @@ const postUrl = postMeta?.url.replace(/^\//, "");
     {postMeta && <meta name="post-cover" content={postCover} />}
     {postMeta && <meta name="post-cover-alt" content={postMeta.coverAlt} />}
     {postMeta && <meta name="post-url" content={postUrl} />}
-    <script is:inline>
+    <script is:inline define:vars={{ themeColors: { light: site.themeColor, dark: site.themeColorDark } }}>
+      // Before first paint: a saved choice wins, else follow the system.
       (() => {
         let saved = null;
         try {
@@ -103,8 +104,10 @@ const postUrl = postMeta?.url.replace(/^\//, "");
         } catch (error) {
           saved = null;
         }
-        const theme = saved === "dark" || saved === "light" ? saved : "light";
+        const systemDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        const theme = saved === "dark" || saved === "light" ? saved : systemDark ? "dark" : "light";
         document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColors[theme]);
       })();
     </script>
     {includeKatex && <link rel="stylesheet" href={katexStylesheetUrl} />}

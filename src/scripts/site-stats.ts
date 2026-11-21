@@ -57,7 +57,10 @@ function updateStat(root: HTMLElement, key: string, value: string, detail?: stri
   const item = root.querySelector<HTMLElement>(`[data-stat-key="${key}"]`);
   const valueNode = item?.querySelector<HTMLElement>("[data-stat-value]");
   const detailNode = item?.querySelector<HTMLElement>("[data-stat-detail]");
-  if (valueNode) valueNode.textContent = value;
+  if (valueNode) {
+    valueNode.textContent = value;
+    valueNode.classList.toggle("is-placeholder", value === "—");
+  }
   if (detail !== undefined && detailNode) detailNode.textContent = detail;
 }
 

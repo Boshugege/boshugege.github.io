@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
@@ -40,7 +41,26 @@ function readingFont() {
         const local = (font.local[`${weight} ${style}`] || []).map((name) => `local("${name}"), `).join("");
         return face
           .replace(/font-family: '[^']+'/, `font-family: '${font.family}'`)
+          // Every browser that runs this site reads woff2; dropping the woff
+          // fallback keeps ~200 unused files (8 MB) out of dist/_astro.
+          .replace(/,\s*url\([^)]*\.woff\)\s*format\(['"]woff['"]\)/g, "")
           .replace("src: ", `src: ${local}`);
+      });
+    },
+  };
+}
+
+// notes.md is read with fs, outside Vite's module graph, so the dev server
+// would not notice edits. Reload the page when it changes.
+function notesReload() {
+  return {
+    name: "pnc-notes-reload",
+    apply: "serve",
+    configureServer(server) {
+      const notes = fileURLToPath(new URL("./src/content/notes.md", import.meta.url));
+      server.watcher.add(notes);
+      server.watcher.on("change", (file) => {
+        if (file === notes) server.ws.send({ type: "full-reload" });
       });
     },
   };
@@ -53,7 +73,7 @@ export default defineConfig({
   prefetch: true,
   integrations: [mdx()],
   vite: {
-    plugins: [readingFont()],
+    plugins: [readingFont(), notesReload()],
   },
   markdown: {
     processor: unified({

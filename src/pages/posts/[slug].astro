@@ -35,6 +35,7 @@ const toc = buildTableOfContents(rendered.headings, post.entry.data.toc);
   updated={post.updated}
   tags={post.tags}
   canonicalPath={post.canonical || `/${post.url}`}
+  sitePath={`/${post.url}`}
   image={post.cover}
   imageAlt={post.coverAlt}
   imageWidth={post.coverWidth}

@@ -1,6 +1,5 @@
 ---
 import Sidebar from "../components/Sidebar.astro";
-import ThemeToggle from "../components/ThemeToggle.astro";
 import DocumentLayout from "./DocumentLayout.astro";
 import { site } from "../lib/site";
 
@@ -27,7 +26,6 @@ const {
   sidebarProps = {},
   jsonLd,
 } = Astro.props;
-
 ---
 
 <DocumentLayout
@@ -39,7 +37,6 @@ const {
   jsonLd={jsonLd}
 >
   <a class="skip-link" href={skipHref}>{skipText}</a>
-  <ThemeToggle />
   <div class="layout">
     <div class="sidebar-transition-anchor" transition:name="site-sidebar" transition:animate="none">
       <Sidebar {...sidebarProps} />

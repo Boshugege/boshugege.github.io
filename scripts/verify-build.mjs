@@ -109,8 +109,22 @@ const contentIndex = indexHtml.indexOf('class="content"');
 if (aboutIndex < 0 || sidebarToolsIndex < aboutIndex || contentIndex < sidebarToolsIndex) {
   throw new Error("Home search and tags must appear below About Me in the desktop sidebar");
 }
-if (!/@media \(max-width: 800px\)[\s\S]*?\.sidebar-home-tools\s*\{\s*display:\s*none;/.test(globalCss)) {
-  throw new Error("Home search and tags must be hidden on mobile");
+// Phones keep search and tags (a compact toolbar), so the mobile breakpoint
+// must not hide them again.
+const mobileCss = globalCss.slice(globalCss.indexOf("@media (max-width: 800px)"));
+const mobileTools = /\.sidebar-home-tools\s*\{([^}]*)\}/.exec(mobileCss)?.[1];
+if (!mobileTools || /display:\s*none/.test(mobileTools)) {
+  throw new Error("Home search and tags must stay available on mobile");
+}
+for (const marker of ["data-filter-status", "data-filter-status-text", "data-filter-clear", "data-tag-strip"]) {
+  if (!indexHtml.includes(marker)) throw new Error(`Home page is missing ${marker}`);
+}
+const yearHeadings = [...indexHtml.matchAll(/<h3 class="dir-year"[^>]*>(\d{4})</g)].map((match) => match[1]);
+if (yearHeadings.length === 0 || yearHeadings.join() !== [...yearHeadings].sort().reverse().join()) {
+  throw new Error("Home post list must be grouped under descending year headings");
+}
+if (!/<header class="site-header"[^>]*>[\s\S]*?data-theme-toggle[\s\S]*?<\/header>/.test(indexHtml)) {
+  throw new Error("The theme toggle must sit inside the site header");
 }
 if (!indexHtml.includes("data-post-list-view") || !indexHtml.includes("次阅读")) {
   throw new Error("Home article metadata is missing dynamic view counts");
@@ -177,6 +191,44 @@ for (const { file, html } of postHtml) {
       throw new Error(`${file}: table of contents points to a missing heading: ${slug}`);
     }
   }
+}
+
+for (const { file, html } of postHtml) {
+  if (!html.includes("data-back-to-top")) throw new Error(`${file}: missing the back-to-top button`);
+}
+
+// Writing-year chart runs without gaps from the latest post year down.
+const chartYears = [...aboutHtml.matchAll(/class="about-year-row[^"]*"[^>]*>\s*<span[^>]*>(\d{4})</g)].map((match) => Number(match[1]));
+if (chartYears.some((year, index) => index > 0 && year !== chartYears[index - 1] - 1)) {
+  throw new Error(`About writing-year chart skips years: ${chartYears.join(", ")}`);
+}
+
+// Full-text RSS 2.0: every post carries its rendered HTML with absolute URLs
+// whose site assets exist.
+const rssXml = await read("rss.xml");
+const rssItems = [...rssXml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map((match) => match[1]);
+if (rssItems.length !== postSources.length || !rssXml.includes('xmlns:content="http://purl.org/rss/1.0/modules/content/"')) {
+  throw new Error(`rss.xml must list all ${postSources.length} posts with the content namespace`);
+}
+if (rssXml.includes("<updated>") || rssXml.includes("静态 HTML 技术博客 RSS") || !rssXml.includes("<lastBuildDate>")) {
+  throw new Error("rss.xml must use standard RSS 2.0 channel fields and the site description");
+}
+const decodeXml = (value) => value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+for (const item of rssItems) {
+  const title = /<title>([\s\S]*?)<\/title>/.exec(item)?.[1];
+  const encoded = /<content:encoded>([\s\S]*?)<\/content:encoded>/.exec(item)?.[1];
+  const content = decodeXml(encoded?.startsWith("<![CDATA[") ? encoded.slice(9, -3) : encoded || "");
+  if (content.length < 100) throw new Error(`rss.xml: ${title} has no full-text content`);
+  if (/\s(?:src|href|poster)="(?!https?:|mailto:|data:)/.test(content) || /<(?:script|style)\b|data-astro-/.test(content)) {
+    throw new Error(`rss.xml: ${title} has relative URLs or page-only markup`);
+  }
+  for (const match of content.matchAll(/https:\/\/parityncsvt\.top\/(_astro\/[^"\s?#]+)/g)) await assertFile(match[1]);
+}
+
+// Reading fonts ship as woff2 only.
+const astroAssets = await fs.readdir(path.join(dist, "_astro"));
+if (astroAssets.some((file) => file.endsWith(".woff")) || !astroAssets.some((file) => file.endsWith(".woff2"))) {
+  throw new Error("dist/_astro must contain woff2 fonts and no woff fallbacks");
 }
 
 const searchSize = (await fs.stat(path.join(dist, "search.json"))).size;

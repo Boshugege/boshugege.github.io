@@ -32,7 +32,7 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
   <div class="about-stat-grid">
     {stats.map((stat) => (
       <div class="about-stat" data-stat-key={stat.key}>
-        <span class="about-stat-value" data-stat-value>{stat.value}</span>
+        <span class:list={["about-stat-value", { "is-placeholder": stat.value === "—" }]} data-stat-value>{stat.value}</span>
         <span class="about-stat-label">{stat.label}</span>
         {stat.detail && <span class="about-stat-detail" data-stat-detail>{stat.detail}</span>}
       </div>
@@ -54,7 +54,7 @@ const statsApi = (import.meta.env.PUBLIC_COMMENTS_API || "/api").replace(/\/$/, 
       <h3>写作年份</h3>
       <div class="about-year-bars">
         {yearlyPosts.map(([year, count]) => (
-          <div class="about-year-row">
+          <div class:list={["about-year-row", { "is-empty": count === 0 }]}>
             <span>{year}</span>
             <div class="about-year-track" aria-hidden="true">
               <i style={`width: ${(count / maxYearCount) * 100}%`}></i>

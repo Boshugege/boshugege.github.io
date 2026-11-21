@@ -31,15 +31,32 @@
   gap: 10px;
   font-size: 14px;
 }
-.post-content a,
-.post-content a:visited {
+/* Navigation links in the post header read as plain text. */
+.post-topbar a,
+.post-topbar a:visited {
   color: var(--text);
   text-decoration: none;
 }
-.post-content a:hover,
-.post-content a:focus {
+.post-topbar a:hover,
+.post-topbar a:focus-visible {
   color: var(--text);
   text-decoration: underline;
+}
+/* Links inside article and note text: link color with a quiet underline that
+   firms up on hover. Component links (heading anchors, tags, prev/next) keep
+   their own styles below. */
+:is(.post-body, .note-body) a:where(:not(.heading-anchor, .post-tags a, .post-nav a)),
+:is(.post-body, .note-body) a:where(:not(.heading-anchor, .post-tags a, .post-nav a)):visited {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--link-underline);
+  text-underline-offset: 0.22em;
+  transition: color 140ms ease, text-decoration-color 140ms ease;
+}
+:is(.post-body, .note-body) a:where(:not(.heading-anchor, .post-tags a, .post-nav a)):hover,
+:is(.post-body, .note-body) a:where(:not(.heading-anchor, .post-tags a, .post-nav a)):focus-visible {
+  text-decoration-color: currentColor;
 }
 .post-content .theme-toggle {
   position: static;
@@ -297,7 +314,16 @@
   padding: 5px 8px;
   border-bottom: 1px solid var(--border);
   text-align: left;
+  vertical-align: top;
+  /* break-word (not the inherited anywhere) keeps words whole when the
+     table sizes its columns; wide tables scroll instead of crushing. */
+  overflow-wrap: break-word;
+}
+.post-content th {
   white-space: nowrap;
+}
+.post-content td {
+  min-width: 5em;
 }
 .post-content .katex-display {
   max-width: 100%;
@@ -341,8 +367,9 @@
 .post-content :not(pre) > code {
   background: var(--inline-code-bg);
   color: var(--text);
-  padding: 0.1em 0.28em;
-  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  font-size: 0.86em;
   overflow-wrap: anywhere;
   word-break: break-word;
   transition: background-color 140ms ease, color 140ms ease;
@@ -379,6 +406,7 @@
   width: 26px;
   height: 26px;
   padding: 5px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -580,4 +608,149 @@
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Image lightbox (src/scripts/lightbox.ts). */
+.post-body img[data-lightbox] {
+  cursor: zoom-in;
+}
+html.lightbox-open {
+  overflow: hidden;
+}
+.lightbox {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: zoom-out;
+  overflow: hidden;
+}
+.lightbox[open] {
+  display: grid;
+  place-items: center;
+  animation: lightbox-in 160ms ease-out;
+}
+.lightbox::backdrop {
+  /* Older engines do not let ::backdrop inherit custom properties. */
+  background: var(--lightbox-backdrop, rgba(16, 22, 28, 0.9));
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.lightbox-figure {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  margin: 0;
+  padding: 16px 0;
+}
+.lightbox-image {
+  display: block;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 110px);
+  max-height: calc(100dvh - 110px);
+  width: auto;
+  height: auto;
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 12px 40px rgba(16, 22, 28, 0.25);
+}
+.lightbox-caption {
+  max-width: min(68ch, calc(100vw - 32px));
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.lightbox-close {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+}
+.lightbox-close svg,
+.back-to-top svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes lightbox-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Back to top (src/scripts/back-to-top.ts). */
+.back-to-top {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--button-bg);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 0s linear 160ms,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.back-to-top[hidden] {
+  display: none;
+}
+.back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 0s,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.back-to-top:hover,
+.back-to-top:focus-visible {
+  background: var(--control-hover-bg);
+  color: var(--text);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox[open] { animation: none; }
+  .back-to-top,
+  .back-to-top.is-visible { transform: none; transition: none; }
+}
+@media print {
+  .back-to-top { display: none; }
 }

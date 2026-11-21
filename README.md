@@ -2,7 +2,9 @@
 
 一个用 Astro + MDX 维护的静态个人博客。仓库只保存可重建的源码、配置、测试和部署入口；`dist/` 及其他静态构建产物不提交到 Git。
 
-站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、RSS/sitemap、全文搜索索引和按需加载的本地 KaTeX。本机部署还通过同源 `/api/*` 提供评论、按日去重的文章阅读次数与 About 动态站点统计。
+站点保留了原来的古早风布局和旧文章 URL，同时使用 Astro 的内容集合、图片管线、静态路由、全文 RSS、sitemap、全文搜索索引和按需加载的本地 KaTeX。本机部署还通过同源 `/api/*` 提供评论、按日去重的文章阅读次数与 About 动态站点统计。
+
+阅读体验：首页文章按年份分组；搜索和标签筛选在手机上同样可用（标签是一行可横向滑动的列表），筛选时列表顶部会显示当前条件、命中篇数和“清除筛选”按钮。主题默认跟随系统的深浅色设置，手动切换后会记住选择。文章正文的链接使用链接色和浅下划线；图片可以点击放大（`Esc` 或点击任意处关闭）；长文章向下滚动后，右下角会出现“回到顶部”按钮。
 
 ## 快速使用
 
@@ -35,7 +37,7 @@ npm run build
 - `npm run dev`：启动 Astro dev server。
 - `npm run build`：生成 `dist/`，并清理未引用的 `_astro` 资产。
 - `npm run verify`：类型检查、单元测试、构建 `dist/`，并检查静态输出契约。
-- `npm run test:404`：构建后启动临时预览服务，使用 Chromium 检查 404 的桌面/手机截图、画布像素、动画交互和降级表现。首次运行需要 `npx playwright install chromium`。
+- `npm run test:404`：构建后启动临时预览服务，用 Chromium 运行 `tests/browser/` 下的全部浏览器测试：404 的桌面/手机截图、画布像素、动画交互和降级表现，Logo 与 Wordmark，320/375px 无横向溢出，首页筛选与清除，明暗主题，文章灯箱和回到顶部。首次运行需要 `npx playwright install chromium`。
 
 ## 404 彩蛋
 
@@ -112,7 +114,7 @@ centerImages: false
 文章里无需 import 即可使用这些组件（定义在 `src/components/mdx/`，新增组件在其 `index.ts` 中注册）：
 
 - `<Figure caption="说明">![alt](./a.jpg)</Figure>`：带说明文字的图片。
-- `<Compare labels={["之前", "之后"]}>` + 相邻两行图片：左右对比图，手机上自动上下排列。
+- `<Compare labels={["之前", "之后"]}>` + 相邻两行图片：左右对比图，每张图下方显示对应标签；手机上上下排列，标签仍跟着各自的图片。
 - `<Note>` / `<Note type="tip">` / `<Note type="warn" title="标题">`：提示框。
 
 完整示例见草稿 `src/content/posts/2026-01-20-sample/index.mdx`，运行 `npm run dev` 后访问 `/posts/2026-01-20-sample.html`。
@@ -180,6 +182,8 @@ npm run note -- "今天的想法，支持 **Markdown**" "可选标题"
 - `notes/YYYY-MM-DD.html`：只用于分享的小页面，带这条随想自己的标题和摘要，供微信外的聊天软件、社交网站生成预览；浏览器打开后立即跳到 `notes.html#…`。站内不链接它，也不进 sitemap 和搜索引擎，「分享」按钮给出的就是这个链接。
 - `notes.json`：首页最近随想预览数据。
 
+`npm run dev` 运行时修改 `notes.md`，页面会自动刷新。
+
 ## 修改外观
 
 整站外观集中在 `src/styles/global.css` 顶部的设计变量里：
@@ -218,7 +222,9 @@ scripts/
 
 ## 生产服务
 
-本仓库是博客文章、随想、About 和前端实现的权威来源。服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
+本仓库是博客文章、随想、About 和前端实现的权威来源。服务器运维手册和瘦身方案（用 Caddy 替代 `server.mjs`、用单文件 SQLite 替代 Directus、保留 5 个 release 实现秒级回滚、Runner 安全）见 [SERVER.md](SERVER.md)。
+
+服务器上的正式静态站服务位于 `/home/lyy/services/pnc-blog`：
 
 - `pnc-blog.service` 运行 `server.mjs`，只监听 `127.0.0.1:46213`。
 - `deploy.sh` 获取 `origin/main`，在临时 worktree 中验证并构建指定提交，再将 `current` 原子切换到新 release。
@@ -226,7 +232,9 @@ scripts/
 - 哈希资源保持一年不可变缓存；源站预压缩响应使用 `no-transform` 避免 CDN 再压缩。Cloudflare 仍负责边缘缓存和客户端编码兼容，不需要缓存 `/api/*` 或错误页面。
 - `releases/` 在部署健康检查期间保留旧版本用于回滚；部署成功后只保留当前 release。
 
-`main` push 会先在 GitHub 托管 Runner 上执行完整验证；通过后，由标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`。部署脚本只构建该次 workflow 已验证的提交 SHA，健康检查覆盖首页、自定义 404 内容及状态码、评论 API；失败会自动回滚，成功后只保留当前 release。
+部署完全不使用 GitHub 托管的算力：push 到 `main`（或在 Actions 页面手动运行 workflow）后，标签为 `pnc-blog` 的本机 self-hosted Runner 调用生产 `deploy.sh`，在临时 worktree 里执行一次 `npm run verify`（验证与构建一起完成），然后发布这次的产物。手动运行时可以在 `deploy_sha` 中填写 `main` 上的历史提交，用来重新部署或回滚。健康检查覆盖首页、自定义 404 内容及状态码、评论 API；失败会自动回滚。
+
+因为仓库是公开的，workflow 不响应 `pull_request`，以免 fork 的代码在服务器上运行。PR 不会自动跑检查，合并前请在本地执行 `npm run verify`。
 
 `/home/lyy/services/pnc-cms` 是正式的 Directus 管理服务，保存 CMS 配置、评论与阅读数据；文章源码仍保存在本仓库。`/home/lyy/services/pnc-comment-api` 是正式的评论与统计 API 服务。博客静态服务器把公开的 `/api/*` 请求转发给它，浏览器不直接访问 Directus。
 
@@ -255,6 +263,10 @@ node scripts/verify-build.mjs
 - 文章封面元数据使用 Astro 优化后的公开图片。
 - 首页与文章页保留阅读次数挂载点，About 保留四项动态统计挂载点。
 - 搜索索引和首页 HTML 没有超过体积预算。
+- 首页在手机上保留搜索和标签、有筛选状态条、文章按年份倒序分组，主题按钮位于站点标题行。
+- About 的写作年份图从最新年份逐年连续排到建站年份，没有空缺。
+- RSS 包含全部文章的全文（`content:encoded`），链接和图片都是绝对地址，引用的 `_astro` 资源确实存在。
+- `_astro` 只输出 woff2 字体，不输出 woff。
 
 ## 发布流程
 
@@ -262,4 +274,4 @@ node scripts/verify-build.mjs
 2. 运行 `npm run verify`。
 3. 检查 `git status`，确认只有源码、配置和测试变更。
 4. 提交并推送到 `main`。
-5. GitHub 托管 Runner 验证该提交；通过后，自托管 Runner 调用服务器上的 `deploy.sh`，在临时 worktree 中重新构建并发布 `dist/`。
+5. 自托管 Runner 调用服务器上的 `deploy.sh`，在临时 worktree 中验证、构建并发布 `dist/`（全程不使用 GitHub 托管 Runner）。

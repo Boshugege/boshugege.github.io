@@ -1,17 +1,30 @@
+import { site } from "../lib/site";
+
 const STORAGE_KEY = "pnc-theme";
+const THEME_COLORS = { light: site.themeColor, dark: site.themeColorDark } as const;
 
 type Theme = "light" | "dark";
 
-function getTheme(): Theme {
+const systemDark = typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-color-scheme: dark)")
+  : undefined;
+
+function getSavedTheme(): Theme | undefined {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "dark" || saved === "light") return saved;
   } catch {}
-  return "light";
+  return undefined;
+}
+
+// A theme picked with the toggle wins; otherwise follow the system setting.
+function getTheme(): Theme {
+  return getSavedTheme() || (systemDark?.matches ? "dark" : "light");
 }
 
 function applyTheme(doc: Document, theme: Theme) {
   doc.documentElement.dataset.theme = theme;
+  doc.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
 }
 
 function updateControls(theme: Theme) {
@@ -48,6 +61,11 @@ document.addEventListener("click", (event) => {
 document.addEventListener("astro:before-swap", (event) => {
   const nextDocument = (event as unknown as { newDocument?: Document }).newDocument;
   if (nextDocument) applyTheme(nextDocument, getTheme());
+});
+
+// Follow live system changes until the reader picks a theme themselves.
+systemDark?.addEventListener("change", () => {
+  if (!getSavedTheme()) initializeTheme();
 });
 
 document.addEventListener("astro:page-load", initializeTheme);

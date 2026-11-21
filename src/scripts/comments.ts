@@ -19,7 +19,12 @@ interface CommentsConfig {
 declare global {
   interface Window {
     turnstile?: {
-      render: (container: Element, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void }) => string;
+      render: (container: Element, options: {
+        sitekey: string;
+        theme?: "light" | "dark" | "auto";
+        callback: (token: string) => void;
+        "expired-callback": () => void;
+      }) => string;
       reset: (widgetId: string) => void;
     };
   }
@@ -148,6 +153,8 @@ async function setupComments(root: HTMLElement) {
       await loadTurnstileScript();
       turnstileWidgetId = window.turnstile?.render(turnstileContainer, {
         sitekey: siteKey,
+        // Match the site theme rather than the system one.
+        theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
         callback: (token: string) => {
           turnstileToken = token;
         },
