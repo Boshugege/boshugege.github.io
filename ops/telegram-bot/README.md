@@ -16,6 +16,7 @@
 | `pnc_bot/deploys.py` | 读 `deploys.jsonl`，DeployTracker 把部署结果对应到回执 |
 | `pnc_bot/state.py` | 自己的 SQLite：offset、评论游标、随想 ↔ 消息映射 |
 | `pnc_bot/textfmt.py` `notes.py` `images.py` `gitrepo.py` | 内容：实体转 Markdown、notes.md 编辑、图片重编码、git 提交/推送/撤销 |
+| `pnc_bot/linkpreview.py` | 随想里的链接预览：找出独占一行的链接，经代理抓标题、描述、缩略图（YouTube / B 站 / X / GitHub 走各自的接口），写进 `src/data/link-previews.json` |
 | `pnc_bot/util.py` | 公用小工具：HTML 转义、去密钥（redact）、时间格式 |
 | `tests/` | unittest；`test_integration.py` 是端到端流程（见下文「测试」） |
 
@@ -25,6 +26,7 @@
 
 - 直接发文字和/或图片 → 新随想。第一行 `# 标题` 或 `标题 | 正文` 可以带标题。相册（最多 10 张）停 2.5 秒后合成一条。
 - 回复机器人的回执或自己的原消息 → 追加到那条随想（那条还在处理时也行：会等它发完再追加）。回复别的消息（评论通知、`/status`、草稿回执、发送失败的回执…）不会发布，机器人会提示怎么发。
+- 随想里**独占一行的 https 链接**会在页面上变成预览卡片（YouTube、B 站是点击后才加载的播放器，X 可以点开原帖，GitHub 仓库显示星标和语言）。机器人发布时抓一次标题、描述和缩略图，和随想放在同一个提交里，`/undo` 会一起撤回。每条最多处理 3 个链接；抓不到不影响发布，回执里会说一句，页面上只显示地址。句子中间的链接和 `[文字](链接)` 不变。
 - `/note 文本`、`/append [id] 文本`（默认追加到机器人最近建的、还在的那条）、`/draft 标题[ | slug]`（下几行是正文，可带图）、`/list`、`/undo`。
 - `/comments`、`/delcomment id`（新评论通知上也有「隐藏这条」按钮）。
 - `/status`、`/logs [名称]`（`pnc-blog` `pnc-api` `pnc-reactions` `pnc-bot` `runner` `cloudflared` `deploy`）、`/deploy [sha]`、`/restart pnc-blog|pnc-api|pnc-reactions`。
@@ -50,7 +52,8 @@
 - 只调用白名单里的 Bot API 方法，永远不会碰 `setWebhook`/`deleteWebhook`/`logOut`/`close`（token 和告警链共用）。
 - 发往 Telegram 的日志文本会去掉形如 bot token、GitHub token 的内容；所有动态内容都做 HTML 转义。
 - 日志里没有消息正文、文件 id、token 或用户 id。
-- 图片一律重编码成不含 EXIF/XMP/ICC 的 WebP。
+- 图片一律重编码成不含 EXIF/XMP/ICC 的 WebP（链接缩略图也一样）。
+- 抓链接预览时只请求 `https://`、默认端口、带点的域名：IP 字面量、`localhost`、`.local` / `.internal` / `.ts.net` 等内网后缀一律拒绝，每次重定向（最多 3 跳）和缩略图地址都重新检查；不带 cookie，User-Agent 是不含站点信息的通用值；HTML 最多读 512 KB、图片 5 MB，单次请求 8 秒、一个链接总共 20 秒。请求和 Telegram 一样经 `PNC_BOT_PROXY` 出去，域名由代理解析，所以对方看到的是代理出口而不是这台机器，这台机器的本地服务也够不着。唯一的例外是 B 站：它对代理出口一律回 412，所以 `linkpreview.DIRECT_HOSTS` 里那几个固定域名（`api.bilibili.com`、`www.bilibili.com`、`b23.tv` 等）不经代理直连，照常校验证书。抓回来的文字只当纯文本存，站点渲染时转义。
 
 ## 配置与部署
 

@@ -186,6 +186,7 @@ class BotPathTests(unittest.TestCase):
         for path in (
             NOTES_PATH,
             IMAGE,
+            "src/data/link-previews.json",
             "src/content/posts/my-draft/index.mdx",
             "src/content/posts/a/20261121-0123456789.webp",
         ):
@@ -195,6 +196,8 @@ class BotPathTests(unittest.TestCase):
         for path in (
             "README.md",
             "src/content/notes.md.bak",
+            "src/data/link-previews.json.bak",
+            "src/data/other.json",
             "src/static/assets/notes/evil.webp",
             "src/static/assets/notes/sub/20261121-0123456789.webp",
             "src/content/posts/My-Draft/index.mdx",

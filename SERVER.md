@@ -1675,3 +1675,62 @@ tail -n 40 "$(jq -r .log ~/services/pnc-blog/state/last-deploy.json)"
   - Alertmanager 和日报仍经 mihomo：mihomo 把 Telegram 流量转给 naive-main，等于已经经过 naive。要直连，得给容器另开一个 socks 转发端口（49847 还承担 http 代理探测），日报脚本也要加 socks 支持，收益为零，所以没改。
   - npm 不支持 socks5 代理，仍直连官方源。
   - 期间排上的 3 次 Security Checks 因 checkout 卡住被手动取消，改好后手动补跑了一次。
+
+### 10.9 随想里的链接预览（2026-11-24）
+
+随想里**独占一行的 `https://` 链接**在页面上显示成预览，句子中间的链接和 `[文字](链接)` 不变：
+
+| 链接 | 页面上的样子 |
+| --- | --- |
+| 普通网页 | 卡片：标题、一行描述、站点名、缩略图，点击在新标签页打开 |
+| YouTube、Bilibili | 带播放按钮的封面；**点了才**在原地换成官方播放器（YouTube 用 `youtube-nocookie.com`） |
+| X / Twitter 的帖子 | 卡片显示作者和正文；下面的「在此展开原帖」按钮点了才加载官方嵌入页 |
+| GitHub 仓库 | 卡片：`owner/repo`、描述、星标数、主要语言、头像 |
+
+设计要点：
+
+- **构建时不联网**。标题、描述、缩略图由 Bot 在发布时抓一次，写进 `src/data/link-previews.json`（以链接为键），缩略图存成 WebP 放在 `src/static/assets/notes/`，和随想在**同一个提交**里，所以 `/undo` 会一起撤回。服务器出网要走代理，偶尔卡住；放在构建时抓，部署会变慢甚至失败，同一份源码两次构建还可能不一样。
+- **读者打开随想页不请求任何第三方**：缩略图是本站文件，播放器和原帖要点了才加载。国内读者打不开 YouTube 时封面和标题照常显示。
+- 没有预览数据的链接也会变成卡片，只显示地址；数据里引用的缩略图文件不存在时卡片不带图。两种情况都不会让构建失败。
+- 手写的随想（不经过 Bot）运行一次 `npm run links`（`scripts/fetch-link-previews.mjs`）补抓，`npm run links -- --all` 全部重抓；不跑也能构建。
+
+代码位置：
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/lib/link-providers.ts` | 只看地址判断是哪家（YouTube / Bilibili / X / GitHub / 普通），并给出播放器地址 |
+| `src/lib/link-cards.ts` | rehype 插件，挂在 `src/lib/notes.ts` 的渲染器上：把「整行只有一个裸链接」换成卡片或封面 |
+| `src/scripts/link-embed.ts` | 点击封面换成 iframe；只加载 `www.youtube-nocookie.com`、`player.bilibili.com`、`platform.twitter.com` 三个主机；X 的嵌入页用消息回报高度，收到第一条才隐藏卡片，12 秒没收到就撤掉 iframe 保留卡片 |
+| `src/styles/link-cards.css` | 样式 |
+| `src/data/link-previews.json` | 预览数据：`{"version": 1, "links": {"<链接>": {kind, title, description, site, author, url, image, stars, language, fetched}}}`，键按字母序，Bot 和 `npm run links` 写出的字节一致 |
+| `ops/telegram-bot/pnc_bot/linkpreview.py` | Bot 端的抓取（见下） |
+| `scripts/verify-build.mjs` | 构建后检查：预览图必须是 `/assets/notes/` 下的本站文件，播放器只能是上面三个主机，`notes.html` 里不能直接出现 `<iframe>` |
+
+Bot 端的抓取（`/note`、直接发消息、`/append`、回复追加都会走）：
+
+- 每条最多处理前 3 个链接。YouTube 和 X 用各自的 oEmbed 接口，Bilibili 用 `api.bilibili.com` 的视频信息接口（`b23.tv` 短链先跟随跳转找到 BV 号，并把真实地址记在 `url` 字段里，站点靠它找播放器），GitHub 仓库用 `api.github.com/repos/…`，其余读页面的 Open Graph 标签。专用接口失败时退回读页面。
+- 抓不到不影响发布：回执和最终的「已上线」消息里会多一行「N 个链接没取到预览，页面上只显示地址」。
+- 缩略图走和随想图片相同的流程（重编码成不含元数据的 WebP）：视频封面最宽 960 px，普通卡片 480 px，GitHub 头像 120 px。文件名是 `日期-<链接和图片内容的哈希前 10 位>.webp`，所以两个链接即使共用一张图（同一作者的两个仓库）也各有各的文件，撤回其中一条不会带走另一条的图。
+- 安全限制：
+  - 只请求 `https://`、默认端口、带点的域名；IP 字面量（含 `127.1`、`0x7f.1`、纯数字等写法）、`localhost`、`.local`、`.internal`、`.lan`、`.home.arpa`、`.ts.net`、`.onion` 等一律拒绝。
+  - 不自动跟随跳转：每一跳（最多 3 跳）和缩略图地址都重新过同一套检查。
+  - 单次请求 8 秒，一个链接总共 20 秒；HTML 最多读 512 KB，JSON 256 KB，图片 5 MB。
+  - 不带 cookie、不带 Referer，User-Agent 是不含站点信息的通用值。
+  - 和 Telegram 一样经 `PNC_BOT_PROXY`（NaiveProxy socks5）出去，域名由代理解析：对方看到的是代理出口；这台机器上只监听 `127.0.0.1` 的服务从代理那边够不着。
+  - 例外是 Bilibili：它对代理出口一律回 HTTP 412（换 User-Agent 也一样），从本机直连正常。所以 `linkpreview.DIRECT_HOSTS` 里的固定域名（`api.bilibili.com`、`bilibili.com`、`www.` / `m.bilibili.com`、`b23.tv`）不经代理直连，B 站会看到这台机器的出口地址。只有这几个写死的名字走直连，而且照常校验证书：DNS 被篡改指向本机服务时 TLS 握手就失败了。封面图（`*.hdslb.com`）仍走代理。残余风险：域名解析到代理服务器自己的内网地址时，Bot 这边无从检查；只有主人自己发的链接才会被抓，抓回来的也只是标题和描述。
+  - 抓回来的文字去掉控制字符和方向控制符、截断（标题 120 字、描述 200 字）后当纯文本存，站点渲染时转义；`link-previews.json` 里的图片路径必须匹配 `/assets/notes/<日期>-<10 位十六进制>.webp`，站点不会渲染远程图片。
+- Bot 可以提交的路径多了一个 `src/data/link-previews.json`（`gitrepo.py` 的白名单）。
+
+排障：
+
+```bash
+journalctl --user -u pnc-bot -n 50 --no-pager | grep -i "link preview"   # 抓取失败只记主机名和原因
+# 在 Mac 上给已有随想补抓 / 重抓（之后正常提交推送）
+npm run links
+npm run links -- --all
+```
+
+- 上线前在服务器上经真实代理试过：YouTube、Bilibili（含 `b23.tv` 短链）、GitHub、X、普通网页各一条，都在 0.6–3.2 秒内取到；Bot 测试共 646 个，全部通过。
+- 卡片只有地址没有标题：那次抓取失败了。在 Mac 上 `npm run links` 补一次并推送即可。
+- 想换掉某条预览：直接改 `src/data/link-previews.json` 里对应的条目（或删掉条目再 `npm run links`）。
+- 点播放没反应：看浏览器控制台，多半是读者的网络到不了对应的播放器主机；封面下面的标题链接仍然能跳到原站。

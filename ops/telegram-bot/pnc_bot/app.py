@@ -12,6 +12,7 @@ Threads:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import logging
 import re
 import secrets
@@ -20,6 +21,7 @@ import sqlite3
 import sys
 import threading
 import time
+import urllib.request
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -27,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from . import auth, gitrepo, images, notes, textfmt
+from . import auth, gitrepo, images, linkpreview, notes, textfmt
 from .comments import (
     Comment,
     CommentPoller,
@@ -42,7 +44,7 @@ from .config import Config, ConfigError, check_paths, load_config
 from .deploys import DeployHistory, DeployTracker, failure_details, record_summary
 from .ops import DEPLOY_SH, DEPLOY_UNIT_MAX_SEC, LOG_SOURCES, RESTARTABLE, SHA_ARG_RE, HttpResult, Ops, OpsError, local_get, plan_deploy
 from .state import State
-from .telegram import FileTooLarge, TelegramClient, TelegramError
+from .telegram import FileTooLarge, TelegramClient, TelegramError, build_opener
 from .util import esc, log_exception, redact, shorten
 
 log = logging.getLogger("pnc_bot")
@@ -478,6 +480,48 @@ class ContentJob:
     key: int | None = None  # entry in App.interrupts
 
 
+@dataclass
+class LinkCard:
+    """A fetched link preview, ready to be stored with the note that holds the link."""
+
+    url: str
+    entry: dict  # the object stored in link-previews.json
+    image_name: str | None = None
+    image_data: bytes | None = None
+
+
+# Thumbnails are stored at about twice their displayed width: video covers
+# span the note, card thumbnails sit beside the text, avatars are icons.
+LINK_IMAGE_WIDTHS = {"youtube": 960, "bilibili": 960, "github": 120}
+LINK_IMAGE_WIDTH = 480
+
+
+def job_links(job: ContentJob) -> list[str]:
+    """The links of a note or an addition that the site shows as cards."""
+    if job.kind == "note":
+        _, body = textfmt.split_title(job.text)
+    elif job.kind == "append":
+        body = job.text
+    else:
+        return []
+    body = textfmt.sanitize_body(body) if body else ""
+    return linkpreview.standalone_links(body)[: linkpreview.MAX_LINKS]
+
+
+def link_image_name(url: str, data: bytes, date: str) -> str:
+    """A note-image name for a link's thumbnail.
+
+    Named by the link as well as the picture: two links sharing one picture
+    (two repositories of one owner) keep a file each, so undoing a note never
+    takes another note's thumbnail with it.
+    """
+    digest = hashlib.sha256(url.encode("utf-8") + b"\0" + data).hexdigest()
+    name = f"{date.replace('-', '')}-{digest[:10]}.webp"
+    if not re.fullmatch(images.IMAGE_NAME_RE, name):
+        raise ValueError("bad date")
+    return name
+
+
 # --- read-only views (shared with --selftest-command) ------------------------------
 
 
@@ -561,8 +605,11 @@ class App:
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
         http_get: Callable[..., HttpResult] = local_get,
+        link_fetcher: Any = None,
     ):
         self.config = config
+        # Fetches link previews for notes; None posts links without one.
+        self.link_fetcher = link_fetcher
         self.chat = config.allowed_user_id
         self.tg = tg
         self.state = state
@@ -1047,6 +1094,59 @@ class App:
             processed.append(image)
         return processed
 
+    def load_link_cards(self, job: ContentJob, date: str) -> tuple[list[LinkCard], int]:
+        """Fetch a preview for each card link of ``job``: (cards, links tried).
+
+        A link whose preview cannot be fetched is skipped, and the site shows
+        its address only: a preview never holds a note back.
+        """
+        if self.link_fetcher is None:
+            return [], 0
+        links = job_links(job)
+        cards: list[LinkCard] = []
+        for url in links:
+            try:
+                preview = self.link_fetcher.fetch(url)
+            except Exception as exc:  # noqa: BLE001 - fetch() should not raise; never fail the note
+                log_exception(log, "link preview failed", exc)
+                preview = None
+            if preview is None:
+                continue
+            name = data = None
+            if preview.image:
+                try:
+                    width = LINK_IMAGE_WIDTHS.get(preview.kind, LINK_IMAGE_WIDTH)
+                    data = images.process_image(preview.image, max_width=width).data
+                    name = link_image_name(url, data, date)
+                except (images.ImageRejected, ValueError, OSError):
+                    name = data = None  # the card goes without a thumbnail
+            entry = linkpreview.entry(preview, f"/assets/notes/{name}" if name else None, date)
+            cards.append(LinkCard(url, entry, name, data))
+        return cards, len(links)
+
+    def _write_link_cards(self, workdir: Path, cards: list[LinkCard]) -> None:
+        """Store ``cards`` in the work tree. When the previews file cannot be
+        extended, ``cards`` is emptied instead: the note is posted without
+        previews, and the receipt counts every link as one without a preview.
+        """
+        if not cards:
+            return
+        path = workdir / linkpreview.PREVIEWS_PATH
+        raw = path.read_text(encoding="utf-8") if path.is_file() else None
+        try:
+            text = linkpreview.merge_previews(raw, {card.url: card.entry for card in cards})
+            linkpreview.validate_previews(text)
+        except ValueError as exc:
+            log.warning("link previews not stored: %s", exc)
+            cards.clear()
+            return
+        self._write_images(
+            workdir / notes.NOTES_ASSET_DIR,
+            {card.image_name: card.image_data for card in cards if card.image_name and card.image_data},
+        )
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
     @staticmethod
     def _image_files(processed: list[Any], date: str) -> dict[str, bytes]:
         files: dict[str, bytes] = {}
@@ -1074,8 +1174,10 @@ class App:
         if missing:
             raise UserError(f"引用的图片不存在或不是图片：{missing[0]}")
 
-    def publish_note(self, job: ContentJob, processed: list[Any]) -> tuple[str, str]:
-        date = notes.today_shanghai()
+    def publish_note(
+        self, job: ContentJob, processed: list[Any], cards: list[LinkCard] | None = None, date: str | None = None
+    ) -> tuple[str, str]:
+        date = date or notes.today_shanghai()
         files = self._image_files(processed, date)
         title, body = textfmt.split_title(job.text)
         if title is not None:
@@ -1095,6 +1197,7 @@ class App:
             notes.validate_notes(raw, new_raw, expect_added=1)
             self._write_images(workdir / notes.NOTES_ASSET_DIR, files)
             self._check_note_images(workdir, full)
+            self._write_link_cards(workdir, cards if cards is not None else [])
             path.write_text(new_raw, encoding="utf-8")
             note = next((n for n in notes.parse_notes(new_raw) if n.id == note_id), None)
             return note_id, notes.note_summary(note) if note else note_id
@@ -1108,8 +1211,10 @@ class App:
         sha, (note_id, _) = self.repo.publish(mutate, message=message, allowed=note_path_allowed)
         return sha, note_id
 
-    def publish_append(self, job: ContentJob, processed: list[Any]) -> tuple[str, str]:
-        date = notes.today_shanghai()
+    def publish_append(
+        self, job: ContentJob, processed: list[Any], cards: list[LinkCard] | None = None, date: str | None = None
+    ) -> tuple[str, str]:
+        date = date or notes.today_shanghai()
         files = self._image_files(processed, date)
         text = textfmt.sanitize_body(job.text) if job.text else ""
         candidates = [job.target] if job.target else self.state.recent_note_ids()
@@ -1136,6 +1241,7 @@ class App:
             # may use a definition from earlier in the note.
             updated = next(n for n in notes.parse_notes(new_raw) if n.id == target)
             self._check_note_images(workdir, updated.body)
+            self._write_link_cards(workdir, cards if cards is not None else [])
             path.write_text(new_raw, encoding="utf-8")
             return target
 
@@ -1200,10 +1306,12 @@ class App:
                 self.edit(job.receipt_id, NOT_A_NOTE_REPLY, retries=True)
                 return
             processed = self.load_images(job.images)
+            date = notes.today_shanghai()
+            cards, links = self.load_link_cards(job, date)
             if job.kind == "note":
-                sha, name = self.publish_note(job, processed)
+                sha, name = self.publish_note(job, processed, cards, date)
             elif job.kind == "append":
-                sha, name = self.publish_append(job, processed)
+                sha, name = self.publish_append(job, processed, cards, date)
             else:
                 sha, name = self.publish_draft(job, processed)
         except Exception as exc:  # noqa: BLE001
@@ -1215,18 +1323,21 @@ class App:
         elif job.kind == "append":
             self.state.map_messages(name, [job.receipt_id, *job.source_ids])
         submitted = f"📝 已提交 <code>{esc(sha[:7])}</code>"
+        # Told in the final message too: the receipt is replaced by it.
+        missed = links - len(cards)
+        no_preview = f"\nℹ️ {missed} 个链接没取到预览，页面上只显示地址" if missed else ""
         if not self.interrupts.update(job.key, f"{submitted}；{STOP_NO_RESULT}"):
             self.edit(job.receipt_id, f"{submitted}；{STOPPING_NO_RESULT}", retries=True)
             return
         if job.kind == "draft":
             done = lambda: f"✅ 草稿已推送：<code>{esc(notes.POSTS_DIR)}/{esc(name)}/</code>"  # noqa: E731
         else:
-            done = lambda: self.note_live(name)  # noqa: E731
+            done = lambda: self.note_live(name) + no_preview  # noqa: E731
         # Watch before the status edit: GitHub may deploy while that edit hangs.
         gate = Gate()
         try:
             self.watch_commit(sha, job.receipt_id, done, key=job.key, gate=gate)
-            self.edit(job.receipt_id, f"{submitted}，部署中…", retries=True)
+            self.edit(job.receipt_id, f"{submitted}，部署中…{no_preview}", retries=True)
         finally:
             gate.open()
 
@@ -1530,6 +1641,12 @@ def build_app(config: Config) -> App:
         history=history,
         comments=CommentStore(config.comments_db),
         ops=ops,
+        # Same proxy as Telegram: preview requests leave from its exit, not this
+        # host. Bilibili refuses that exit (HTTP 412), so its few fixed hosts
+        # are asked without a proxy; see linkpreview.DIRECT_HOSTS.
+        link_fetcher=linkpreview.Fetcher(
+            build_opener(config.proxy), direct=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        ),
     )
 
 

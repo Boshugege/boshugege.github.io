@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import TypeVar
 
 from .images import IMAGE_NAME_RE
+from .linkpreview import PREVIEWS_PATH
 from .notes import NOTES_ASSET_DIR, NOTES_PATH, POSTS_DIR
 
 __all__ = [
@@ -51,6 +52,7 @@ SUBJECT_MAX = 72
 _IMAGE_NAME = IMAGE_NAME_RE.lstrip("^").rstrip("$")
 _BOT_PATH_RE = re.compile(
     rf"(?:{re.escape(NOTES_PATH)}"
+    rf"|{re.escape(PREVIEWS_PATH)}"
     rf"|{re.escape(NOTES_ASSET_DIR)}/{_IMAGE_NAME}"
     rf"|{re.escape(POSTS_DIR)}/[a-z0-9][a-z0-9-]*/(?:index\.mdx|{_IMAGE_NAME}))"
 )
@@ -107,7 +109,8 @@ def commit_message(subject: str, trailers: dict[str, str]) -> str:
 
 
 def is_bot_content_path(path: str) -> bool:
-    """Paths the bot may write: notes.md, note images, draft index.mdx + images."""
+    """Paths the bot may write: notes.md, note images (link thumbnails are
+    note images), the link previews file, draft index.mdx + images."""
     return _BOT_PATH_RE.fullmatch(path) is not None
 
 
