@@ -1,12 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { loadLinkPreviews, rehypeLinkCards, type LinkPreviews } from "./link-cards";
 import { rehypeNoteImages } from "./note-images";
 import { toPlainText } from "./text";
 
 const notesPath = path.join(process.cwd(), "src/content/notes.md");
 // Astro's publicDir (astro.config.mjs): note images live in src/static/assets/notes.
 const staticDir = path.join(process.cwd(), "src/static");
+// Titles and thumbnails for links in notes; see src/lib/link-cards.ts.
+const linkPreviewsPath = path.join(process.cwd(), "src/data/link-previews.json");
+let linkPreviews: LinkPreviews = new Map();
 
 // Each note in notes.md starts with "## YYYY-MM-DD" or "## YYYY-MM-DD | 标题".
 const HEADING = /^##\s+(\d{4}-\d{2}-\d{2})(?:\s+\|\s*(.+))?\s*$/gm;
@@ -30,7 +34,8 @@ function getProcessor() {
   return processor ||= createMarkdownProcessor({
     syntaxHighlight: "shiki",
     shikiConfig: { themes: { light: "github-light", dark: "github-dark" }, defaultColor: false },
-    rehypePlugins: [[rehypeNoteImages, { staticDir }]],
+    // Link cards first: their thumbnails get a size from rehypeNoteImages.
+    rehypePlugins: [[rehypeLinkCards, { previews: () => linkPreviews, staticDir }], [rehypeNoteImages, { staticDir }]],
   });
 }
 
@@ -46,6 +51,7 @@ export function getNotes() {
 async function loadNotes() {
   const raw = (await fs.readFile(notesPath, "utf8")).replace(/\r\n/g, "\n");
   const matches = [...raw.matchAll(HEADING)];
+  linkPreviews = await loadLinkPreviews(linkPreviewsPath);
   const markdown = await getProcessor();
   // New notes go on top, so number same-day notes from the bottom (oldest
   // first): adding a note never changes the URL of one already shared.

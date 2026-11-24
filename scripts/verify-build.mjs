@@ -144,6 +144,18 @@ for (const entry of JSON.parse(await read("notes.json")).entries) {
     throw new Error(`Share page for ${entry.url} is missing its redirect or preview tags`);
   }
 }
+// Link previews (src/lib/link-cards.ts): thumbnails are local files, and a
+// player is named in the markup, never loaded by it.
+for (const [, src] of notesHtml.matchAll(/<img class="link-(?:card-thumb|card-avatar|embed-thumb)" src="([^"]*)"/g)) {
+  if (!/^\/assets\/notes\/[^/"]+\.webp$/.test(src)) throw new Error(`notes.html: link preview image is not a local note asset: ${src}`);
+  await assertFile(src.slice(1));
+}
+for (const [, src] of notesHtml.matchAll(/data-embed-src="([^"]*)"/g)) {
+  if (!/^https:\/\/(?:www\.youtube-nocookie\.com|player\.bilibili\.com|platform\.twitter\.com)\//.test(src)) {
+    throw new Error(`notes.html: unexpected embed player: ${src}`);
+  }
+}
+if (/<iframe\b/.test(notesHtml)) throw new Error("notes.html: players must load on click, not with the page");
 if (!notesHtml.includes("notes-timeline")) {
   throw new Error("Notes page is missing the notes timeline");
 }

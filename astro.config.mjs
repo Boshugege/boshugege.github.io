@@ -57,10 +57,11 @@ function notesReload() {
     name: "pnc-notes-reload",
     apply: "serve",
     configureServer(server) {
-      const notes = fileURLToPath(new URL("./src/content/notes.md", import.meta.url));
-      server.watcher.add(notes);
+      // The notes and the link previews shown in them (src/lib/link-cards.ts).
+      const files = ["./src/content/notes.md", "./src/data/link-previews.json"].map((file) => fileURLToPath(new URL(file, import.meta.url)));
+      server.watcher.add(files);
       server.watcher.on("change", (file) => {
-        if (file === notes) server.ws.send({ type: "full-reload" });
+        if (files.includes(file)) server.ws.send({ type: "full-reload" });
       });
     },
   };

@@ -124,8 +124,9 @@ test("post links stand out, images open in a lightbox and back-to-top appears", 
   expect(await noHorizontalOverflow(page)).toBe(true);
 });
 
-// notes.md has no images yet, so the test adds one to the served page, as
-// src/lib/note-images.ts renders it; the lightbox script is the page's own.
+// The test adds an image to the served page, as src/lib/note-images.ts
+// renders it, and looks at that one only (notes may hold other images and
+// link thumbnails); the lightbox script is the page's own.
 test("note images open in the lightbox", async ({ page }) => {
   await page.route("**/notes.html", async (route) => {
     const response = await route.fetch();
@@ -137,7 +138,7 @@ test("note images open in the lightbox", async ({ page }) => {
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/notes.html");
-  const image = page.locator(".note-body img");
+  const image = page.locator('.note-body img[alt="测试配图"]');
   await expect(image).toHaveCount(1);
   await expect(image).toHaveAttribute("data-lightbox", "");
   await expect(image).toHaveCSS("cursor", "zoom-in");
@@ -153,6 +154,67 @@ test("note images open in the lightbox", async ({ page }) => {
   await expect(dialog).toBeVisible();
   await dialog.click({ position: { x: 5, y: 5 } });
   await expect(dialog).toBeHidden();
+  expect(await noHorizontalOverflow(page)).toBe(true);
+});
+
+// Link previews, with the markup src/lib/link-cards.ts renders (notes.md need
+// not contain a link). The players are stubbed: the test never leaves the machine.
+test("link previews load a player only on request", async ({ page }) => {
+  const external = 'target="_blank" rel="noopener noreferrer"';
+  const cards = [
+    `<a class="link-card" href="https://example.com/page" data-link-kind="link" ${external}><span class="link-card-text"><span class="link-card-title">一个网页</span><span class="link-card-desc">描述</span><span class="link-card-site">example.com</span></span><img class="link-card-thumb" src="/assets/img/avatar.png" alt="" loading="lazy" decoding="async" width="1024" height="1024"></a>`,
+    `<div class="link-embed link-embed-video" data-link-kind="youtube" data-embed-src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&amp;rel=0" data-embed-title="一个视频"><a class="link-embed-cover" href="https://youtu.be/dQw4w9WgXcQ" aria-label="播放视频：一个视频" ${external}><img class="link-embed-thumb" src="/assets/img/avatar.png" alt="" width="1024" height="1024"><span class="link-embed-play" aria-hidden="true"></span></a><span class="link-embed-caption"><a class="link-embed-title" href="https://youtu.be/dQw4w9WgXcQ" ${external}>一个视频</a><span class="link-embed-site">YouTube</span></span></div>`,
+    `<div class="link-embed link-embed-post" data-link-kind="x" data-embed-src="https://platform.twitter.com/embed/Tweet.html?id=20&amp;dnt=true" data-embed-title="jack (@jack)"><a class="link-card" href="https://x.com/jack/status/20" data-link-kind="x" ${external}><span class="link-card-text"><span class="link-card-title">jack (@jack)</span><span class="link-card-site">X</span></span></a><button type="button" class="link-embed-load" hidden>在此展开原帖</button></div>`,
+    // A player address this site does not embed must never be loaded.
+    `<div class="link-embed link-embed-video" data-link-kind="youtube" data-embed-src="https://evil.example/embed"><a class="link-embed-cover" id="bad-cover" href="#bad" ${external}><span class="link-embed-play" aria-hidden="true"></span></a></div>`,
+  ].join("\n");
+  await page.route("**/notes.html", async (route) => {
+    const response = await route.fetch();
+    const html = (await response.text()).replace(/<div class="note-body[^"]*"[^>]*>/, `$&<div id="link-preview-test">${cards}</div>`);
+    await route.fulfill({ status: response.status(), contentType: "text/html; charset=utf-8", body: html });
+  });
+  const requested: string[] = [];
+  await page.route(/^https:\/\/(www\.youtube-nocookie\.com|platform\.twitter\.com|evil\.example)\//, async (route) => {
+    const url = route.request().url();
+    requested.push(url);
+    const resize = '<script>parent.postMessage({ "twttr.embed": { method: "twttr.private.resize", params: [{ width: 550, height: 321 }] } }, "*")</script>';
+    await route.fulfill({ contentType: "text/html", body: `<!doctype html><title>stub</title>${url.includes("twitter") ? resize : ""}` });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/notes.html");
+
+  // Only the cards added above: real notes may hold previews of their own.
+  const area = page.locator("#link-preview-test");
+  // Nothing is requested from a provider before the reader asks.
+  const card = area.locator('.link-card[data-link-kind="link"]');
+  await expect(card).toBeVisible();
+  await expect(card).toHaveAttribute("target", "_blank");
+  await expect(card.locator("img")).not.toHaveAttribute("data-lightbox", "");
+  expect(requested).toEqual([]);
+  await expect(page.locator("iframe")).toHaveCount(0);
+
+  const video = area.locator('.link-embed-video[data-link-kind="youtube"]').first();
+  await video.locator(".link-embed-cover").click();
+  const player = video.locator("iframe.link-embed-frame");
+  await expect(player).toHaveAttribute("src", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0");
+  await expect(player).toHaveAttribute("title", "一个视频");
+  await expect(video.locator(".link-embed-cover")).toHaveCount(0);
+  await expect(video.locator(".link-embed-title")).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe("/notes.html");
+
+  const post = area.locator(".link-embed-post");
+  const load = post.locator(".link-embed-load");
+  await expect(load).toBeVisible();
+  await load.click();
+  await expect(post).toHaveClass(/is-loaded/);
+  await expect(post.locator("iframe")).toHaveAttribute("src", /^https:\/\/platform\.twitter\.com\/embed\/Tweet\.html\?id=20&dnt=true&theme=(light|dark)&lang=zh-cn$/);
+  await expect(post.locator("iframe")).toHaveCSS("height", "321px");
+  await expect(post.locator(".link-card")).toBeHidden();
+  await expect(load).toHaveCount(0);
+
+  await page.locator("#bad-cover").click();
+  await expect(area.locator("iframe")).toHaveCount(2);
+  expect(requested.some((url) => url.includes("evil.example"))).toBe(false);
   expect(await noHorizontalOverflow(page)).toBe(true);
 });
 

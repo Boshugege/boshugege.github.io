@@ -4,6 +4,7 @@ import NoteItem from "../components/NoteItem.astro";
 import { getNotes } from "../lib/notes";
 import "../styles/content.css";
 import "../styles/notes.css";
+import "../styles/link-cards.css";
 import "../styles/reading-font";
 
 const notes = await getNotes();
@@ -30,6 +31,7 @@ const notes = await getNotes();
   </aside>
   <script>
     import "../scripts/lightbox";
+    import "../scripts/link-embed";
 
     // Highlight the note a #link points at. A class instead of :target,
     // because client-side page navigation does not update :target.

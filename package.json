@@ -10,6 +10,7 @@
     "build": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro build --force && node scripts/cleanup-build.mjs && node scripts/compress-build.mjs",
     "new": "node scripts/new-post.mjs",
     "note": "node scripts/new-note.mjs",
+    "links": "node --experimental-strip-types scripts/fetch-link-previews.mjs",
     "preview": "cross-env ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "typecheck": "tsc -p tsconfig.client.json",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
