@@ -1,4 +1,13 @@
 {
-  "links": {},
+  "links": {
+    "https://www.youtube.com/watch?v=RaDAoaHBmos": {
+      "author": "New York Times Opinion",
+      "fetched": "2026-11-24",
+      "image": "/assets/notes/20261124-e30c675251.webp",
+      "kind": "youtube",
+      "site": "YouTube",
+      "title": "‘I Don’t Write Like ChatGPT. ChatGPT Writes Like Me.’"
+    }
+  },
   "version": 1
 }

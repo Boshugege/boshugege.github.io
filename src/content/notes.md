@@ -4,6 +4,10 @@
 > 每条随想都有自己的链接 `/notes.html#YYYY-MM-DD`，推送后即发布。
 > 独占一行的 `https://` 链接会显示成预览卡片（视频可以点开播放）。用 Telegram 机器人发的随想自动带标题和缩略图；手写的运行一次 `npm run links`。
 
+## 2026-11-24
+
+https://www.youtube.com/watch?v=RaDAoaHBmos
+
 ## 2026-11-22
 
 昨晚让Claude大人接入了telegram bot自动发随想，这下写起来方便多了，支持的格式还不少。唉，AI！
